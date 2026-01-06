@@ -1,13 +1,18 @@
 import { LinearGradient } from "expo-linear-gradient"
-import { customTheme } from "../theme/custom.theme"
 import React, { ReactNode } from "react"
+import { customTheme } from "../theme/custom.theme"
 
-export const CardGradient: React.FC<{styles?: any, children: ReactNode}> = ({children, styles}) => {
+export const CardGradient: React.FC<{
+  styles?: any, 
+  children: ReactNode,
+  colors_one?: '1' | '2' | '3' | '4',
+  colors_two?: '1' | '2' | '3' | '4',
+}> = ({children, styles, colors_one = '4', colors_two = '2'}) => {
   return (
     <LinearGradient
       colors={[
-        customTheme['background-basic-color-4'],
-        customTheme['background-basic-color-2']
+        customTheme[`background-basic-color-${colors_one}`],
+        customTheme[`background-basic-color-${colors_two}`]
       ]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0.5 }}

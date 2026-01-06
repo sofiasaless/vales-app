@@ -1,3 +1,5 @@
+import { mapping as evaMapping } from '@eva-design/eva';
+
 export const customTheme = {
   /* =========================
    * Backgrounds (mais claros, azul)
@@ -69,4 +71,30 @@ export const customTheme = {
    * Focus / Ring
    * ========================= */
   'color-primary-focus': '#46D4BC',
+};
+
+export const customMapping = {
+  ...evaMapping,
+  strict: {
+    ...evaMapping.strict,
+
+    'text-font-family': 'JetBrains-Regular',
+    'text-font-weight': '400',
+
+    'text-heading-1-font-family': 'JetBrains-Bold',
+    'text-heading-2-font-family': 'JetBrains-Bold',
+    'text-heading-3-font-family': 'JetBrains-SemiBold',
+    'text-heading-4-font-family': 'JetBrains-SemiBold',
+    'text-heading-5-font-family': 'JetBrains-Medium',
+    'text-heading-6-font-family': 'JetBrains-Medium',
+
+    'text-subtitle-1-font-family': 'JetBrains-Medium',
+    'text-subtitle-2-font-family': 'JetBrains-Regular',
+
+    'text-paragraph-1-font-family': 'JetBrains-Regular',
+    'text-paragraph-2-font-family': 'JetBrains-Regular',
+
+    'text-caption-1-font-family': 'JetBrains-Regular',
+    'text-caption-2-font-family': 'JetBrains-Regular',
+  },
 };

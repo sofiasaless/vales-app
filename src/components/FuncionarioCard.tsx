@@ -6,6 +6,8 @@ import { customTheme } from '../theme/custom.theme';
 import { Employee } from '../types';
 import { CardGradient } from './CardGradient';
 import { StatusBadge } from './StatusBadge';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../routes/StackRoutes';
 
 interface FuncionarioCardProps {
   employee: Employee;
@@ -13,6 +15,7 @@ interface FuncionarioCardProps {
 
 export const FuncionarioCard: React.FC<FuncionarioCardProps> = ({ employee }) => {
   const theme = useTheme();
+  const navigator = useNavigation<NavigationProp<RootStackParamList>>();
 
   const voucherTotal = employee.currentVoucher.reduce(
     (total, item) => total + item.unitPrice * item.quantity,
@@ -41,6 +44,9 @@ export const FuncionarioCard: React.FC<FuncionarioCardProps> = ({ employee }) =>
         styles.pressable,
         pressed && { opacity: 0.85, borderWidth: 0.6, borderColor: customTheme['color-primary-300'], borderRadius: 16 },
       ]}
+      onPress={() => {
+        navigator.navigate('Vale')
+      }}
     >
       <CardGradient styles={styles.card}>
         <View style={styles.content}>
@@ -74,7 +80,7 @@ export const FuncionarioCard: React.FC<FuncionarioCardProps> = ({ employee }) =>
             R$ {voucherTotal.toFixed(2)}
           </Text>
 
-          <StatusBadge status={status}/>
+          <StatusBadge status={status} />
         </View>
       </CardGradient>
     </Pressable>

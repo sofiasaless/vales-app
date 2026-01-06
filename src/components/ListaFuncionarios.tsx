@@ -6,13 +6,14 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { mockEmployees } from '../mocks/mockData';
 import { CardGradient } from './CardGradient';
 import { FuncionarioCard } from './FuncionarioCard';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 export const ListaFuncionarios = () => {
   const theme = useTheme();
 
   const EmptyState = () => (
     <View style={styles.empty}>
-      {/* <Feather name="users" size={24} color="white" /> */}
+      <AntDesign name="usergroup-delete" size={46} color={theme['text-hint-color']} />
       <Text appearance="hint" style={styles.emptyText}>
         Nenhum funcionário cadastrado
       </Text>
@@ -23,6 +24,7 @@ export const ListaFuncionarios = () => {
   );
 
   const funcionarios = mockEmployees.concat(mockEmployees);
+  // const funcionarios: any[] = [];
 
   return (
     <Layout level="1" style={styles.screen}>
