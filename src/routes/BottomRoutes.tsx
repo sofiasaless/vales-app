@@ -6,6 +6,7 @@ import { Cadastro } from '../screens/Cadastro';
 import { Funcionarios } from '../screens/Funcionarios';
 import { BottomNavigation, BottomNavigationTab } from '@ui-kitten/components';
 import { BottomTab } from '../components/BottomTab';
+import { Perfil } from '../screens/Perfil';
 
 export type BottomTabParamList = {
   Funcionarios: undefined;
@@ -36,7 +37,7 @@ export const BottomTabsRoutes = () => {
       />
       <TabStack.Screen 
         name="Perfil" 
-        component={Funcionarios}
+        component={Perfil}
         options={{ title: 'Meu Perfil' }}
       />
     </TabStack.Navigator>

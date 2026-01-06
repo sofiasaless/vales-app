@@ -7,6 +7,7 @@ import { customTheme } from '../theme/custom.theme';
 import { BottomTabsRoutes } from './BottomRoutes';
 import { DetalhesFuncionario } from '../screens/DetalhesFuncionario';
 import { HIstoricoPagamentos } from '../screens/HIstoricoPagamentos';
+import Mensalidades from '../screens/Mensalidades';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -17,6 +18,7 @@ export type RootStackParamList = {
   Assinatura: undefined;
   Detalhes: undefined;
   Historico: undefined;
+  Mensalidades: undefined;
   // Comanda: { idMesa: string | undefined };
   // Cardapio: { idMesa: string | undefined };
   // Transferir: { idMesa: string | undefined, disponibilizarMesa: boolean | undefined };
@@ -65,6 +67,12 @@ export default function StackRoutes() {
         name="Historico"
         component={HIstoricoPagamentos}
         options={optionsHeader('Histórico de pagamentos')}
+      />
+
+      <Stack.Screen
+        name="Mensalidades"
+        component={Mensalidades}
+        options={optionsHeader('Mensalidades')}
       />
     </Stack.Navigator>
   );

@@ -17,7 +17,7 @@ type Props = {
 const IconTab = ({ nome, ativo }: { nome: string; ativo: boolean }) => {
   const color = ativo
     ? customTheme['color-primary-600']
-    : customTheme['color-basic-600'];
+    : customTheme['text-disabled-color'];
 
   switch (nome) {
     case "Funcionarios":
@@ -38,7 +38,7 @@ export function BottomTab({ state, descriptors, navigation }: Props) {
   return (
     <Layout >
       <BottomNavigation
-        style={{paddingBlock: 12}}
+        style={{paddingBlock: 12, backgroundColor: customTheme['background-alternative-color-1']}}
         selectedIndex={state.index}
         onSelect={(index) => {
           const route = state.routes[index];
@@ -78,6 +78,6 @@ export function BottomTab({ state, descriptors, navigation }: Props) {
 export const styles = StyleSheet.create({
   icon: {
     flex: 1,
-    flexDirection: 'column'
+    flexDirection: 'column',
   },
 });

@@ -6,6 +6,7 @@ import { Button, Input, Layout, Radio, RadioGroup, Text } from "@ui-kitten/compo
 import { EmployeeType } from "../types";
 import { useState } from "react";
 import { parseCurrencyInput, validateCPF } from "../util/formatadores.util";
+import { customTheme } from "../theme/custom.theme";
 
 const paydayOptions = [5, 10, 15, 20, 25, 30];
 
@@ -86,8 +87,9 @@ export const Cadastro = () => {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
-          <CardGradient styles={styles.card}>
+          <View style={styles.card}>
             <Input
+              size="small"
               label="Nome Completo *"
               placeholder="Ex: Maria Silva"
               value={formData.name}
@@ -98,6 +100,7 @@ export const Cadastro = () => {
 
             {/* Cargo */}
             <Input
+              size="small"
               label="Cargo *"
               placeholder="Ex: Cozinheira"
               value={formData.role}
@@ -117,7 +120,6 @@ export const Cadastro = () => {
                 onChange={(index) =>
                   handleChange('type', index === 0 ? 'FIXO' : 'DIARISTA')
                 }
-                style={styles.radioGroup}
               >
                 <Radio>Fixo (Quinzenas)</Radio>
                 <Radio>Diarista</Radio>
@@ -126,6 +128,7 @@ export const Cadastro = () => {
 
             {/* Salário */}
             <Input
+              size="small"
               label={
                 formData.type === 'DIARISTA'
                   ? 'Valor da Diária *'
@@ -144,6 +147,7 @@ export const Cadastro = () => {
 
             {/* CPF */}
             <Input
+              size="small"
               label="CPF"
               placeholder="000.000.000-00"
               keyboardType="numeric"
@@ -155,37 +159,44 @@ export const Cadastro = () => {
 
             {/* Datas */}
             <Input
+              size="small"
               label="Data de Nascimento"
               placeholder="YYYY-MM-DD"
               value={formData.birthDate}
-            onChangeText={(v) => handleChange('birthDate', v)}
+              onChangeText={(v) => handleChange('birthDate', v)}
             />
 
             <Input
+              size="small"
               label="Data de Admissão"
               placeholder="YYYY-MM-DD"
               value={formData.admissionDate}
-            onChangeText={(v) => handleChange('admissionDate', v)}
+              onChangeText={(v) => handleChange('admissionDate', v)}
             />
 
             {/* Payday */}
-            <View>
-              <Text category="label" style={styles.label}>
-                Dia do Pagamento
-              </Text>
+            <View style={styles.paymentDays}>
+              <Input
+                style={{flex: 1}}
+                size="small"
+                label="1° Dia do Pagamento"
+                placeholder="Todo dia 4"
+                // value={formData.d}
+                onChangeText={(v) => handleChange('birthDate', v)}
+              />
 
-              <RadioGroup
-                selectedIndex={paydayOptions.indexOf(formData.payday)}
-              onChange={(index) =>
-                handleChange('payday', paydayOptions[index])
-              }
-              >
-                {paydayOptions.map((day) => (
-                  <Radio key={day}>Todo dia {day}</Radio>
-                ))}
-              </RadioGroup>
+              <Input
+                style={{flex: 1}}
+                size="small"
+                label="2° Dia do Pagamento"
+                placeholder="Todo dia 19"
+                // value={formData.d}
+                onChangeText={(v) => handleChange('birthDate', v)}
+              />
             </View>
-          </CardGradient>
+
+            <Button size="small" appearance="outline">Calcular dias de pagamento</Button>
+          </View>
 
           <Button
             size="large"
@@ -209,20 +220,24 @@ const styles = StyleSheet.create({
 
   card: {
     padding: 16,
-    borderRadius: 16,
     gap: 16,
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: customTheme["text-disabled-color"],
+    borderRadius: 16,
+    backgroundColor: customTheme["background-basic-color-4"]
   },
 
   label: {
     marginBottom: 8,
   },
 
-  radioGroup: {
-    gap: 8,
-  },
-
   submit: {
     borderRadius: 12,
   },
+
+  paymentDays: {
+    flexDirection: 'row',
+    gap: 10
+  }
 });
