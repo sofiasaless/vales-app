@@ -23,7 +23,7 @@ const IconTab = ({ nome, ativo }: { nome: string; ativo: boolean }) => {
     case "Funcionarios":
       return <MaterialIcons name="diversity-3" size={22} color={color} />;
 
-    case "Cadastro":
+    case "Contratar":
       return <MaterialIcons name="business-center" size={20} color={color} />;
 
     case "Perfil":

@@ -8,6 +8,7 @@ import { BottomTabsRoutes } from './BottomRoutes';
 import { DetalhesFuncionario } from '../screens/DetalhesFuncionario';
 import { HIstoricoPagamentos } from '../screens/HIstoricoPagamentos';
 import Mensalidades from '../screens/Mensalidades';
+import Cardapio from '../screens/Cardapio';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -19,6 +20,7 @@ export type RootStackParamList = {
   Detalhes: undefined;
   Historico: undefined;
   Mensalidades: undefined;
+  Cardapio: undefined;
   // Comanda: { idMesa: string | undefined };
   // Cardapio: { idMesa: string | undefined };
   // Transferir: { idMesa: string | undefined, disponibilizarMesa: boolean | undefined };
@@ -73,6 +75,12 @@ export default function StackRoutes() {
         name="Mensalidades"
         component={Mensalidades}
         options={optionsHeader('Mensalidades')}
+      />
+
+      <Stack.Screen
+        name="Cardapio"
+        component={Cardapio}
+        options={optionsHeader('Cardápio')}
       />
     </Stack.Navigator>
   );

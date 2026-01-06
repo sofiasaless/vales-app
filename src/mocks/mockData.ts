@@ -147,3 +147,90 @@ export const mockManager: Manager = {
   name: 'Carlos Roberto',
   email: 'carlos@restaurante.com',
 };
+
+export const menuProducts: MenuProduct[] = [
+  {
+    id: '1',
+    name: 'Hambúrguer Clássico',
+    category: 'Lanches',
+    price: 24.90,
+    available: true
+  },
+  {
+    id: '2',
+    name: 'Batata Frita',
+    category: 'Acompanhamentos',
+    price: 12.50,
+    available: true
+  },
+  {
+    id: '3',
+    name: 'Refrigerante 500ml',
+    category: 'Bebidas',
+    price: 8.00,
+    available: true
+  },
+  {
+    id: '4',
+    name: 'Pizza Margherita',
+    category: 'Pizzas',
+    price: 45.90,
+    available: true
+  },
+  {
+    id: '5',
+    name: 'Salada Caesar',
+    category: 'Saladas',
+    price: 22.50,
+    available: false
+  },
+  {
+    id: '6',
+    name: 'Sorvete de Chocolate',
+    category: 'Sobremesas',
+    price: 14.90,
+    available: true
+  },
+  {
+    id: '7',
+    name: 'Café Expresso',
+    category: 'Bebidas',
+    price: 5.00,
+    available: true
+  },
+  {
+    id: '8',
+    name: 'X-Tudo',
+    category: 'Lanches',
+    price: 32.90,
+    available: true
+  },
+  {
+    id: '9',
+    name: 'Água Mineral',
+    category: 'Bebidas',
+    price: 4.50,
+    available: false
+  },
+  {
+    id: '10',
+    name: 'Brownie com Sorvete',
+    category: 'Sobremesas',
+    price: 18.90,
+    available: true
+  },
+  {
+    id: '11',
+    name: 'Milk Shake de Morango',
+    category: 'Bebidas',
+    price: 16.90,
+    available: true
+  },
+  {
+    id: '12',
+    name: 'Frango à Parmegiana',
+    category: 'Pratos Principais',
+    price: 38.50,
+    available: true
+  }
+];

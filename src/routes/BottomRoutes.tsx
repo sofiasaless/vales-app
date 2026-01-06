@@ -10,7 +10,7 @@ import { Perfil } from '../screens/Perfil';
 
 export type BottomTabParamList = {
   Funcionarios: undefined;
-  Cadastro: undefined;
+  Contratar: undefined;
   Perfil: undefined;
 };
 
@@ -31,9 +31,9 @@ export const BottomTabsRoutes = () => {
         options={{ title: 'Funcionários' }}
       />
       <TabStack.Screen 
-        name="Cadastro" 
+        name="Contratar" 
         component={Cadastro}
-        options={{ title: 'Cadastrar' }}
+        options={{ title: 'Contratar' }}
       />
       <TabStack.Screen 
         name="Perfil" 

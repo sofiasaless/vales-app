@@ -158,6 +158,7 @@ export const GerenciaVales = () => {
           <Button
             size="small"
             accessoryLeft={<AntDesign name="plus" size={15} color="black" />}
+            onPress={() => navigation.navigate('Cardapio')}
           >
             Itens
           </Button>

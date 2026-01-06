@@ -1,28 +1,26 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import {
   Button,
   Card,
   Layout,
   Modal,
-  Text,
-  useTheme,
+  Text
 } from '@ui-kitten/components';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { CardGradient } from '../components/CardGradient';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { ItemVale } from '../components/ItemVale';
 import { mockEmployees } from '../mocks/mockData';
-import { customTheme } from '../theme/custom.theme';
 import { RootStackParamList } from '../routes/StackRoutes';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { customTheme } from '../theme/custom.theme';
 
 export const ResumoPagamento = () => {
-  const theme = useTheme();
   const navigator = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -134,10 +132,10 @@ export const ResumoPagamento = () => {
             <View
               style={[
                 styles.iconWrapper,
-                { backgroundColor: '#6fe0cb57' },
+                { backgroundColor: '#6fe0cb2f' },
               ]}
             >
-              <FontAwesome name="money" size={14} color={customTheme['color-primary-900']} />
+              <MaterialIcons name="payments" size={16} color={customTheme['color-success-600']} />
             </View>
             <Text status="success" category="s1">
               Total a Pagar
@@ -153,9 +151,7 @@ export const ResumoPagamento = () => {
 
         {/* Confirmar */}
         <Button
-          status="success"
           size="medium"
-          style={styles.confirmButton}
           appearance='outline'
           onPress={() => {
             navigator.navigate('Assinatura');
@@ -166,9 +162,7 @@ export const ResumoPagamento = () => {
         </Button>
 
         <Button
-          status="success"
           size="medium"
-          style={styles.confirmButton}
           onPress={() => setShowConfirmModal(true)}
           accessoryLeft={<MaterialIcons name="payment" size={18} color="black" />}
         >
@@ -268,9 +262,6 @@ const styles = StyleSheet.create({
   },
   voucherList: {
     marginTop: 12
-  },
-  confirmButton: {
-    marginTop: 12,
   },
   centered: {
     flex: 1,

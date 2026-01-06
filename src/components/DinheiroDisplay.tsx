@@ -5,7 +5,7 @@ import { Text, useTheme } from '@ui-kitten/components';
 interface DinheiroDisplayProps {
   value: number;
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  variant?: 'default' | 'positive' | 'negative';
+  variant?: 'default' | 'positive' | 'negative' | 'black';
   showSign?: boolean;
   style?: any;
 }
@@ -30,6 +30,7 @@ export const DinheiroDisplay = ({
     default: theme['text-basic-color'],
     positive: theme['color-success-600'],
     negative: theme['color-danger-600'],
+    black: 'black'
   };
 
   return (

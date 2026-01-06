@@ -118,7 +118,7 @@ export const Perfil = () => {
           />
           <View style={styles.divider} />
           <MenuItem
-            icon={<MaterialIcons name="payments" size={20} color={iconColor} />}
+            icon={<MaterialIcons name="calendar-month" size={20} color={iconColor} />}
             label="Mensalidades"
             onPress={() => navigation.navigate('Mensalidades')}
           />
