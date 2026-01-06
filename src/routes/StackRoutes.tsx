@@ -3,10 +3,12 @@ import { enableScreens } from 'react-native-screens';
 import { GerenciaVales } from '../screens/GerenciaVales';
 import { customTheme } from '../theme/custom.theme';
 import { Funcionarios } from '../screens/Funcionarios';
+import { ResumoPagamento } from '../screens/ResumoPagamento';
 
 export type RootStackParamList = {
   Vale: undefined;
   Funcionario: undefined;
+  ResumoPagamento: undefined;
   // Comanda: { idMesa: string | undefined };
   // Cardapio: { idMesa: string | undefined };
   // Transferir: { idMesa: string | undefined, disponibilizarMesa: boolean | undefined };
@@ -32,6 +34,18 @@ export default function StackRoutes() {
         component={GerenciaVales}
         options={{
           title: 'Gerênciar vales',
+          headerStyle: {
+            backgroundColor: customTheme['background-basic-color-1']
+          },
+          headerTintColor: customTheme['text-basic-color']
+        }}
+      />
+
+      <Stack.Screen
+        name="ResumoPagamento"
+        component={ResumoPagamento}
+        options={{
+          title: 'Resumo pagamento',
           headerStyle: {
             backgroundColor: customTheme['background-basic-color-1']
           },

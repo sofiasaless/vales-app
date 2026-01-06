@@ -16,10 +16,12 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { mockEmployees } from '../mocks/mockData';
 import { customTheme } from '../theme/custom.theme';
 import { ItemVale } from '../components/ItemVale';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../routes/StackRoutes';
 
 export const GerenciaVales = () => {
   // const route = useRoute();
-  // const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   // const { id } = route.params as RouteParams;
 
   // const { getEmployee, getVoucherTotal, dispatch } = useEmployees();
@@ -164,7 +166,7 @@ export const GerenciaVales = () => {
         {/* Lista de Itens */}
         {vales.length > 0 ? (
           vales.map((item) => (
-            <ItemVale key={item.id} item={item} />
+            <ItemVale key={item.id} item={item} showControls/>
           ))
         ) : (
           <Card style={styles.emptyCard}>
@@ -190,9 +192,9 @@ export const GerenciaVales = () => {
         <Button
           size="medium"
           // disabled={voucherTotal === 0}
-          // onPress={() =>
-          //   navigation.navigate('Payment', { employeeId: employee.id })
-          // }
+          onPress={() =>
+            navigation.navigate('ResumoPagamento')
+          }
           accessoryLeft={<Entypo name="credit-card" size={20} color="black" />}
         >
           Pagar Funcionário

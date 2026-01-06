@@ -1,18 +1,19 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Card, Text, Button, useTheme } from '@ui-kitten/components';
 import Feather from '@expo/vector-icons/Feather';
+import { Card, Text, useTheme } from '@ui-kitten/components';
+import React from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { VoucherItem } from '../types';
 import { customTheme } from '../theme/custom.theme';
+import { VoucherItem } from '../types';
 
 interface VoucherItemCardProps {
   item: VoucherItem;
   showControls?: boolean;
+  dangerStyle?: boolean
 }
 
 export const ItemVale: React.FC<VoucherItemCardProps> = ({
-  item
+  item, showControls, dangerStyle
 }) => {
   const theme = useTheme();
   const totalValue = item.unitPrice * item.quantity;
@@ -22,7 +23,8 @@ export const ItemVale: React.FC<VoucherItemCardProps> = ({
       style={[
         styles.card,
         {
-          backgroundColor: `${theme['color-basic-600']}80`, // secondary/50
+          backgroundColor: (dangerStyle)?'#d9554636':`${theme['color-basic-600']}80`,
+          borderWidth: (dangerStyle)?0:1
         },
       ]}
       disabled
@@ -44,9 +46,11 @@ export const ItemVale: React.FC<VoucherItemCardProps> = ({
         <View style={styles.right}>
           <Text category='s2'>R$ {totalValue}</Text>
 
-            <TouchableOpacity style={styles.removeButton}>
-              <Feather name="trash" size={15} color={customTheme['color-danger-600']} />
-            </TouchableOpacity>
+            {showControls && 
+              <TouchableOpacity style={styles.removeButton}>
+                <Feather name="trash" size={15} color={customTheme['color-danger-600']} />
+              </TouchableOpacity>
+            }
         </View>
       </View>
     </Card>

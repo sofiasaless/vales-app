@@ -68,6 +68,7 @@ export const ListaFuncionarios = () => {
       </View>
 
       <FlatList
+        showsVerticalScrollIndicator={false}
         data={funcionarios}
         keyExtractor={(item) => item.id}
         numColumns={2}
