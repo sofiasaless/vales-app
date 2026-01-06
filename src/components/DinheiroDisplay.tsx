@@ -37,7 +37,6 @@ export const DinheiroDisplay = ({
       style={[
         styles.base,
         styles[size],
-        { color: colorMap[variant] },
         style,
       ]}
     >

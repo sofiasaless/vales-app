@@ -4,11 +4,13 @@ import { GerenciaVales } from '../screens/GerenciaVales';
 import { customTheme } from '../theme/custom.theme';
 import { Funcionarios } from '../screens/Funcionarios';
 import { ResumoPagamento } from '../screens/ResumoPagamento';
+import { Assinatura } from '../screens/Assinatura';
 
 export type RootStackParamList = {
   Vale: undefined;
   Funcionario: undefined;
   ResumoPagamento: undefined;
+  Assinatura: undefined;
   // Comanda: { idMesa: string | undefined };
   // Cardapio: { idMesa: string | undefined };
   // Transferir: { idMesa: string | undefined, disponibilizarMesa: boolean | undefined };
@@ -46,6 +48,18 @@ export default function StackRoutes() {
         component={ResumoPagamento}
         options={{
           title: 'Resumo pagamento',
+          headerStyle: {
+            backgroundColor: customTheme['background-basic-color-1']
+          },
+          headerTintColor: customTheme['text-basic-color']
+        }}
+      />
+      
+      <Stack.Screen
+        name="Assinatura"
+        component={Assinatura}
+        options={{
+          title: 'Assinatura do funcionário',
           headerStyle: {
             backgroundColor: customTheme['background-basic-color-1']
           },

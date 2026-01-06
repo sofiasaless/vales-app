@@ -1,3 +1,4 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -17,13 +18,12 @@ import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { ItemVale } from '../components/ItemVale';
 import { mockEmployees } from '../mocks/mockData';
 import { customTheme } from '../theme/custom.theme';
+import { RootStackParamList } from '../routes/StackRoutes';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 
 export const ResumoPagamento = () => {
   const theme = useTheme();
-  // const navigation = useNavigation();
-  // const route = useRoute();
-  // const { employeeId } = route.params as RouteParams;
-
+  const navigator = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -88,7 +88,7 @@ export const ResumoPagamento = () => {
             >
               <AntDesign name="wallet" size={14} color={customTheme['color-primary-400']} />
             </View>
-            <Text appearance="hint">Salário Base</Text>
+            <Text appearance="s1">Salário Base</Text>
           </View>
 
           <DinheiroDisplay size='lg' value={3237.40}/>
@@ -105,7 +105,7 @@ export const ResumoPagamento = () => {
             >
               <MaterialCommunityIcons name="receipt-text-minus-outline" size={16} color={customTheme['color-danger-600']}  />
             </View>
-            <Text appearance="hint">Total do Vale a Descontar</Text>
+            <Text appearance="s1">Total do Vale a Descontar</Text>
           </View>
 
           <DinheiroDisplay
@@ -139,7 +139,7 @@ export const ResumoPagamento = () => {
             >
               <FontAwesome name="money" size={14} color={customTheme['color-primary-900']} />
             </View>
-            <Text status="success" category="hint">
+            <Text status="success" category="s1">
               Total a Pagar
             </Text>
           </View>
@@ -156,10 +156,23 @@ export const ResumoPagamento = () => {
           status="success"
           size="medium"
           style={styles.confirmButton}
-          onPress={() => setShowConfirmModal(true)}
-          accessoryLeft={<AntDesign name="signature" size={18} color="black" />}
+          appearance='outline'
+          onPress={() => {
+            navigator.navigate('Assinatura');
+          }}
+          accessoryLeft={<AntDesign name="signature" size={18} color={customTheme['color-primary-400']} />}
         >
-          Ir para assinatura do vale
+          Assinatura do funcinoário
+        </Button>
+
+        <Button
+          status="success"
+          size="medium"
+          style={styles.confirmButton}
+          onPress={() => setShowConfirmModal(true)}
+          accessoryLeft={<MaterialIcons name="payment" size={18} color="black" />}
+        >
+          Confirmar pagamento
         </Button>
       </Layout>
 
@@ -174,9 +187,9 @@ export const ResumoPagamento = () => {
             Confirmar Pagamento
           </Text>
 
-          <Text appearance="hint" style={styles.modalText}>
-            Você está prestes a confirmar o pagamento de{' '}
-            <Text category="s1">{employee.name}</Text>
+          <Text appearance="s1" style={styles.modalText}>
+            Você está prestes a confirmar o pagamento de {employee.name}.
+            Certifique-se de coletar a assinatura do funcionário e compartilhar o comprovante de vales.
           </Text>
 
           <View style={styles.modalAmount}>
