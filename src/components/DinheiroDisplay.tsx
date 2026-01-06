@@ -38,6 +38,7 @@ export const DinheiroDisplay = ({
         styles.base,
         styles[size],
         style,
+        {color: colorMap[variant]}
       ]}
     >
       {sign}

@@ -1,0 +1,266 @@
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Button, Card, Layout, Text } from '@ui-kitten/components';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+
+import { DinheiroDisplay } from '../components/DinheiroDisplay';
+import { mockEmployees } from '../mocks/mockData';
+import { formatDateTime } from '../util/formatadores.util';
+import { ItemVale } from '../components/ItemVale';
+import { customTheme } from '../theme/custom.theme';
+
+export const HIstoricoPagamentos = () => {
+  // const route = useRoute<any>();
+  const navigation = useNavigation<any>();
+  // const { id } = route.params;
+
+  const employee = mockEmployees[0];
+
+  const [expandedPayment, setExpandedPayment] = useState<string | null>(null);
+
+  if (!employee) {
+    return (
+      <Layout style={styles.center}>
+        {/* <AlertCircle size={48} color="#ff3d71" /> */}
+        <Text category="h6" style={styles.mt}>
+          Funcionário não encontrado
+        </Text>
+        <Button
+          appearance="outline"
+          style={styles.mt}
+          onPress={() => navigation.goBack()}
+        >
+          Voltar
+        </Button>
+      </Layout>
+    );
+  }
+
+  const toggleExpand = (paymentId: string) => {
+    setExpandedPayment((prev) =>
+      prev === paymentId ? null : paymentId
+    );
+  };
+
+  return (
+    <Layout style={styles.container}>
+
+      <View style={styles.content}>
+        {employee.paymentHistory.length > 0 ? (
+          employee.paymentHistory.map((payment) => {
+            const isExpanded = expandedPayment === payment.id;
+
+            return (
+              <Card key={payment.id} style={styles.card}>
+                <TouchableOpacity
+                  activeOpacity={0.7}
+                  onPress={() => toggleExpand(payment.id)}
+                  style={styles.cardHeader}
+                >
+                  <View style={styles.headerLeft}>
+                    <Text appearance="hint" category="c1">
+                      {formatDateTime(payment.date)}
+                    </Text>
+
+                    <View style={styles.amountRow}>
+                      <DinheiroDisplay
+                        value={payment.amountPaid}
+                        size="md"
+                        variant="positive"
+                      />
+                      <Text appearance="hint" category="c1">
+                        pago
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.headerRight}>
+                    <View style={styles.voucherInfo}>
+                      <Text appearance="hint" category="c1">
+                        Vale descontado
+                      </Text>
+                      <DinheiroDisplay
+                        value={-payment.voucherTotal}
+                        size="sm"
+                        variant="negative"
+                      />
+                    </View>
+
+                    {isExpanded ? (
+                      <MaterialIcons name="keyboard-arrow-up" size={24} color="#8f9bb3" />
+                    ) : (
+                      <MaterialIcons name="keyboard-arrow-down" size={24} color="#8f9bb3" />
+                    )}
+                  </View>
+                </TouchableOpacity>
+
+                {/* Expanded content */}
+                {isExpanded && (
+                  <View style={styles.expanded}>
+                    <View style={styles.summaryRow}>
+                      <View style={styles.summaryCard}>
+                        <Text appearance="hint" category="c1">
+                          Salário Base
+                        </Text>
+                        <DinheiroDisplay
+                          value={payment.baseSalary}
+                          size="sm"
+                        />
+                      </View>
+
+                      <View style={[styles.summaryCard, styles.dangerCard]}>
+                        <Text appearance="hint" category="c1">
+                          Desconto Vale
+                        </Text>
+                        <DinheiroDisplay
+                          value={-payment.voucherTotal}
+                          size="sm"
+                          variant="negative"
+                        />
+                      </View>
+                    </View>
+
+                    <View style={styles.voucherSection}>
+                      <View style={styles.voucherTitle}>
+                        <MaterialIcons name="receipt-long" size={15} color="#8f9bb3" />
+                        <Text category="s2">
+                          Itens do Vale
+                        </Text>
+                      </View>
+
+                      <View>
+                        {employee.currentVoucher.map((item) => (
+                          <ItemVale
+                            key={item.id}
+                            item={item}
+                            showControls={false}
+                          // style={styles.voucherItem}
+                          />
+                        ))}
+                      </View>
+                    </View>
+                  </View>
+                )}
+              </Card>
+            );
+          })
+        ) : (
+          <View style={styles.empty}>
+            <MaterialIcons name="history" size={48} color="#8f9bb3" />
+            <Text appearance="hint" style={styles.mt}>
+              Nenhum pagamento registrado
+            </Text>
+            <Text appearance="hint" category="c1">
+              O histórico aparecerá após o primeiro pagamento
+            </Text>
+          </View>
+        )}
+      </View>
+    </Layout>
+  );
+};
+
+
+
+export const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingBottom: 24,
+  },
+
+  content: {
+    padding: 16,
+    gap: 12,
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+
+  mt: {
+    marginTop: 16,
+  },
+
+  card: {
+    padding: 0,
+    overflow: 'hidden',
+    backgroundColor: customTheme['background-basic-color-3']
+  },
+
+  cardHeader: {
+    // padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  headerLeft: {
+    flex: 1,
+  },
+
+  amountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+  },
+
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+
+  voucherInfo: {
+    alignItems: 'flex-end',
+  },
+
+  expanded: {
+    borderTopWidth: 1,
+    marginTop: 10,
+    paddingTop: 13,
+    borderTopColor: 'rgba(143,155,179,0.2)',
+  },
+
+  summaryRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+
+  summaryCard: {
+    flex: 1,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(143,155,179,0.12)',
+  },
+
+  dangerCard: {
+    backgroundColor: 'rgba(255, 61, 113, 0.09)',
+  },
+
+  voucherSection: {
+    marginTop: 8,
+  },
+
+  voucherTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+
+  voucherItem: {
+    backgroundColor: 'rgba(143,155,179,0.15)',
+  },
+
+  empty: {
+    alignItems: 'center',
+    paddingVertical: 48,
+    gap: 4,
+  },
+});

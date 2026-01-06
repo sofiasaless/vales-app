@@ -207,11 +207,9 @@ export const GerenciaVales = () => {
             size='small'
             style={styles.actionButton}
             accessoryLeft={<Feather name="user" size={15} color={customTheme['text-basic-color']} />}
-          // onPress={() =>
-          //   navigation.navigate('EmployeeDetails', {
-          //     employeeId: employee.id,
-          //   })
-          // }
+          onPress={() =>
+            navigation.navigate('Detalhes')
+          }
           >
             Detalhes
           </Button>
@@ -222,11 +220,9 @@ export const GerenciaVales = () => {
             appearance="outline"
             style={styles.actionButton}
             accessoryLeft={<MaterialCommunityIcons name="history" size={16} color={customTheme['text-basic-color']} />}
-          // onPress={() =>
-          //   navigation.navigate('EmployeeHistory', {
-          //     employeeId: employee.id,
-          //   })
-          // }
+          onPress={() =>
+            navigation.navigate('Historico')
+          }
           >
             Histórico
           </Button>

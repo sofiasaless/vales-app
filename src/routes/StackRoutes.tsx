@@ -1,10 +1,12 @@
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import { enableScreens } from 'react-native-screens';
 import { Assinatura } from '../screens/Assinatura';
 import { GerenciaVales } from '../screens/GerenciaVales';
 import { ResumoPagamento } from '../screens/ResumoPagamento';
 import { customTheme } from '../theme/custom.theme';
 import { BottomTabsRoutes } from './BottomRoutes';
+import { DetalhesFuncionario } from '../screens/DetalhesFuncionario';
+import { HIstoricoPagamentos } from '../screens/HIstoricoPagamentos';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -13,6 +15,8 @@ export type RootStackParamList = {
   Cadastro: undefined;
   ResumoPagamento: undefined;
   Assinatura: undefined;
+  Detalhes: undefined;
+  Historico: undefined;
   // Comanda: { idMesa: string | undefined };
   // Cardapio: { idMesa: string | undefined };
   // Transferir: { idMesa: string | undefined, disponibilizarMesa: boolean | undefined };
@@ -36,38 +40,42 @@ export default function StackRoutes() {
       <Stack.Screen
         name="Vale"
         component={GerenciaVales}
-        options={{
-          title: 'Gerênciar vales',
-          headerStyle: {
-            backgroundColor: customTheme['background-basic-color-1']
-          },
-          headerTintColor: customTheme['text-basic-color']
-        }}
+        options={optionsHeader('Gerênciar vales')}
       />
 
       <Stack.Screen
         name="ResumoPagamento"
         component={ResumoPagamento}
-        options={{
-          title: 'Resumo pagamento',
-          headerStyle: {
-            backgroundColor: customTheme['background-basic-color-1']
-          },
-          headerTintColor: customTheme['text-basic-color']
-        }}
+        options={optionsHeader('Resumo pagamento')}
       />
-      
+
       <Stack.Screen
         name="Assinatura"
         component={Assinatura}
-        options={{
-          title: 'Assinatura do funcionário',
-          headerStyle: {
-            backgroundColor: customTheme['background-basic-color-1']
-          },
-          headerTintColor: customTheme['text-basic-color']
-        }}
+        options={optionsHeader('Assinatura do funcionário')}
+      />
+
+      <Stack.Screen
+        name="Detalhes"
+        component={DetalhesFuncionario}
+        options={optionsHeader('Detalhes')}
+      />
+
+      <Stack.Screen
+        name="Historico"
+        component={HIstoricoPagamentos}
+        options={optionsHeader('Histórico de pagamentos')}
       />
     </Stack.Navigator>
   );
+}
+
+const optionsHeader = (title: string): StackNavigationOptions => {
+  return {
+    title: title,
+    headerStyle: {
+      backgroundColor: customTheme['background-basic-color-1']
+    },
+    headerTintColor: customTheme['text-basic-color']
+  }
 }
