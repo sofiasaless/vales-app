@@ -1,11 +1,10 @@
-import * as SplashScreen from 'expo-splash-screen';
+import { useFocusEffect } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { StyleSheet } from "react-native";
+import * as SplashScreen from 'expo-splash-screen';
+import { useCallback } from 'react';
 import { Container } from "../components/Container";
 import { Header } from "../components/Header";
 import { ListaFuncionarios } from "../components/ListaFuncionarios";
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -37,7 +36,3 @@ export const Funcionarios = () => {
     </Container>
   )
 }
-
-const styles = StyleSheet.create({
-
-});

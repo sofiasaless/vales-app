@@ -165,8 +165,8 @@ export const GerenciaVales = () => {
 
         {/* Lista de Itens */}
         {vales.length > 0 ? (
-          vales.map((item) => (
-            <ItemVale key={item.id} item={item} showControls/>
+          vales.map((item, index) => (
+            <ItemVale key={index} item={item} showControls/>
           ))
         ) : (
           <Card style={styles.emptyCard}>

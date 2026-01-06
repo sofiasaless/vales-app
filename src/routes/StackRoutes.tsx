@@ -1,14 +1,16 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import { enableScreens } from 'react-native-screens';
-import { GerenciaVales } from '../screens/GerenciaVales';
-import { customTheme } from '../theme/custom.theme';
-import { Funcionarios } from '../screens/Funcionarios';
-import { ResumoPagamento } from '../screens/ResumoPagamento';
 import { Assinatura } from '../screens/Assinatura';
+import { GerenciaVales } from '../screens/GerenciaVales';
+import { ResumoPagamento } from '../screens/ResumoPagamento';
+import { customTheme } from '../theme/custom.theme';
+import { BottomTabsRoutes } from './BottomRoutes';
 
 export type RootStackParamList = {
+  Tabs: undefined;
   Vale: undefined;
   Funcionario: undefined;
+  Cadastro: undefined;
   ResumoPagamento: undefined;
   Assinatura: undefined;
   // Comanda: { idMesa: string | undefined };
@@ -26,8 +28,8 @@ export default function StackRoutes() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Funcionario"
-        component={Funcionarios}
+        name="Tabs"
+        component={BottomTabsRoutes}
         options={{ headerShown: false }}
       />
 

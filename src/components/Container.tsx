@@ -27,6 +27,5 @@ export const styles = StyleSheet.create({
 
   pageContainerWithTabs: {
     flex: 1,
-    paddingBottom: 80,
   },
 });
