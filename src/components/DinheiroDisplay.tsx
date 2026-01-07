@@ -4,7 +4,7 @@ import { Text, useTheme } from '@ui-kitten/components';
 
 interface DinheiroDisplayProps {
   value: number;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'tn' | 'sm' | 'md' | 'lg' | 'xl';
   variant?: 'default' | 'positive' | 'negative' | 'black';
   showSign?: boolean;
   style?: any;
@@ -39,7 +39,7 @@ export const DinheiroDisplay = ({
         styles.base,
         styles[size],
         style,
-        {color: colorMap[variant]}
+        { color: colorMap[variant] }
       ]}
     >
       {sign}
@@ -54,7 +54,9 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: -0.3,
   },
-
+  tn: {
+    fontSize: 12,
+  },
   sm: {
     fontSize: 14,
   },

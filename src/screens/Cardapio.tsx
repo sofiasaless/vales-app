@@ -1,18 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Button, Layout, Text, useTheme } from '@ui-kitten/components';
-import React, { useMemo, useState } from 'react';
+import Feather from '@expo/vector-icons/Feather';
+import { Button, Input, Layout, Text, useTheme } from '@ui-kitten/components';
+import React, { useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
   View
 } from 'react-native';
 
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { ItemCardapio } from '../components/ItemCardapio';
 import { mockEmployees, mockMenuProducts } from '../mocks/mockData';
-import { VoucherItem } from '../types';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../routes/StackRoutes';
+import { VoucherItem } from '../types';
+import { customTheme } from '../theme/custom.theme';
 
 interface SelectedItem {
   productId: string;
@@ -106,9 +108,22 @@ export default function Cardapio() {
 
   return (
     <Layout style={styles.container}>
+      <Layout style={styles.barraPesquisa}>
+        <Input
+          size="large"
+          status='primary'
+          // label="Nome Completo *"
+          placeholder="Pesquisar por produto...."
+          accessoryLeft={<Feather name="search" size={22} color={customTheme['color-primary-500']} />}
+        // value={formData.name}
+        // onChangeText={(v) => handleChange('name', v)}
+        // status={errors.name ? 'danger' : 'basic'}
+        // caption={errors.name}
+        />
+      </Layout>
       <ScrollView contentContainerStyle={styles.content}>
 
-        {mockMenuProducts.map((product, index) => (
+        {mockMenuProducts.concat(mockMenuProducts).map((product, index) => (
           <ItemCardapio
             key={index}
             product={product}
@@ -169,6 +184,10 @@ const createStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       flex: 1,
+    },
+    barraPesquisa: {
+      paddingHorizontal: 16,
+      paddingBlock: 10
     },
     content: {
       padding: 16,

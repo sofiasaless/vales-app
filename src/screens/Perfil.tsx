@@ -114,7 +114,7 @@ export const Perfil = () => {
           <MenuItem
             icon={<MaterialIcons name="dining" size={20} color={iconColor} />}
             label="Gerenciar Cardápio"
-            onPress={() => navigation.navigate('Historico')}
+            onPress={() => navigation.navigate('GerenciaCardapio')}
           />
           <View style={styles.divider} />
           <MenuItem

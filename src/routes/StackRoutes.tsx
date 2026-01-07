@@ -9,6 +9,7 @@ import { DetalhesFuncionario } from '../screens/DetalhesFuncionario';
 import { HIstoricoPagamentos } from '../screens/HIstoricoPagamentos';
 import Mensalidades from '../screens/Mensalidades';
 import Cardapio from '../screens/Cardapio';
+import { GerenciaCardapio } from '../screens/GerenciaCardapio';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -17,6 +18,7 @@ export type RootStackParamList = {
   Cadastro: undefined;
   ResumoPagamento: undefined;
   Assinatura: undefined;
+  GerenciaCardapio: undefined;
   Detalhes: undefined;
   Historico: undefined;
   Mensalidades: undefined;
@@ -81,6 +83,12 @@ export default function StackRoutes() {
         name="Cardapio"
         component={Cardapio}
         options={optionsHeader('Cardápio')}
+      />
+
+      <Stack.Screen
+        name="GerenciaCardapio"
+        component={GerenciaCardapio}
+        options={optionsHeader('Gerenciar itens do cardápio')}
       />
     </Stack.Navigator>
   );

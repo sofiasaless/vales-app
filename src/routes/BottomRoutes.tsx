@@ -38,7 +38,7 @@ export const BottomTabsRoutes = () => {
       <TabStack.Screen 
         name="Perfil" 
         component={Perfil}
-        options={{ title: 'Meu Perfil' }}
+        options={{ title: 'Perfil' }}
       />
     </TabStack.Navigator>
   );
