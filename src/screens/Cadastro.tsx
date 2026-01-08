@@ -1,29 +1,59 @@
+import { Button, Input, Layout, Radio, RadioGroup, Text } from "@ui-kitten/components";
+import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Container } from "../components/Container";
 import { Header } from "../components/Header";
-import { CardGradient } from "../components/CardGradient";
-import { Button, Input, Layout, Radio, RadioGroup, Text } from "@ui-kitten/components";
-import { EmployeeType } from "../types";
-import { useState } from "react";
-import { parseCurrencyInput, validateCPF } from "../util/formatadores.util";
 import { customTheme } from "../theme/custom.theme";
-
-const paydayOptions = [5, 10, 15, 20, 25, 30];
+import { validateCPF } from "../util/formatadores.util";
+import { FuncionarioPostRequestBody, TipoFuncionario } from "../schema/funcionario.schema";
+import { converterParaDate } from "../util/datas.util";
+import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
+import { DatePicker } from "../components/DatePicker";
 
 export const Cadastro = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState({
-    name: '',
-    role: '',
-    baseSalary: '',
-    type: 'FIXO' as EmployeeType,
+  const [formData, setFormData] = useState<FuncionarioPostRequestBody>({
+    nome: '',
+    cargo: '',
+    salario: 0,
+    tipo: 'FIXO' as TipoFuncionario,
     cpf: '',
-    birthDate: '',
-    admissionDate: '',
-    payday: 5,
+    data_admissao: new Date(),
+    primeiro_dia_pagamento: 0,
+    segundo_dia_pagamento: 0
   });
+
+  const [dataAdmissao, setDataAdmissao] = useState<Date>(new Date)
+  const settingAdmissao = (tipo: 'DATA' | 'HORA', dado?: string) => {
+    if (tipo === 'DATA' && dado != undefined) {
+      setDataAdmissao(converterParaDate(dado))
+    }
+  }
+
+  const [dataNascimento, setDataNascimento] = useState<Date>(new Date)
+  const settingNascimento = (tipo: 'DATA' | 'HORA', dado?: string) => {
+    if (tipo === 'DATA' && dado != undefined) {
+      setDataNascimento(converterParaDate(dado))
+      setFormData((prev) => (({
+        ...prev,
+        data_nascimento: converterParaDate(dado)
+      })))
+    }
+  }
+
+  const calcularDiasDePagamento = () => {
+    const dia1 = new Date(new Date().setDate(dataAdmissao.getDate() + 14));
+    const dia2 = new Date(new Date().setDate(dia1.getDate() + 14));
+    setFormData((prev) => (
+      {
+        ...prev,
+        primeiro_dia_pagamento: dia1.getDate(),
+        segundo_dia_pagamento: dia2.getDate()
+      }
+    ))
+  }
 
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -54,19 +84,24 @@ export const Cadastro = () => {
   };
 
   const handleSalaryChange = (value: string) => {
-    handleChange('baseSalary', value.replace(/[^\d,]/g, ''));
+    let valor = Number(value)
+    if (isNaN(valor)) {
+      handleChange('salario', 0);
+      return
+    }
+    handleChange('salario', valor);
   };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) newErrors.name = 'Nome é obrigatório';
-    if (!formData.role.trim()) newErrors.role = 'Cargo é obrigatório';
+    if (formData.nome === '') newErrors.nome = 'Nome é obrigatório';
+    if (formData.cargo === '') newErrors.cargo = 'Cargo é obrigatório';
 
-    if (!formData.baseSalary) {
-      newErrors.baseSalary = 'Salário é obrigatório';
-    } else if (parseCurrencyInput(formData.baseSalary) <= 0) {
-      newErrors.baseSalary = 'Salário deve ser maior que zero';
+    if (!formData.salario) {
+      newErrors.salario = 'Salário é obrigatório';
+    } else if (formData.salario <= 0) {
+      newErrors.salario = 'Salário deve ser maior que zero';
     }
 
     if (formData.cpf && !validateCPF(formData.cpf)) {
@@ -76,6 +111,25 @@ export const Cadastro = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  const [isLoading, setIsLoading] = useState(false)
+  const handleSubmit = async () => {
+    setIsLoading(true)
+    console.info(formData);
+    if (!validate()) {
+      return;
+    }
+
+    try {
+      const funcSer = new FuncionarioFirestore()
+      await funcSer.criar(formData);
+      console.info('sucesso ao cadastrar')
+    } catch (error) {
+      console.error(`erro ao cadastrar funcionario ${error}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
 
   return (
@@ -92,10 +146,10 @@ export const Cadastro = () => {
               size="small"
               label="Nome Completo *"
               placeholder="Ex: Maria Silva"
-              value={formData.name}
-              onChangeText={(v) => handleChange('name', v)}
-              status={errors.name ? 'danger' : 'basic'}
-              caption={errors.name}
+              value={formData.nome}
+              onChangeText={(v) => handleChange('nome', v)}
+              status={errors.nome ? 'danger' : 'basic'}
+              caption={errors.nome}
             />
 
             {/* Cargo */}
@@ -103,10 +157,10 @@ export const Cadastro = () => {
               size="small"
               label="Cargo *"
               placeholder="Ex: Cozinheira"
-              value={formData.role}
-              onChangeText={(v) => handleChange('role', v)}
-              status={errors.role ? 'danger' : 'basic'}
-              caption={errors.role}
+              value={formData.cargo}
+              onChangeText={(v) => handleChange('cargo', v)}
+              status={errors.cargo ? 'danger' : 'basic'}
+              caption={errors.cargo}
             />
 
             {/* Tipo */}
@@ -116,9 +170,9 @@ export const Cadastro = () => {
               </Text>
 
               <RadioGroup
-                selectedIndex={formData.type === 'FIXO' ? 0 : 1}
+                selectedIndex={formData.tipo === 'FIXO' ? 0 : 1}
                 onChange={(index) =>
-                  handleChange('type', index === 0 ? 'FIXO' : 'DIARISTA')
+                  handleChange('tipo', index === 0 ? 'FIXO' : 'DIARISTA')
                 }
               >
                 <Radio>Fixo (Quinzenas)</Radio>
@@ -130,16 +184,16 @@ export const Cadastro = () => {
             <Input
               size="small"
               label={
-                formData.type === 'DIARISTA'
+                formData.tipo === 'DIARISTA'
                   ? 'Valor da Diária *'
                   : 'Salário Base *'
               }
               placeholder="0,00"
               keyboardType="numeric"
-              value={formData.baseSalary}
+              value={formData.salario.toString()}
               onChangeText={handleSalaryChange}
-              status={errors.baseSalary ? 'danger' : 'basic'}
-              caption={errors.baseSalary}
+              status={errors.salario ? 'danger' : 'basic'}
+              caption={errors.salario}
               accessoryLeft={() => (
                 <Text style={{ marginHorizontal: 8 }}>R$</Text>
               )}
@@ -158,53 +212,51 @@ export const Cadastro = () => {
             />
 
             {/* Datas */}
-            <Input
-              size="small"
-              label="Data de Nascimento"
-              placeholder="YYYY-MM-DD"
-              value={formData.birthDate}
-              onChangeText={(v) => handleChange('birthDate', v)}
-            />
+            <View>
+              <Text category="label" style={styles.label}>
+                Data de nascimento
+              </Text>
+              <DatePicker dataPreEstabelecida={dataNascimento} tamanBtn="small" tipo="date" setarData={settingNascimento} />
+            </View>
 
-            <Input
-              size="small"
-              label="Data de Admissão"
-              placeholder="YYYY-MM-DD"
-              value={formData.admissionDate}
-              onChangeText={(v) => handleChange('admissionDate', v)}
-            />
+            <View>
+              <Text category="label" style={styles.label}>
+                Data de admissão
+              </Text>
+              <DatePicker dataPreEstabelecida={dataAdmissao} tamanBtn="small" tipo="date" setarData={settingAdmissao} />
+            </View>
 
             {/* Payday */}
             <View style={styles.paymentDays}>
               <Input
-                style={{flex: 1}}
+                style={{ flex: 1 }}
                 size="small"
                 label="1° Dia do Pagamento"
                 placeholder="Todo dia 4"
-                // value={formData.d}
-                onChangeText={(v) => handleChange('birthDate', v)}
+                value={(formData.primeiro_dia_pagamento === 0) ? '' : formData.primeiro_dia_pagamento.toString()}
+                onChangeText={(v) => handleChange('primeiro_dia_pagamento', v)}
               />
 
               <Input
-                style={{flex: 1}}
+                style={{ flex: 1 }}
                 size="small"
                 label="2° Dia do Pagamento"
                 placeholder="Todo dia 19"
-                // value={formData.d}
-                onChangeText={(v) => handleChange('birthDate', v)}
+                value={(formData.segundo_dia_pagamento === 0) ? '' : formData.segundo_dia_pagamento.toString()}
+                onChangeText={(v) => handleChange('segundo_dia_pagamento', v)}
               />
             </View>
 
-            <Button size="small" appearance="outline">Calcular dias de pagamento</Button>
+            <Button onPress={calcularDiasDePagamento} size="small" status="warning" appearance="ghost">Calcular dias de pagamento</Button>
           </View>
 
           <Button
             size="large"
-            // onPress={handleSubmit}
-            // accessoryLeft={<UserPlus size={18} />}
+            onPress={handleSubmit}
             style={styles.submit}
+            disabled={isLoading}
           >
-            Cadastrar Funcionário
+            {(isLoading)?'Contrantado...':'Cadastrar Funcionário'}
           </Button>
         </ScrollView>
       </Layout>
