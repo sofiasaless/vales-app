@@ -6,7 +6,9 @@ import { Alert } from 'react-native';
 
 export function usePushNotifications() {
   useEffect(() => {
+      Alert.alert('cheguei na funcao de usePushNotifica')
     async function init() {
+      Alert.alert('cheguei na funcao init')
       const token = await registerForPushNotifications();
 
       Alert.alert('token ', token || 'nada')
