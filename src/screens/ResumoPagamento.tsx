@@ -1,5 +1,4 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import {
@@ -10,17 +9,24 @@ import {
   Text
 } from '@ui-kitten/components';
 import React, { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
 
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { CardGradient } from '../components/CardGradient';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { ItemVale } from '../components/ItemVale';
 import { mockEmployees } from '../mocks/mockData';
 import { RootStackParamList } from '../routes/StackRoutes';
+import { Funcionario } from '../schema/funcionario.schema';
 import { customTheme } from '../theme/custom.theme';
 
+interface RouteParams {
+  funcObj: Funcionario
+}
+
 export const ResumoPagamento = () => {
+  const route = useRoute();
+  const { funcObj } = route.params as RouteParams;
   const navigator = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -89,7 +95,7 @@ export const ResumoPagamento = () => {
             <Text appearance="s1">Salário Base</Text>
           </View>
 
-          <DinheiroDisplay size='lg' value={3237.40}/>
+          <DinheiroDisplay size='lg' value={3237.40} />
         </CardGradient>
 
         {/* Vale */}
@@ -101,7 +107,7 @@ export const ResumoPagamento = () => {
                 { backgroundColor: '#ef6a5b3b' },
               ]}
             >
-              <MaterialCommunityIcons name="receipt-text-minus-outline" size={16} color={customTheme['color-danger-600']}  />
+              <MaterialCommunityIcons name="receipt-text-minus-outline" size={16} color={customTheme['color-danger-600']} />
             </View>
             <Text appearance="s1">Total do Vale a Descontar</Text>
           </View>
@@ -112,18 +118,27 @@ export const ResumoPagamento = () => {
             variant="negative"
           />
 
-          {employee.currentVoucher.length > 0 && (
-            <View style={styles.voucherList}>
-              {employee.currentVoucher.map((item) => (
-                <ItemVale
-                  dangerStyle
-                  key={item.id}
-                  item={item}
-                  showControls={false}
+          <View style={{ maxHeight: 150, marginTop: 10 }}>
+            {
+              funcObj?.vales?.length > 0 ? (
+                <FlatList
+                  data={funcObj.vales}
+                  keyExtractor={(_, index) => index.toString()}
+                  renderItem={({ item }) => (
+                    <ItemVale key={item.id} item={item} showControls={false} dangerStyle/>
+                  )}
+                  nestedScrollEnabled
+                  showsVerticalScrollIndicator={false}
                 />
-              ))}
-            </View>
-          )}
+              ) : (
+                <Card style={styles.emptyCard}>
+                  <Text appearance="hint" style={styles.emptyText}>
+                    Nenhum item no vale
+                  </Text>
+                </Card>
+              )
+            }
+          </View>
         </CardGradient>
 
         {/* Total a pagar */}
@@ -304,5 +319,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 12,
+  },
+  emptyCard: {
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  emptyText: {
+    marginTop: 8,
   },
 });

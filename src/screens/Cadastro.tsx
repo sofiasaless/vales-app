@@ -10,20 +10,23 @@ import { converterParaDate } from "../util/datas.util";
 import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
 import { DatePicker } from "../components/DatePicker";
 
+const emptyFuncionario: FuncionarioPostRequestBody = {
+  nome: '',
+  cargo: '',
+  salario: 0,
+  tipo: 'FIXO' as TipoFuncionario,
+  cpf: '',
+  data_admissao: new Date(),
+  primeiro_dia_pagamento: 0,
+  segundo_dia_pagamento: 0,
+  vales: []
+}
+
 export const Cadastro = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState<FuncionarioPostRequestBody>({
-    nome: '',
-    cargo: '',
-    salario: 0,
-    tipo: 'FIXO' as TipoFuncionario,
-    cpf: '',
-    data_admissao: new Date(),
-    primeiro_dia_pagamento: 0,
-    segundo_dia_pagamento: 0
-  });
+  const [formData, setFormData] = useState<FuncionarioPostRequestBody>(emptyFuncionario);
 
   const [dataAdmissao, setDataAdmissao] = useState<Date>(new Date)
   const settingAdmissao = (tipo: 'DATA' | 'HORA', dado?: string) => {
@@ -116,12 +119,14 @@ export const Cadastro = () => {
   const handleSubmit = async () => {
     setIsLoading(true)
     if (!validate()) {
+      setIsLoading(false)
       return;
     }
 
     try {
       const funcSer = new FuncionarioFirestore()
       await funcSer.criar(formData);
+      setFormData(emptyFuncionario);
       console.info('sucesso ao cadastrar')
     } catch (error) {
       console.error(`erro ao cadastrar funcionario ${error}`)
@@ -254,7 +259,7 @@ export const Cadastro = () => {
             style={styles.submit}
             disabled={isLoading}
           >
-            {(isLoading)?'Contrantado...':'Cadastrar Funcionário'}
+            {(isLoading) ? 'Contrantado...' : 'Cadastrar Funcionário'}
           </Button>
         </ScrollView>
       </Layout>

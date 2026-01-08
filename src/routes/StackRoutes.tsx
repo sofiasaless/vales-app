@@ -10,13 +10,14 @@ import { HIstoricoPagamentos } from '../screens/HIstoricoPagamentos';
 import Mensalidades from '../screens/Mensalidades';
 import Cardapio from '../screens/Cardapio';
 import { GerenciaCardapio } from '../screens/GerenciaCardapio';
+import { Funcionario } from '../schema/funcionario.schema';
 
 export type RootStackParamList = {
   Tabs: undefined;
-  Vale: undefined;
+  Vale: { idFunc: string };
   Funcionario: undefined;
   Cadastro: undefined;
-  ResumoPagamento: undefined;
+  ResumoPagamento: { funcObj: Funcionario };
   Assinatura: undefined;
   GerenciaCardapio: undefined;
   Detalhes: undefined;

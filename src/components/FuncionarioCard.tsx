@@ -2,41 +2,44 @@ import { Avatar, Text, useTheme } from '@ui-kitten/components';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { customTheme } from '../theme/custom.theme';
-import { Employee } from '../types';
-import { CardGradient } from './CardGradient';
-import { StatusBadge } from './StatusBadge';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../routes/StackRoutes';
+import { Funcionario } from '../schema/funcionario.schema';
+import { customTheme } from '../theme/custom.theme';
+import { CardGradient } from './CardGradient';
+import { StatusBadge } from './StatusBadge';
 
 interface FuncionarioCardProps {
-  employee: Employee;
+  employee: Funcionario;
 }
 
 export const FuncionarioCard: React.FC<FuncionarioCardProps> = ({ employee }) => {
   const theme = useTheme();
   const navigator = useNavigation<NavigationProp<RootStackParamList>>();
 
-  const voucherTotal = employee.currentVoucher.reduce(
-    (total, item) => total + item.unitPrice * item.quantity,
-    0
-  );
+  const voucherTotal = () => {
+    if (employee.vales?.length === 0) return 0;
+    return employee.vales?.reduce(
+      (total, item) => total + item.preco_unit * item.quantidade,
+      0
+    );
+  }
 
   const today = new Date();
-  const paidToday = employee.paymentHistory.some((payment) => {
-    const paymentDate = new Date(payment.date);
-    return (
-      paymentDate.getDate() === today.getDate() &&
-      paymentDate.getMonth() === today.getMonth() &&
-      paymentDate.getFullYear() === today.getFullYear()
-    );
-  });
+  // const paidToday = employee.paymentHistory.some((payment) => {
+  //   const paymentDate = new Date(payment.date);
+  //   return (
+  //     paymentDate.getDate() === today.getDate() &&
+  //     paymentDate.getMonth() === today.getMonth() &&
+  //     paymentDate.getFullYear() === today.getFullYear()
+  //   );
+  // });
 
-  const status = paidToday
-    ? 'today'
-    : voucherTotal > 0
-      ? 'pending'
-      : 'paid';
+  // const status = paidToday
+  //   ? 'today'
+  //   : voucherTotal > 0
+  //     ? 'pending'
+  //     : 'paid';
 
   return (
     <Pressable
@@ -45,7 +48,7 @@ export const FuncionarioCard: React.FC<FuncionarioCardProps> = ({ employee }) =>
         pressed && { opacity: 0.85, borderWidth: 0.6, borderColor: customTheme['color-primary-300'], borderRadius: 16 },
       ]}
       onPress={() => {
-        navigator.navigate('Vale')
+        navigator.navigate('Vale', { idFunc: employee.id })
       }}
     >
       <CardGradient styles={styles.card}>
@@ -61,7 +64,7 @@ export const FuncionarioCard: React.FC<FuncionarioCardProps> = ({ employee }) =>
             numberOfLines={1}
             style={styles.name}
           >
-            {employee.name}
+            {employee.nome}
           </Text>
 
           <Text
@@ -69,18 +72,18 @@ export const FuncionarioCard: React.FC<FuncionarioCardProps> = ({ employee }) =>
             appearance="hint"
             style={styles.role}
           >
-            {employee.role}
+            {employee.cargo}
           </Text>
 
           <Text
             category="h6"
-            status={voucherTotal > 0 ? 'danger' : 'basic'}
+            status={voucherTotal() > 0 ? 'danger' : 'basic'}
             style={styles.value}
           >
-            R$ {voucherTotal.toFixed(2)}
+            R$ {voucherTotal().toFixed(2)}
           </Text>
 
-          <StatusBadge status={status} />
+          {/* <StatusBadge status={status} /> */}
         </View>
       </CardGradient>
     </Pressable>

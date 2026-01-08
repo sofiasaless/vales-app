@@ -5,9 +5,10 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { customTheme } from '../theme/custom.theme';
 import { VoucherItem } from '../types';
+import { Vale } from '../schema/vale.shema';
 
 interface VoucherItemCardProps {
-  item: VoucherItem;
+  item: Vale;
   showControls?: boolean;
   dangerStyle?: boolean
 }
@@ -16,7 +17,7 @@ export const ItemVale: React.FC<VoucherItemCardProps> = ({
   item, showControls, dangerStyle
 }) => {
   const theme = useTheme();
-  const totalValue = item.unitPrice * item.quantity;
+  const totalValue = item.preco_unit * item.quantidade;
 
   return (
     <Card
@@ -33,11 +34,11 @@ export const ItemVale: React.FC<VoucherItemCardProps> = ({
         {/* Info */}
         <View style={styles.info}>
           <Text category="s2" numberOfLines={1}>
-            {item.name}
+            {item.descricao}
           </Text>
 
           <Text appearance="hint" category="c2">
-            {item.quantity}x{' '}
+            {item.quantidade}x{' '}
             <Text category='s2'>{totalValue}</Text>
           </Text>
         </View>

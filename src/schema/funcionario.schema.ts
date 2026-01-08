@@ -1,3 +1,5 @@
+import { Vale } from "./vale.shema"
+
 export type TipoFuncionario = 'DIARISTA' | 'FIXO'
 
 export type Funcionario = {
@@ -10,6 +12,7 @@ export type Funcionario = {
   foto_url?: string,
   data_nascimento?: Date,
   data_admissao: Date,
+  vales: Vale[]
   primeiro_dia_pagamento: number,
   segundo_dia_pagamento: number,
   restaurante_ref?: string,
