@@ -115,7 +115,6 @@ export const Cadastro = () => {
   const [isLoading, setIsLoading] = useState(false)
   const handleSubmit = async () => {
     setIsLoading(true)
-    console.info(formData);
     if (!validate()) {
       return;
     }
@@ -130,7 +129,6 @@ export const Cadastro = () => {
       setIsLoading(false)
     }
   }
-
 
   return (
     <Container>
