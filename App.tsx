@@ -11,17 +11,17 @@ import { customMapping, customTheme } from "./src/theme/custom.theme";
 import * as Notifications from 'expo-notifications';
 import { ActivityIndicator, Alert, View } from 'react-native';
 
-export default function App() {
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
+export default function App() {
 
   usePushNotifications()
 

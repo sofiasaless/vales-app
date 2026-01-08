@@ -33,7 +33,7 @@ export const Funcionarios = () => {
   return (
     <Container>
       <Header title="Funcionários" subtitle="3 cadastrados" />
-      <Text>VERSÃO 1.0.3</Text>
+      <Text>VERSÃO 1.0.5</Text>
       {/* <ListaFuncionarios /> */}
     </Container>
   )
