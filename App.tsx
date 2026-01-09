@@ -1,15 +1,14 @@
 import * as eva from '@eva-design/eva';
-import { ApplicationProvider, IconRegistry } from '@ui-kitten/components';
-import { EvaIconsPack } from '@ui-kitten/eva-icons';
+import { ApplicationProvider } from '@ui-kitten/components';
+import * as Notifications from 'expo-notifications';
 import { StatusBar } from "expo-status-bar";
 import * as Updates from 'expo-updates';
 import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, View } from 'react-native';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
 import Routes from './src/routes';
 import './src/services/pushNotification';
 import { customMapping, customTheme } from "./src/theme/custom.theme";
-import * as Notifications from 'expo-notifications';
-import { ActivityIndicator, Alert, View } from 'react-native';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -69,7 +68,6 @@ export default function App() {
 
   return (
     <>
-      <IconRegistry icons={EvaIconsPack} />
       <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
         <Routes />
         <StatusBar style="light" />
