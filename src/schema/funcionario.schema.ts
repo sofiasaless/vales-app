@@ -17,11 +17,11 @@ export type Funcionario = {
   incentivo: Incentivo[]
   primeiro_dia_pagamento: number,
   segundo_dia_pagamento: number,
-  restaurante_ref?: string,
+  gerente_ref: string,
   data_cadastro: Date,
 }
 
-export type FuncionarioPostRequestBody = Omit<Funcionario, "id" | "data_cadastro" | "restaurante_ref">
+export type FuncionarioPostRequestBody = Omit<Funcionario, "id" | "data_cadastro">
 
 export type FuncionarioUpdateRequestBody = Pick<
   Funcionario,
