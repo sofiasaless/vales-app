@@ -1,13 +1,23 @@
 // Funções de cálculo
 
+import { Vale } from '../schema/vale.shema';
 import type { VoucherItem, Employee } from '../types';
 
 export const calculateVoucherItemTotal = (item: VoucherItem): number => {
   return item.unitPrice * item.quantity;
 };
 
+export const calcularTotalVale = (item: Vale): number => {
+  return item.preco_unit * item.quantidade;
+};
+
 export const calculateVoucherTotal = (items: VoucherItem[]): number => {
   return items.reduce((total, item) => total + calculateVoucherItemTotal(item), 0);
+};
+
+export const calcularTotalVales = (items: Vale[] | undefined): number => {
+  if (!items) return 0;
+  return items.reduce((total, item) => total + calcularTotalVale(item), 0);
 };
 
 export const calculatePaymentAmount = (baseSalary: number, voucherTotal: number): number => {

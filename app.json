@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "nobres-vales",
+    "name": "Vales Restaurante",
     "slug": "nobres-vales",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,8 +12,15 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/ff0ea816-2e87-48f3-9b97-e496793ad230"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sofiasaless.nobresvales"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,10 +28,31 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.sofiasaless.nobresvales",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "@react-native-community/datetimepicker",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/adaptive-icon.png",
+          "color": "#ffffff"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ff0ea816-2e87-48f3-9b97-e496793ad230"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "owner": "sofiasaless"
   }
 }

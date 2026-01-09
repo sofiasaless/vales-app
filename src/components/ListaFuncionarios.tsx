@@ -1,12 +1,13 @@
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { useFocusEffect } from '@react-navigation/native';
 import { Layout, Text, useTheme } from '@ui-kitten/components';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { mockEmployees } from '../mocks/mockData';
+import { useFuncionarios } from '../hooks/useFuncionarios';
 import { CardGradient } from './CardGradient';
 import { FuncionarioCard } from './FuncionarioCard';
-import AntDesign from '@expo/vector-icons/AntDesign';
 
 export const ListaFuncionarios = () => {
   const theme = useTheme();
@@ -23,8 +24,13 @@ export const ListaFuncionarios = () => {
     </View>
   );
 
-  const funcionarios = mockEmployees.concat(mockEmployees);
-  // const funcionarios: any[] = [];
+  const { listarFuncionarios, listaFuncionarios, isLoading } = useFuncionarios()
+
+  useFocusEffect(
+    useCallback(() => {
+      listarFuncionarios()
+    }, [])
+  );
 
   return (
     <Layout level="1" style={styles.screen}>
@@ -40,7 +46,7 @@ export const ListaFuncionarios = () => {
           </View>
 
           <Text category="h5" style={styles.value}>
-            {funcionarios.length}
+            {listaFuncionarios?.length || 0}
           </Text>
 
           <Text category="c1" appearance="hint">
@@ -67,20 +73,25 @@ export const ListaFuncionarios = () => {
         </CardGradient>
       </View>
 
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        data={funcionarios}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.column}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <View style={styles.employeeItem}>
-            <FuncionarioCard employee={item} />
-          </View>
-        )}
-        ListEmptyComponent={<EmptyState />}
-      />
+      {
+        (isLoading) ?
+          <Text>Carregando funcionários...</Text>
+          :
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={listaFuncionarios}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.column}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <View style={styles.employeeItem}>
+                <FuncionarioCard employee={item} />
+              </View>
+            )}
+            ListEmptyComponent={<EmptyState />}
+          />
+      }
     </Layout>
   );
 };

@@ -1,42 +1,39 @@
+import { NavigationProp, useNavigation, useRoute } from "@react-navigation/native";
 import { Button, Input, Layout, Radio, RadioGroup, Text } from "@ui-kitten/components";
 import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Container } from "../components/Container";
-import { Header } from "../components/Header";
-import { customTheme } from "../theme/custom.theme";
-import { validateCPF } from "../util/formatadores.util";
-import { FuncionarioPostRequestBody, TipoFuncionario } from "../schema/funcionario.schema";
-import { converterParaDate } from "../util/datas.util";
-import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
 import { DatePicker } from "../components/DatePicker";
+import { RootStackParamList } from "../routes/StackRoutes";
+import { Funcionario, FuncionarioUpdateRequestBody } from "../schema/funcionario.schema";
+import { customTheme } from "../theme/custom.theme";
+import { converterParaDate } from "../util/datas.util";
+import { converterTimestamp, validateCPF } from "../util/formatadores.util";
+import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
 
-const emptyFuncionario: FuncionarioPostRequestBody = {
-  nome: '',
-  cargo: '',
-  salario: 0,
-  tipo: 'FIXO' as TipoFuncionario,
-  cpf: '',
-  data_admissao: new Date(),
-  primeiro_dia_pagamento: 0,
-  segundo_dia_pagamento: 0,
-  vales: [],
-  incentivo: []
+interface RouteParams {
+  funcObj: Funcionario
 }
 
-export const Cadastro = () => {
+export const EditarFuncionario = () => {
+  const route = useRoute();
+  const { funcObj } = route.params as RouteParams;
+  const navigator = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState<FuncionarioPostRequestBody>(emptyFuncionario);
+  const [formData, setFormData] = useState<FuncionarioUpdateRequestBody>({
+    ...funcObj
+  });
 
-  const [dataAdmissao, setDataAdmissao] = useState<Date>(new Date)
+  const [dataAdmissao, setDataAdmissao] = useState<Date>(converterTimestamp(funcObj.data_admissao))
   const settingAdmissao = (tipo: 'DATA' | 'HORA', dado?: string) => {
     if (tipo === 'DATA' && dado != undefined) {
       setDataAdmissao(converterParaDate(dado))
     }
   }
 
-  const [dataNascimento, setDataNascimento] = useState<Date>(new Date)
+  const [dataNascimento, setDataNascimento] = useState<Date>(converterTimestamp(funcObj.data_nascimento))
   const settingNascimento = (tipo: 'DATA' | 'HORA', dado?: string) => {
     if (tipo === 'DATA' && dado != undefined) {
       setDataNascimento(converterParaDate(dado))
@@ -124,13 +121,24 @@ export const Cadastro = () => {
       return;
     }
 
+    const dataToUpdate: FuncionarioUpdateRequestBody = {
+      nome: formData.nome,
+      cargo: formData.cargo,
+      primeiro_dia_pagamento: formData.primeiro_dia_pagamento,
+      segundo_dia_pagamento: formData.segundo_dia_pagamento,
+      salario: formData.salario,
+      tipo: formData.tipo,
+      cpf: formData.cpf,
+      data_admissao: dataAdmissao,
+      data_nascimento: dataNascimento,
+    }
+
     try {
       const funcSer = new FuncionarioFirestore()
-      await funcSer.criar(formData);
-      setFormData(emptyFuncionario);
-      console.info('sucesso ao cadastrar')
+      await funcSer.atualizar(funcObj.id, dataToUpdate);
+      navigator.goBack()
     } catch (error) {
-      console.error(`erro ao cadastrar funcionario ${error}`)
+      console.error(`erro ao atualizar funcionario ${error}`)
     } finally {
       setIsLoading(false)
     }
@@ -138,7 +146,6 @@ export const Cadastro = () => {
 
   return (
     <Container>
-      <Header title="Novo funcionário" subtitle="Preencha os dados" />
       <Layout level="1" style={{ flex: 1 }}>
 
         <ScrollView
@@ -251,16 +258,17 @@ export const Cadastro = () => {
               />
             </View>
 
-            <Button onPress={calcularDiasDePagamento} size="small" status="warning" appearance="ghost">Calcular dias de pagamento</Button>
+            <Button onPress={calcularDiasDePagamento} size="small" status="warning" appearance="ghost">Recalcular dias de pagamento</Button>
           </View>
 
           <Button
             size="large"
+            appearance="outline"
             onPress={handleSubmit}
             style={styles.submit}
             disabled={isLoading}
           >
-            {(isLoading) ? 'Contrantado...' : 'Cadastrar Funcionário'}
+            {(isLoading) ? 'Editando...' : 'Salvar alterações'}
           </Button>
         </ScrollView>
       </Layout>

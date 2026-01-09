@@ -10,19 +10,22 @@ import { HIstoricoPagamentos } from '../screens/HIstoricoPagamentos';
 import Mensalidades from '../screens/Mensalidades';
 import Cardapio from '../screens/Cardapio';
 import { GerenciaCardapio } from '../screens/GerenciaCardapio';
+import { Funcionario } from '../schema/funcionario.schema';
+import { EditarFuncionario } from '../screens/EditarFuncionario';
 
 export type RootStackParamList = {
   Tabs: undefined;
-  Vale: undefined;
+  Vale: { idFunc: string };
   Funcionario: undefined;
   Cadastro: undefined;
-  ResumoPagamento: undefined;
+  ResumoPagamento: { funcObj: Funcionario };
   Assinatura: undefined;
   GerenciaCardapio: undefined;
-  Detalhes: undefined;
+  Detalhes: { idFunc: string };
   Historico: undefined;
   Mensalidades: undefined;
   Cardapio: undefined;
+  EditarFuncionario: { funcObj: Funcionario };
   // Comanda: { idMesa: string | undefined };
   // Cardapio: { idMesa: string | undefined };
   // Transferir: { idMesa: string | undefined, disponibilizarMesa: boolean | undefined };
@@ -65,6 +68,12 @@ export default function StackRoutes() {
         name="Detalhes"
         component={DetalhesFuncionario}
         options={optionsHeader('Detalhes')}
+      />
+
+      <Stack.Screen
+        name="EditarFuncionario"
+        component={EditarFuncionario}
+        options={optionsHeader('Editar funcionário')}
       />
 
       <Stack.Screen

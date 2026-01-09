@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { Container } from "../components/Container";
 import { Header } from "../components/Header";
 import { ListaFuncionarios } from "../components/ListaFuncionarios";
+import { Text } from '@ui-kitten/components';
 
 SplashScreen.preventAutoHideAsync();
 

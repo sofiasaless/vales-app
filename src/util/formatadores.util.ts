@@ -1,5 +1,7 @@
 // Utilitários de formatação
 
+import { Timestamp } from "firebase/firestore";
+
 export const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -78,3 +80,13 @@ export const validateCPF = (cpf: string): boolean => {
   
   return true;
 };
+
+export const converterTimestamp = (data: Timestamp | any) => {
+  const formatada = data.toDate() as Date
+  return formatada
+}
+
+export const converterParaIsoDate = (data: Timestamp | any) => {
+  if (data === undefined) return ''
+  return converterTimestamp(data).toLocaleDateString()
+}
