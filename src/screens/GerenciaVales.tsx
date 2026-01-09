@@ -7,6 +7,7 @@ import {
   Card,
   Input,
   Layout,
+  Modal,
   Text
 } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
@@ -19,9 +20,10 @@ import { ItemVale } from '../components/ItemVale';
 import { useFuncionarios } from '../hooks/useFuncionarios';
 import { useVales } from '../hooks/useVales';
 import { RootStackParamList } from '../routes/StackRoutes';
-import { ValeDinheiroPostRequestBody } from '../schema/vale.shema';
+import { Vale, ValeDinheiroPostRequestBody } from '../schema/vale.shema';
 import { customTheme } from '../theme/custom.theme';
 import { calcularTotalVales } from '../util/calculos.util';
+import { AvatarIniciais } from '../components/AvatarIniciais';
 
 type RouteParams = {
   idFunc: string;
@@ -43,16 +45,15 @@ export const GerenciaVales = () => {
 
   const { encontrarPorId, isLoadingF, funcionarioFoco } = useFuncionarios()
 
-  const totalVale = calcularTotalVales(funcionarioFoco?.vales);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const handleRemoveItem = (itemId: string) => {
-    // dispatch({
-    //   type: 'REMOVE_VOUCHER_ITEM',
-    //   payload: { employeeId: funcionarioFoco.id, itemId },
-    // });
+  const { adicionarVale, isLoading: carregando, removerVale, isLoadingVales, listarVales, vales } = useVales()
+
+  const handleRemoveItem = async (valeToRemove: Vale) => {
+    console.info('apagando...')
+    await removerVale(idFunc, valeToRemove);
+    listarVales(idFunc);
   };
-
-  const { adicionarVale, isLoading: carregando } = useVales()
 
   const handleAddCashVoucher = async () => {
 
@@ -72,15 +73,20 @@ export const GerenciaVales = () => {
       quantidade: 1,
       ...formVale
     })) {
-      encontrarPorId(idFunc);
+      listarVales(idFunc);
     }
 
+    setModalVisible(false)
     setFormVale(emptyVale)
     setCashError('');
   };
 
+  const valesRevertidos = vales?.reverse()
+  
+
   useEffect(() => {
     encontrarPorId(idFunc);
+    listarVales(idFunc)
   }, [idFunc])
 
   return (
@@ -95,7 +101,8 @@ export const GerenciaVales = () => {
         <ScrollView contentContainerStyle={styles.content}>
           <Layout level='1' style={styles.card}>
             <View style={styles.employeeHeader}>
-              <Avatar size='giant' source={{ uri: 'https://static.vecteezy.com/ti/vetor-gratis/p1/7319933-black-avatar-person-icons-user-profile-icon-vetor.jpg' }} />
+              {/* <Avatar size='giant' source={{ uri: 'https://static.vecteezy.com/ti/vetor-gratis/p1/7319933-black-avatar-person-icons-user-profile-icon-vetor.jpg' }} /> */}
+              <AvatarIniciais name={funcionarioFoco?.nome || ''}/>
               <View style={styles.employeeInfo}>
                 <Text category="h6">{funcionarioFoco?.nome}</Text>
                 <Text appearance="hint">{funcionarioFoco?.cargo}</Text>
@@ -108,56 +115,7 @@ export const GerenciaVales = () => {
             </View>
           </Layout>
 
-          <Layout level='1' style={styles.card}>
-            <Text category="s2" style={styles.sectionTitle}>
-              Adicionar vale em Dinheiro
-            </Text>
-
-            <Input
-              label="Valor (R$)"
-              size='small'
-              placeholder="0,00"
-              value={formVale.preco_unit.toString()}
-              keyboardType="decimal-pad"
-              onChangeText={(text) => {
-                const valor = text.replace(/[^\d,]/g, '');
-                setFormVale((prev) => (({
-                  ...prev,
-                  preco_unit: Number(valor)
-                })))
-              }}
-              status={cashError ? 'danger' : 'basic'}
-            />
-
-            <Input
-              label="Descrição"
-              size='small'
-              placeholder="Ex: Adiantamento"
-              value={formVale.descricao}
-              onChangeText={(text) => {
-                setFormVale((prev) => (({
-                  ...prev,
-                  descricao: text
-                })))
-              }}
-              style={styles.input}
-            />
-
-            {cashError && (
-              <Text status="danger" category="c1" style={styles.errorText}>
-                {cashError}
-              </Text>
-            )}
-
-            <Button
-              style={styles.addButton}
-              size='small'
-              onPress={handleAddCashVoucher}
-              disabled={carregando}
-            >
-              {(carregando) ? "Adicionando..." : "Adicionar Vale"}
-            </Button>
-          </Layout>
+          <Button onPress={() => setModalVisible(true)} size='small' appearance='outline'>Adicionar vale em dinheiro</Button>
 
           {/* Vale Atual Header */}
           <View style={styles.sectionHeader}>
@@ -174,25 +132,29 @@ export const GerenciaVales = () => {
             </Button>
           </View>
 
-          <View style={{ maxHeight: 140 }}>
-            {(funcionarioFoco) ?
-              funcionarioFoco?.vales?.length > 0 ? (
-                <FlatList
-                  data={funcionarioFoco.vales}
-                  keyExtractor={(_, index) => index.toString()}
-                  renderItem={({ item }) => (
-                    <ItemVale item={item} showControls />
-                  )}
-                  nestedScrollEnabled
-                  showsVerticalScrollIndicator={false}
-                />
-              ) : (
-                <Card style={styles.emptyCard}>
-                  <Text appearance="hint" style={styles.emptyText}>
-                    Nenhum item no vale
-                  </Text>
-                </Card>
-              )
+          <View style={{ maxHeight: 290, minHeight: 190 }}>
+            {(valesRevertidos) ?
+              (isLoadingVales)
+                ?
+                <Text>Carregando vales...</Text>
+                :
+                valesRevertidos?.length > 0 ? (
+                  <FlatList
+                    data={valesRevertidos}
+                    keyExtractor={(_, index) => index.toString()}
+                    renderItem={({ item }) => (
+                      <ItemVale item={item} showControls onExclude={handleRemoveItem} />
+                    )}
+                    nestedScrollEnabled
+                    showsVerticalScrollIndicator={false}
+                  />
+                ) : (
+                  <Card style={styles.emptyCard}>
+                    <Text appearance="hint" style={styles.emptyText}>
+                      Nenhum item no vale
+                    </Text>
+                  </Card>
+                )
               :
               <></>
             }
@@ -201,7 +163,7 @@ export const GerenciaVales = () => {
           <Layout level='1' style={styles.card}>
             <View style={styles.totalRow}>
               <Text category="s1">Total do Vale</Text>
-              <Text category="s1">R$ {totalVale.toFixed(2)}</Text>
+              <Text category="s1">R$ {calcularTotalVales(vales).toFixed(2)}</Text>
             </View>
           </Layout>
 
@@ -224,7 +186,7 @@ export const GerenciaVales = () => {
               style={styles.actionButton}
               accessoryLeft={<Feather name="user" size={15} color={customTheme['text-basic-color']} />}
               onPress={() =>
-                navigation.navigate('Detalhes')
+                navigation.navigate('Detalhes', { idFunc: idFunc })
               }
             >
               Detalhes
@@ -244,6 +206,62 @@ export const GerenciaVales = () => {
             </Button>
           </View>
         </ScrollView>
+
+        <Modal
+          visible={modalVisible}
+          backdropStyle={styles.backdrop}
+          onBackdropPress={() => setModalVisible(false)}
+        >
+          <Card disabled style={{ padding: 10, width: '130%', alignSelf: 'center' }}>
+            <Text category="h6" style={styles.modalTitle}>
+              Preencha abaixo
+            </Text>
+
+            <Input
+              label="Valor (R$)"
+              size='small'
+              placeholder="0,00"
+              value={formVale.preco_unit.toString()}
+              keyboardType="decimal-pad"
+              onChangeText={(text) => {
+                const valor = text.replace(/[^\d,]/g, '');
+                setFormVale((prev) => (({
+                  ...prev,
+                  preco_unit: Number(valor)
+                })))
+              }}
+              status={cashError ? 'danger' : 'basic'}
+              style={styles.input}
+            />
+
+            <Input
+              label="Descrição"
+              size='small'
+              placeholder="Ex: Adiantamento"
+              value={formVale.descricao}
+              onChangeText={(text) => {
+                setFormVale((prev) => (({
+                  ...prev,
+                  descricao: text
+                })))
+              }}
+              style={styles.input}
+            />
+
+            <View style={styles.modalActions}>
+              <Button
+                size='small'
+                appearance="outline"
+                onPress={() => setModalVisible(false)}
+              >
+                Cancelar
+              </Button>
+              <Button onPress={handleAddCashVoucher} size='small'>
+                Confirmar
+              </Button>
+            </View>
+          </Card>
+        </Modal>
       </Layout>
   );
 };
@@ -255,6 +273,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     paddingBottom: 32,
+    gap: 18
   },
   centered: {
     flex: 1,
@@ -271,8 +290,8 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: 18,
-    marginTop: 10,
-    marginBottom: 12,
+    // marginTop: 10,
+    // marginBottom: 12,
     borderRadius: 16,
     borderWidth: 0.5,
     borderColor: customTheme['text-disabled-color'],
@@ -290,7 +309,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
   },
   emptyCard: {
     padding: 24,
@@ -319,7 +337,6 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: 'row',
-    marginTop: 12,
   },
   actionButton: {
     flex: 1,
@@ -331,5 +348,27 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingHorizontal: 8,
     paddingVertical: 4,
+  },
+  backdrop: {
+    backgroundColor: 'rgba(0,0,0,0.5)'
+  },
+  modalTitle: {
+    marginBottom: 12,
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginTop: 16,
+  },
+
+  deleteText: {
+    marginVertical: 12,
   },
 });

@@ -19,6 +19,7 @@ import { mockEmployees } from '../mocks/mockData';
 import { RootStackParamList } from '../routes/StackRoutes';
 import { Funcionario } from '../schema/funcionario.schema';
 import { customTheme } from '../theme/custom.theme';
+import { calcularTotalVales } from '../util/calculos.util';
 
 interface RouteParams {
   funcObj: Funcionario
@@ -95,7 +96,7 @@ export const ResumoPagamento = () => {
             <Text appearance="s1">Salário Base</Text>
           </View>
 
-          <DinheiroDisplay size='lg' value={3237.40} />
+          <DinheiroDisplay size='lg' value={funcObj.salario} />
         </CardGradient>
 
         {/* Vale */}
@@ -113,7 +114,7 @@ export const ResumoPagamento = () => {
           </View>
 
           <DinheiroDisplay
-            value={-932}
+            value={-calcularTotalVales(funcObj.vales)}
             size="lg"
             variant="negative"
           />
@@ -158,7 +159,7 @@ export const ResumoPagamento = () => {
           </View>
 
           <DinheiroDisplay
-            value={382}
+            value={(funcObj.salario - calcularTotalVales(funcObj.vales))}
             size="xl"
             variant="positive"
           />
@@ -203,7 +204,7 @@ export const ResumoPagamento = () => {
 
           <View style={styles.modalAmount}>
             <DinheiroDisplay
-              value={303}
+              value={(funcObj.salario - calcularTotalVales(funcObj.vales))}
               size="xl"
               variant="positive"
             />

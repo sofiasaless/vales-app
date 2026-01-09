@@ -3,18 +3,19 @@ import { Card, Text, useTheme } from '@ui-kitten/components';
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
-import { customTheme } from '../theme/custom.theme';
-import { VoucherItem } from '../types';
 import { Vale } from '../schema/vale.shema';
+import { customTheme } from '../theme/custom.theme';
+import { converterTimestamp } from '../util/formatadores.util';
 
 interface VoucherItemCardProps {
   item: Vale;
   showControls?: boolean;
-  dangerStyle?: boolean
+  dangerStyle?: boolean;
+  onExclude?: (v: Vale) => void
 }
 
 export const ItemVale: React.FC<VoucherItemCardProps> = ({
-  item, showControls, dangerStyle
+  item, showControls, dangerStyle, onExclude
 }) => {
   const theme = useTheme();
   const totalValue = item.preco_unit * item.quantidade;
@@ -41,6 +42,10 @@ export const ItemVale: React.FC<VoucherItemCardProps> = ({
             {item.quantidade}x{' '}
             <Text category='s2'>{totalValue}</Text>
           </Text>
+
+          <Text category="c2" style={{color: customTheme['text-hint-color']}} numberOfLines={1}>
+            Adc. em {converterTimestamp(item.data_adicao).toLocaleDateString()}
+          </Text>
         </View>
 
         {/* Right side */}
@@ -48,7 +53,7 @@ export const ItemVale: React.FC<VoucherItemCardProps> = ({
           <Text category='s2'>R$ {totalValue}</Text>
 
             {showControls && 
-              <TouchableOpacity style={styles.removeButton}>
+              <TouchableOpacity onPress={() => onExclude!(item)} style={styles.removeButton}>
                 <Feather name="trash" size={15} color={customTheme['color-danger-600']} />
               </TouchableOpacity>
             }

@@ -1,4 +1,4 @@
-import { arrayUnion, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc } from "firebase/firestore";
 import { Funcionario, FuncionarioPostRequestBody } from "../schema/funcionario.schema";
 import { PatternFirestore } from "./pattern.firestore";
 import { COLLECTIONS } from "../enums/firebase.enum";
@@ -52,10 +52,20 @@ export class FuncionarioFirestore extends PatternFirestore {
     })
   }
 
+  public async removerVale(id: string, body: Vale) {
+    await updateDoc(doc(this.setup(), id), {
+      vales: arrayRemove(body)
+    })
+  }
+
   public async atualizar(id: string, payload: Partial<Funcionario>) {
     await updateDoc(doc(this.setup(), id), {
       ...payload    
     })
+  }
+
+  public async excluir(id: string) {
+    await deleteDoc(doc(this.setup(), id));
   }
 
 }

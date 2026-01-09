@@ -1,45 +1,31 @@
 import Entypo from '@expo/vector-icons/Entypo';
 import {
-  Avatar,
   Button,
   Card,
   Divider,
   Layout,
   Text
 } from '@ui-kitten/components';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useCallback, useEffect } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
+import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { AvatarIniciais } from '../components/AvatarIniciais';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
-import { mockEmployees } from '../mocks/mockData';
-import { formatCPF, formatDate, getPaydayText } from '../util/formatadores.util';
+import { useFuncionarios } from '../hooks/useFuncionarios';
 import { customTheme } from '../theme/custom.theme';
-import { CardGradient } from '../components/CardGradient';
+import { converterParaIsoDate, formatCPF } from '../util/formatadores.util';
+import { RootStackParamList } from '../routes/StackRoutes';
+import { FuncionarioFirestore } from '../firestore/funcionario.firestore';
+
+interface RouteParams {
+  idFunc: string
+}
 
 export const DetalhesFuncionario = () => {
-  // const navigation = useNavigation();
-
-  const employee = mockEmployees[0];
-
-  if (!employee) {
-    return (
-      <Layout style={styles.center}>
-        {/* <Icon
-          name="alert-circle-outline"
-          style={[styles.iconLarge, { tintColor: customTheme['color-danger-500'] }]}
-        /> */}
-        <Text category="h6">Funcionário não encontrado</Text>
-        <Button
-          appearance="outline"
-          style={styles.mt}
-        // onPress={() => navigation.goBack()}
-        >
-          Voltar
-        </Button>
-      </Layout>
-    );
-  }
-
+  const route = useRoute();
+  const { idFunc } = route.params as RouteParams;
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const InfoRow = ({
     icon,
@@ -70,111 +56,133 @@ export const DetalhesFuncionario = () => {
     );
   }
 
+  const { encontrarPorId, isLoadingF, funcionarioFoco } = useFuncionarios()
+
+  const handleExcluir = async () => {
+    try {
+      const funcFir = new FuncionarioFirestore()
+      await funcFir.excluir(idFunc)
+      navigation.navigate('Funcionario')
+    } catch (error) {
+      console.error('erro ao excluir funcionário ', error)
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      encontrarPorId(idFunc);
+    }, [idFunc])
+  )
+
   return (
     <Layout style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        {(isLoadingF) ?
+          <Text>Carregando...</Text>
+          :
+          <>
+            <Card style={styles.cardCenter}>
+              <AvatarIniciais name={funcionarioFoco?.nome || ''} size='md' />
+              <Text category="h5" style={styles.name}>
+                {funcionarioFoco?.nome}
+              </Text>
+              <Text appearance="hint">{funcionarioFoco?.cargo}</Text>
 
-        {/* Header Card */}
-        <Card style={styles.cardCenter}>
-          <Avatar size='giant' source={{ uri: 'https://static.vecteezy.com/ti/vetor-gratis/p1/7319933-black-avatar-person-icons-user-profile-icon-vetor.jpg' }} />
-          <Text category="h5" style={styles.name}>
-            {employee.name}
-          </Text>
-          <Text appearance="hint">{employee.role}</Text>
+              <View style={styles.typeBadge}>
+                <Text category="c1" style={{ color: customTheme['color-primary-600'] }}>
+                  {funcionarioFoco?.tipo === 'DIARISTA'
+                    ? 'Diarista'
+                    : 'Fixo (Quinzenas)'}
+                </Text>
+              </View>
+            </Card>
 
-          <View style={styles.typeBadge}>
-            <Text category="c1" style={{ color: customTheme['color-primary-600'] }}>
-              {employee.type === 'DIARISTA'
-                ? 'Diarista'
-                : 'Fixo (Quinzenas)'}
-            </Text>
-          </View>
-        </Card>
+            {/* Personal Info */}
+            <Card style={styles.card}>
+              <Text category="s1" style={styles.cardTitle}>
+                Informações Pessoais
+              </Text>
+              <Divider />
 
-        {/* Personal Info */}
-        <Card style={styles.card}>
-          <Text category="s1" style={styles.cardTitle}>
-            Informações Pessoais
-          </Text>
-          <Divider />
+              {funcionarioFoco?.cpf && (
+                <InfoRow
+                  icon={<Entypo name="text-document-inverted" size={22} color={customTheme['text-hint-color']} />}
+                  label="CPF"
+                  value={formatCPF(funcionarioFoco?.cpf)}
+                />
+              )}
 
-          {employee.cpf && (
-            <InfoRow
-              icon={<Entypo name="text-document-inverted" size={22} color={customTheme['text-hint-color']} />}
-              label="CPF"
-              value={formatCPF(employee.cpf)}
-            />
-          )}
+              {funcionarioFoco?.data_nascimento && (
+                <InfoRow
+                  icon={<Entypo name="cake" size={22} color={customTheme['text-hint-color']} />}
+                  label="Data de Nascimento"
+                  value={converterParaIsoDate(funcionarioFoco?.data_nascimento)}
+                />
+              )}
+            </Card>
 
-          {employee.birthDate && (
-            <InfoRow
-              icon={<Entypo name="cake" size={22} color={customTheme['text-hint-color']} />}
-              label="Data de Nascimento"
-              value={formatDate(employee.birthDate)}
-            />
-          )}
-        </Card>
+            {/* Employment Info */}
+            <Card style={styles.card}>
+              <Text category="s1" style={styles.cardTitle}>
+                Dados Funcionais
+              </Text>
+              <Divider />
 
-        {/* Employment Info */}
-        <Card style={styles.card}>
-          <Text category="s1" style={styles.cardTitle}>
-            Dados Funcionais
-          </Text>
-          <Divider />
+              <InfoRow
+                icon={<Entypo name="briefcase" size={22} color={customTheme['text-hint-color']} />}
+                label="Cargo"
+                value={funcionarioFoco?.cargo}
+              />
 
-          <InfoRow
-            icon={<Entypo name="briefcase" size={22} color={customTheme['text-hint-color']} />}
-            label="Cargo"
-            value={employee.role}
-          />
+              <InfoRow
+                icon={<Entypo name="wallet" size={22} color={customTheme['text-hint-color']} />}
+                label={
+                  funcionarioFoco?.tipo === 'DIARISTA'
+                    ? 'Valor Diária'
+                    : 'Salário Base'
+                }
+                value={<DinheiroDisplay value={funcionarioFoco?.salario || 0} />}
+              />
 
-          <InfoRow
-            icon={<Entypo name="wallet" size={22} color={customTheme['text-hint-color']} />}
-            label={
-              employee.type === 'DIARISTA'
-                ? 'Valor Diária'
-                : 'Salário Base'
-            }
-            value={<DinheiroDisplay value={employee.baseSalary} />}
-          />
+              <InfoRow
+                icon={<Entypo name="calendar" size={22} color={customTheme['text-hint-color']} />}
+                label="Data de Admissão"
+                value={converterParaIsoDate(funcionarioFoco?.data_admissao)}
+              />
 
-          <InfoRow
-            icon={<Entypo name="calendar" size={22} color={customTheme['text-hint-color']} />}
-            label="Data de Admissão"
-            value={formatDate(employee.admissionDate)}
-          />
+              <InfoRow
+                icon={<Entypo name="clock" size={22} color={customTheme['text-hint-color']} />}
+                label="Primeiro Dia de Pagamento"
+                value={funcionarioFoco?.primeiro_dia_pagamento.toString()}
+              />
 
-          <InfoRow
-            icon={<Entypo name="clock" size={22} color={customTheme['text-hint-color']} />}
-            label="Dia do Pagamento"
-            value={getPaydayText(employee.payday)}
-          />
-        </Card>
+              <InfoRow
+                icon={<Entypo name="clock" size={22} color={customTheme['text-hint-color']} />}
+                label="Segundo Dia de Pagamento"
+                value={funcionarioFoco?.segundo_dia_pagamento.toString()}
+              />
+            </Card>
 
-        {/* Actions */}
-        <View style={styles.actions}>
-          <Button
-            appearance="outline"
-            style={styles.actionButton}
-            disabled
-          // accessoryLeft={(props) => (
-          //   <Icon {...props} name="edit-outline" />
-          // )}
-          >
-            Editar
-          </Button>
+            {/* Actions */}
+            <View style={styles.actions}>
+              <Button
+                appearance="outline"
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('EditarFuncionario', { funcObj: funcionarioFoco! })}
+              >
+                Editar
+              </Button>
 
-          <Button
-            status="danger"
-            style={styles.actionButton}
-          // accessoryLeft={(props) => (
-          //   <Icon {...props} name="trash-2-outline" />
-          // )}
-          // onPress={handleDelete}
-          >
-            Demitir
-          </Button>
-        </View>
+              <Button
+                status="danger"
+                style={styles.actionButton}
+                onPress={handleExcluir}
+              >
+                Demitir
+              </Button>
+            </View>
+          </>
+        }
       </ScrollView>
     </Layout>
   );

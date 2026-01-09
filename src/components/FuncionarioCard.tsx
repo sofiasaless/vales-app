@@ -8,6 +8,7 @@ import { Funcionario } from '../schema/funcionario.schema';
 import { customTheme } from '../theme/custom.theme';
 import { CardGradient } from './CardGradient';
 import { StatusBadge } from './StatusBadge';
+import { AvatarIniciais } from './AvatarIniciais';
 
 interface FuncionarioCardProps {
   employee: Funcionario;
@@ -53,27 +54,24 @@ export const FuncionarioCard: React.FC<FuncionarioCardProps> = ({ employee }) =>
     >
       <CardGradient styles={styles.card}>
         <View style={styles.content}>
-          <Avatar
+          {/* <Avatar
             size="large"
             style={styles.avatar}
             source={{ uri: 'https://static.vecteezy.com/ti/vetor-gratis/p1/7319933-black-avatar-person-icons-user-profile-icon-vetor.jpg' }}
-          />
+          /> */}
+          <AvatarIniciais name={employee.nome} />
 
           <Text
             category="s1"
             numberOfLines={1}
             style={styles.name}
-          >
-            {employee.nome}
-          </Text>
+          >{employee.nome}</Text>
 
           <Text
-            category="c1"
+            category="s2"
             appearance="hint"
             style={styles.role}
-          >
-            {employee.cargo}
-          </Text>
+          >{employee.cargo}</Text>
 
           <Text
             category="h6"
@@ -111,6 +109,7 @@ const styles = StyleSheet.create({
   name: {
     textAlign: 'center',
     width: '100%',
+    marginTop: 10
   },
 
   role: {
@@ -120,6 +119,7 @@ const styles = StyleSheet.create({
   },
 
   value: {
+    textAlign: 'center',
     marginBottom: 8,
   },
 });

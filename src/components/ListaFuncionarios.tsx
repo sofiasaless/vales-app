@@ -24,7 +24,7 @@ export const ListaFuncionarios = () => {
     </View>
   );
 
-  const { listarFuncionarios, listaFuncionarios } = useFuncionarios()
+  const { listarFuncionarios, listaFuncionarios, isLoading } = useFuncionarios()
 
   useFocusEffect(
     useCallback(() => {
@@ -73,20 +73,25 @@ export const ListaFuncionarios = () => {
         </CardGradient>
       </View>
 
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        data={listaFuncionarios}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.column}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <View style={styles.employeeItem}>
-            <FuncionarioCard employee={item} />
-          </View>
-        )}
-        ListEmptyComponent={<EmptyState />}
-      />
+      {
+        (isLoading) ?
+          <Text>Carregando funcionários...</Text>
+          :
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            data={listaFuncionarios}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            columnWrapperStyle={styles.column}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <View style={styles.employeeItem}>
+                <FuncionarioCard employee={item} />
+              </View>
+            )}
+            ListEmptyComponent={<EmptyState />}
+          />
+      }
     </Layout>
   );
 };
