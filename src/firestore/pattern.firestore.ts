@@ -14,4 +14,8 @@ export abstract class PatternFirestore {
     return collection(firestore, this.COLLECTION_NAME);
   }
 
+  firestore() {
+    return firestore
+  }
+
 }

@@ -1,14 +1,14 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { Card, Layout, Text } from '@ui-kitten/components';
+import { Layout, Text } from '@ui-kitten/components';
 import React, { ReactNode } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { AvatarIniciais } from '../components/AvatarIniciais';
-import { Header } from '../components/Header';
-import { customTheme } from '../theme/custom.theme';
 import { CardGradient } from '../components/CardGradient';
+import { Header } from '../components/Header';
 import { RootStackParamList } from '../routes/StackRoutes';
+import { customTheme } from '../theme/custom.theme';
 
 export const Perfil = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -108,7 +108,7 @@ export const Perfil = () => {
           <MenuItem
             icon={<MaterialCommunityIcons name="finance" size={20} color={iconColor} />}
             label="Finanças"
-            onPress={() => navigation.navigate('Detalhes')}
+            onPress={() => {}}
           />
           <View style={styles.divider} />
           <MenuItem

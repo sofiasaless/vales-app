@@ -3,16 +3,20 @@ import { Funcionario, FuncionarioPostRequestBody } from "../schema/funcionario.s
 import { PatternFirestore } from "./pattern.firestore";
 import { COLLECTIONS } from "../enums/firebase.enum";
 import { Vale } from "../schema/vale.shema";
+import { AuthSerivce } from "../auth/auth.service";
 
 export class FuncionarioFirestore extends PatternFirestore {
+
+  private readonly authService = new AuthSerivce()
 
   constructor() {
     super(COLLECTIONS.FUNCIONARIOS)
   }
 
   public async criar(body: FuncionarioPostRequestBody) {
-    const bodyToSave: Partial<Funcionario> = {
+    const bodyToSave = {
       ...body,
+      gerente_ref: this.authService.getRef(),
       data_cadastro: new Date(),
     }
 

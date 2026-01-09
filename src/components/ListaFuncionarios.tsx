@@ -8,6 +8,7 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { useFuncionarios } from '../hooks/useFuncionarios';
 import { CardGradient } from './CardGradient';
 import { FuncionarioCard } from './FuncionarioCard';
+import { DinheiroDisplay } from './DinheiroDisplay';
 
 export const ListaFuncionarios = () => {
   const theme = useTheme();
@@ -63,9 +64,7 @@ export const ListaFuncionarios = () => {
             </Text>
           </View>
 
-          <Text category="h5" status="danger" style={styles.value}>
-            R$ {(31972).toFixed(2)}
-          </Text>
+          <DinheiroDisplay value={40239} variant='negative' size='md'/>
 
           <Text category="c1" appearance="hint" style={styles.mt4}>
             32 funcionário(s)

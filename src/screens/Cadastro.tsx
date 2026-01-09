@@ -2,13 +2,13 @@ import { Button, Input, Layout, Radio, RadioGroup, Text } from "@ui-kitten/compo
 import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { Container } from "../components/Container";
-import { Header } from "../components/Header";
-import { customTheme } from "../theme/custom.theme";
-import { validateCPF } from "../util/formatadores.util";
-import { FuncionarioPostRequestBody, TipoFuncionario } from "../schema/funcionario.schema";
-import { converterParaDate } from "../util/datas.util";
-import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
 import { DatePicker } from "../components/DatePicker";
+import { Header } from "../components/Header";
+import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
+import { FuncionarioPostRequestBody, TipoFuncionario } from "../schema/funcionario.schema";
+import { customTheme } from "../theme/custom.theme";
+import { converterParaDate } from "../util/datas.util";
+import { validateCPF } from "../util/formatadores.util";
 
 const emptyFuncionario: FuncionarioPostRequestBody = {
   nome: '',
@@ -20,7 +20,8 @@ const emptyFuncionario: FuncionarioPostRequestBody = {
   primeiro_dia_pagamento: 0,
   segundo_dia_pagamento: 0,
   vales: [],
-  incentivo: []
+  incentivo: [],
+  gerente_ref: '5ZgfLpdgaEZbAlq5Bf9Bs0qf5Fw1'
 }
 
 export const Cadastro = () => {
