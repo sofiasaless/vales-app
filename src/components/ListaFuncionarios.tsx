@@ -5,10 +5,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Layout, Text, useTheme } from '@ui-kitten/components';
 import React, { useCallback } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { useFuncionarios } from '../hooks/useFuncionarios';
+import { useFuncionarios, useFuncionariosRestaurante } from '../hooks/useFuncionarios';
 import { CardGradient } from './CardGradient';
 import { FuncionarioCard } from './FuncionarioCard';
 import { DinheiroDisplay } from './DinheiroDisplay';
+import { useRestauranteConectado } from '../hooks/useRestaurante';
 
 export const ListaFuncionarios = () => {
   const theme = useTheme();
@@ -25,12 +26,14 @@ export const ListaFuncionarios = () => {
     </View>
   );
 
-  const { listarFuncionarios, listaFuncionarios, isLoading } = useFuncionarios()
+  const { data: res, isLoading: carregandoRes } = useRestauranteConectado()
+
+  const { data: funcionarios, isLoading, refetch } = useFuncionariosRestaurante(res?.id || '')
 
   useFocusEffect(
     useCallback(() => {
-      listarFuncionarios()
-    }, [])
+      refetch()
+    }, [carregandoRes])
   );
 
   return (
@@ -47,7 +50,7 @@ export const ListaFuncionarios = () => {
           </View>
 
           <Text category="h5" style={styles.value}>
-            {listaFuncionarios?.length || 0}
+            {funcionarios?.length || 0}
           </Text>
 
           <Text category="c1" appearance="hint">
@@ -64,7 +67,7 @@ export const ListaFuncionarios = () => {
             </Text>
           </View>
 
-          <DinheiroDisplay value={40239} variant='negative' size='md'/>
+          <DinheiroDisplay value={40239} variant='negative' size='md' />
 
           <Text category="c1" appearance="hint" style={styles.mt4}>
             32 funcionário(s)
@@ -78,7 +81,7 @@ export const ListaFuncionarios = () => {
           :
           <FlatList
             showsVerticalScrollIndicator={false}
-            data={listaFuncionarios}
+            data={funcionarios}
             keyExtractor={(item) => item.id}
             numColumns={2}
             columnWrapperStyle={styles.column}

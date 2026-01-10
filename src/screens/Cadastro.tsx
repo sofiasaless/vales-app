@@ -9,6 +9,7 @@ import { FuncionarioPostRequestBody, TipoFuncionario } from "../schema/funcionar
 import { customTheme } from "../theme/custom.theme";
 import { converterParaDate } from "../util/datas.util";
 import { validateCPF } from "../util/formatadores.util";
+import { useRestauranteId } from "../hooks/useRestaurante";
 
 const emptyFuncionario: FuncionarioPostRequestBody = {
   nome: '',
@@ -117,12 +118,18 @@ export const Cadastro = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const { data: id_res } = useRestauranteId()
+
   const [isLoading, setIsLoading] = useState(false)
   const handleSubmit = async () => {
     setIsLoading(true)
     if (!validate()) {
       setIsLoading(false)
       return;
+    }
+
+    if (id_res?.uid) {
+      formData.restaurante_ref = id_res.uid;
     }
 
     try {

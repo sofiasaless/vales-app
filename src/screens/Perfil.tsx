@@ -11,6 +11,7 @@ import { RootStackParamList } from '../routes/StackRoutes';
 import { customTheme } from '../theme/custom.theme';
 import { useGerenteConectado } from '../hooks/useGerente';
 import { useSair } from '../hooks/useSair';
+import { useRestauranteConectado } from '../hooks/useRestaurante';
 
 export const Perfil = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -61,6 +62,8 @@ export const Perfil = () => {
     isLoading
   } = useGerenteConectado()
 
+  const { data: rest_conectado } = useRestauranteConectado()
+
   const { isLoading: carregandoLogout, sairDasContas } = useSair()
 
   return (
@@ -80,8 +83,8 @@ export const Perfil = () => {
               <Text category="h6">
                 {gerente_conectado?.nome}
               </Text>
-              <Text appearance="hint">
-                nobres@gmail.com
+              <Text category='s2' appearance="hint">
+                {rest_conectado?.email}
               </Text>
 
               <View style={styles.roleRow}>
@@ -106,7 +109,7 @@ export const Perfil = () => {
                 Restaurante
               </Text>
               <Text category="s1">
-                Nobres Grill
+                {rest_conectado?.nome_fantasia}
               </Text>
             </View>
           </View>

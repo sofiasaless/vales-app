@@ -1,4 +1,4 @@
-import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { Funcionario, FuncionarioPostRequestBody } from "../schema/funcionario.schema";
 import { PatternFirestore } from "./pattern.firestore";
 import { COLLECTIONS } from "../enums/firebase.enum";
@@ -16,17 +16,18 @@ export class FuncionarioFirestore extends PatternFirestore {
   public async criar(body: FuncionarioPostRequestBody) {
     const bodyToSave = {
       ...body,
-      gerente_ref: this.restauranteService.getRef(),
+      restaurante_ref: this.restauranteService.getRef(body.restaurante_ref),
       data_cadastro: new Date(),
     }
 
     await setDoc(doc(this.setup()), bodyToSave);
   }
 
-  public async listar(): Promise<Funcionario[]> {
+  public async listar(restauranteId: string): Promise<Funcionario[]> {
     const queryResult = await getDocs(
       query(
         this.setup(),
+        where("restaurante_ref", "==", this.restauranteService.getRef(restauranteId)),
         orderBy('nome', 'asc')
       )
     );
@@ -43,7 +44,7 @@ export class FuncionarioFirestore extends PatternFirestore {
 
   public async encontrarPorId(id: string): Promise<Funcionario> {
     const result = await getDoc(doc(this.setup(), id))
-    
+
     return {
       id: result.id,
       ...result.data()
@@ -64,7 +65,7 @@ export class FuncionarioFirestore extends PatternFirestore {
 
   public async atualizar(id: string, payload: Partial<Funcionario>) {
     await updateDoc(doc(this.setup(), id), {
-      ...payload    
+      ...payload
     })
   }
 

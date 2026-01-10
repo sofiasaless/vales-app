@@ -59,11 +59,11 @@ export const LoginGerente: React.FC = () => {
   };
 
   const handleBack = () => {
-    // logout();
+    navigator.navigate('LoginRestaurante')
   };
 
   const carregarInformacoes = async () => {
-    await listarGerentes(restaurante_conectado?.uid || '')
+    await listarGerentes(restaurante_conectado?.id || '')
   }
 
   useFocusEffect(
@@ -77,7 +77,7 @@ export const LoginGerente: React.FC = () => {
       <View style={styles.header}>
         <View style={styles.restaurantBadge}>
           <Text category="s1" style={styles.restaurantName}>
-            {restaurante_conectado?.displayName}
+            {restaurante_conectado?.nome_fantasia}
           </Text>
         </View>
 
