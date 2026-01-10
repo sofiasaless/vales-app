@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
 import { useLoginGerente } from '../hooks/useLoginGerente';
-import { useLoginRestaurante } from '../hooks/useLoginRestaurante';
+import { useRestauranteConectado } from '../hooks/useRestaurante';
 import { RootStackParamList } from '../routes/StackRoutes';
 
 export const LoginGerente: React.FC = () => {
@@ -25,7 +25,10 @@ export const LoginGerente: React.FC = () => {
 
   const { entrarComGerente, gerentes, isLoading, isLoadingGerentes, listarGerentes } = useLoginGerente()
 
-  const { restauranteConectado, buscarRestauranteLogado } = useLoginRestaurante()
+  const {
+    data: restaurante_conectado,
+    isLoading: loadingRes
+  } = useRestauranteConectado()
 
   const validateForm = (): boolean => {
     const newErrors: { manager?: string; password?: string } = {};
@@ -60,26 +63,21 @@ export const LoginGerente: React.FC = () => {
   };
 
   const carregarInformacoes = async () => {
-    const res = buscarRestauranteLogado()
-    await listarGerentes(res!.uid)
+    await listarGerentes(restaurante_conectado?.uid || '')
   }
 
   useFocusEffect(
     useCallback(() => {
       carregarInformacoes()
-    }, [])
+    }, [loadingRes])
   )
-
-  useEffect(() => {
-
-  }, [gerentes])
 
   return (
     <CardGradient colors_one='4' colors_two='1' styles={styles.container}>
       <View style={styles.header}>
         <View style={styles.restaurantBadge}>
           <Text category="s1" style={styles.restaurantName}>
-            {restauranteConectado?.displayName}
+            {restaurante_conectado?.displayName}
           </Text>
         </View>
 

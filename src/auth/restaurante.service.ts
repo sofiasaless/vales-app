@@ -4,6 +4,7 @@ import { COLLECTIONS } from "../enums/firebase.enum";
 import { PatternFirestore } from "../firestore/pattern.firestore";
 import { Restaurante } from "../schema/restaurante.schema";
 import { auth } from "../config/firebase.config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export class RestauranteSerivce extends PatternFirestore {
 
@@ -45,6 +46,11 @@ export class RestauranteSerivce extends PatternFirestore {
 
   public getRef() {
     return doc(this.setup(), '')
+  }
+
+  public async desconectar() {
+    await AsyncStorage.clear()
+    await this.setupAuth().signOut()
   }
 
 }

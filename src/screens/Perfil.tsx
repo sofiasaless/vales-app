@@ -9,6 +9,8 @@ import { CardGradient } from '../components/CardGradient';
 import { Header } from '../components/Header';
 import { RootStackParamList } from '../routes/StackRoutes';
 import { customTheme } from '../theme/custom.theme';
+import { useGerenteConectado } from '../hooks/useGerente';
+import { useSair } from '../hooks/useSair';
 
 export const Perfil = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -54,6 +56,13 @@ export const Perfil = () => {
     </TouchableOpacity>
   );
 
+  const { 
+    data: gerente_conectado,
+    isLoading
+  } = useGerenteConectado()
+
+  const { isLoading: carregandoLogout, sairDasContas } = useSair()
+
   return (
     <Layout style={styles.container}>
       <Header
@@ -65,20 +74,20 @@ export const Perfil = () => {
         {/* Profile */}
         <CardGradient styles={styles.card}>
           <View style={styles.profileRow}>
-            <AvatarIniciais name={'Mateus Nobre'} size="lg" />
+            <AvatarIniciais name={gerente_conectado?.nome || ''} size="lg" />
 
             <View style={styles.profileInfo}>
               <Text category="h6">
-                Mateus Nobre
+                {gerente_conectado?.nome}
               </Text>
               <Text appearance="hint">
-                nobre@gmail.com
+                nobres@gmail.com
               </Text>
 
               <View style={styles.roleRow}>
                 <MaterialCommunityIcons name="account-tie" size={16} color="#2EB8A2" />
                 <Text style={styles.roleText}>
-                  Gerente
+                  {gerente_conectado?.tipo}
                 </Text>
               </View>
             </View>
@@ -108,7 +117,7 @@ export const Perfil = () => {
           <MenuItem
             icon={<MaterialCommunityIcons name="finance" size={20} color={iconColor} />}
             label="Finanças"
-            onPress={() => {}}
+            onPress={() => { }}
           />
           <View style={styles.divider} />
           <MenuItem
@@ -136,7 +145,11 @@ export const Perfil = () => {
             icon={<MaterialIcons name="logout" size={24} color={customTheme['color-danger-600']} />}
             label="Sair"
             danger
-            onPress={() => { }}
+            onPress={async () => {
+              if ((await sairDasContas()).ok) {
+                navigation.navigate('LoginRestaurante');
+              }
+            }}
           />
         </CardGradient>
 

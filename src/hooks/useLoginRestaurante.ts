@@ -1,4 +1,3 @@
-import { User } from "@firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState } from "react";
 import { RestauranteSerivce } from "../auth/restaurante.service";
@@ -22,16 +21,8 @@ export function useLoginRestaurante() {
     }
   }
 
-  const [restauranteConectado, setRestauranteConectado] = useState<User | null>()
-  const buscarRestauranteLogado = () => {
-    setRestauranteConectado(restServ.getRestauranteLogado())
-    return restServ.getRestauranteLogado()
-  }
-
   return {
     isLoading,
     entrarComRestaurante,
-    restauranteConectado,
-    buscarRestauranteLogado
   }
 }
