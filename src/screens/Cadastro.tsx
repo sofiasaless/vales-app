@@ -21,7 +21,7 @@ const emptyFuncionario: FuncionarioPostRequestBody = {
   segundo_dia_pagamento: 0,
   vales: [],
   incentivo: [],
-  gerente_ref: '5ZgfLpdgaEZbAlq5Bf9Bs0qf5Fw1'
+  restaurante_ref: ''
 }
 
 export const Cadastro = () => {

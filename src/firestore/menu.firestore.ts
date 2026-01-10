@@ -31,7 +31,7 @@ export class MenuFirestore extends PatternFirestore {
     itensCardapio.map(async (item) => {
       const itemToSave = {
         ...item,
-        gerente_ref: doc(collection(this.firestore(), COLLECTIONS.GERENTES), item.gerente_ref),
+        restaurante_ref: doc(collection(this.firestore(), COLLECTIONS.GERENTES), '5ZgfLpdgaEZbAlq5Bf9Bs0qf5Fw1'),
         data_criacao: new Date()
       }
 

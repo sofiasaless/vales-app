@@ -11,13 +11,15 @@
   "dependencies": {
     "@eva-design/eva": "^2.2.0",
     "@expo/vector-icons": "^15.0.3",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-navigation/bottom-tabs": "^7.9.0",
     "@react-navigation/native": "^7.1.26",
     "@react-navigation/stack": "^7.6.13",
-    "@tanstack/react-query": "^4.42.0",
+    "@tanstack/react-query": "^5.90.16",
     "@ui-kitten/components": "^5.3.1",
+    "bcryptjs": "^2.4.3",
     "expo": "~54.0.30",
     "expo-clipboard": "~8.0.8",
     "expo-constants": "~18.0.13",
@@ -48,7 +50,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/react": "~19.1.0",
+    "@types/react-native": "^0.72.8",
     "babel-preset-expo": "^54.0.9",
     "react-native-dotenv": "^3.4.11",
     "typescript": "~5.9.2"

@@ -6,9 +6,7 @@ import {
   Input,
   Layout,
   Modal,
-  Text,
-  Toggle,
-  useTheme,
+  Text
 } from '@ui-kitten/components';
 import React, { useState } from 'react';
 import {
@@ -18,26 +16,25 @@ import {
 } from 'react-native';
 
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
-import { mockMenuProducts } from '../mocks/mockData';
+import { useCardapio } from '../hooks/useCardapio';
+import { ItemMenu, ItemMenuPostRequestBody } from '../schema/menu.schema';
 import { customTheme } from '../theme/custom.theme';
-import { MenuProduct } from '../types';
 import { parseCurrencyInput } from '../util/formatadores.util';
 
 export const GerenciaCardapio = () => {
   const styles = createStyles();
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<MenuProduct | null>(null);
-  const [deleteProduct, setDeleteProduct] = useState<MenuProduct | null>(null);
+  const [editingProduct, setEditingProduct] = useState<ItemMenuPostRequestBody | null>(null);
+  const [deleteProduct, setDeleteProduct] = useState<ItemMenuPostRequestBody | null>(null);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    price: '',
-    available: true,
+  const [formData, setFormData] = useState<ItemMenuPostRequestBody>({
+    descricao: '',
+    preco: 0,
   });
 
   const resetForm = () => {
-    setFormData({ name: '', price: '', available: true });
+    setFormData({ descricao: '', preco: 0 });
     setEditingProduct(null);
   };
 
@@ -46,23 +43,22 @@ export const GerenciaCardapio = () => {
     setModalVisible(true);
   };
 
-  const openEdit = (product: MenuProduct) => {
+  const openEdit = (product: ItemMenu) => {
     setFormData({
-      name: product.name,
-      price: product.price.toString().replace('.', ','),
-      available: product.available,
+      descricao: product.descricao,
+      preco: product.preco,
     });
     setEditingProduct(product);
     setModalVisible(true);
   };
 
   const handleSave = () => {
-    if (!formData.name.trim() || !formData.price) {
+    if (!formData.descricao.trim() || !formData.preco) {
       // toast.error('Preencha todos os campos');
       return;
     }
 
-    const price = parseCurrencyInput(formData.price);
+    const price = parseCurrencyInput(formData.preco.toString());
     if (price <= 0) {
       // toast.error('Preço inválido');
       return;
@@ -109,19 +105,24 @@ export const GerenciaCardapio = () => {
     setDeleteProduct(null);
   };
 
-  const renderItem = ({ item }: { item: MenuProduct }) => (
+  const {
+    data: itensCardapio,
+    isLoading
+  } = useCardapio('5ZgfLpdgaEZbAlq5Bf9Bs0qf5Fw1')
+
+  const renderItem = ({ item }: { item: ItemMenu }) => (
     <Card
-      style={[styles.card, !item.available && styles.disabled]}
+      style={[styles.card]}
     >
       <View style={styles.cardRow}>
         <View style={styles.cardInfo}>
-          <Text category="s1">{item.name}</Text>
-          <DinheiroDisplay value={item.price} size="tn" />
-          {!item.available && (
+          <Text category="s1">{item.descricao}</Text>
+          <DinheiroDisplay value={item.preco} size="tn" />
+          {/* {!item.available && (
             <Text status="warning" category="c1">
               Indisponível
             </Text>
-          )}
+          )} */}
         </View>
 
         <View style={styles.actions}>
@@ -158,29 +159,28 @@ export const GerenciaCardapio = () => {
         >Novo produto</Button>
       </Layout>
 
-      {mockMenuProducts.length > 0 ? (
-        <FlatList
-          data={mockMenuProducts}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
-          renderItem={renderItem}
-        />
-      ) : (
-        <View style={styles.empty}>
-          {/* <Ionicons
-            name="cube-outline"
-            size={48}
-            color={theme['color-basic-500']}
-          /> */}
-          <Text appearance="hint" style={styles.emptyText}>
-            Nenhum produto cadastrado
-          </Text>
-          <Button onPress={openAdd} style={styles.emptyButton}>
-            {/* <Ionicons name="add" size={18} /> */}
-            <Text>Adicionar Produto</Text>
-          </Button>
-        </View>
-      )}
+      {(itensCardapio) ?
+        itensCardapio.length > 0 ? (
+          <FlatList
+            data={itensCardapio}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.list}
+            renderItem={renderItem}
+          />
+        ) : (
+          <View style={styles.empty}>
+            <Text appearance="hint" style={styles.emptyText}>
+              Nenhum produto cadastrado
+            </Text>
+            <Button onPress={openAdd} style={styles.emptyButton}>
+              {/* <Ionicons name="add" size={18} /> */}
+              <Text>Adicionar Produto</Text>
+            </Button>
+          </View>
+        )
+        :
+        <Text>Ocorreu um erro ao carregar o cardápio</Text>
+      }
 
       {/* Add / Edit Modal */}
       <Modal
@@ -188,29 +188,29 @@ export const GerenciaCardapio = () => {
         backdropStyle={styles.backdrop}
         onBackdropPress={() => setModalVisible(false)}
       >
-        <Card disabled style={{padding: 10, width: '130%', alignSelf: 'center'}}>
+        <Card disabled style={{ padding: 10, width: '130%', alignSelf: 'center' }}>
           <Text category="h6" style={styles.modalTitle}>
             {editingProduct ? 'Editar Produto' : 'Novo Produto'}
           </Text>
 
           <Input
             label="Nome do Produto"
-            value={formData.name}
+            value={formData.descricao}
             onChangeText={(name) =>
-              setFormData({ ...formData, name })
+              setFormData({ ...formData, descricao: name })
             }
             style={styles.input}
           />
 
           <Input
             label="Preço"
-            value={formData.price}
+            value={formData.preco.toString()}
             keyboardType="decimal-pad"
             placeholder="0,00"
             onChangeText={(price) =>
               setFormData({
                 ...formData,
-                price: price.replace(/[^\d,]/g, ''),
+                preco: Number(price),
               })
             }
             style={styles.input}

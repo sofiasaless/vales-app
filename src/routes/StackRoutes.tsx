@@ -12,6 +12,9 @@ import Cardapio from '../screens/Cardapio';
 import { GerenciaCardapio } from '../screens/GerenciaCardapio';
 import { Funcionario } from '../schema/funcionario.schema';
 import { EditarFuncionario } from '../screens/EditarFuncionario';
+import { Config } from '../screens/Config';
+import { LoginRestaurante } from '../screens/LoginRestaurante';
+import { LoginGerente } from '../screens/LoginGerente';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -26,11 +29,9 @@ export type RootStackParamList = {
   Mensalidades: undefined;
   Cardapio: undefined;
   EditarFuncionario: { funcObj: Funcionario };
-  // Comanda: { idMesa: string | undefined };
-  // Cardapio: { idMesa: string | undefined };
-  // Transferir: { idMesa: string | undefined, disponibilizarMesa: boolean | undefined };
-  // Configuracoes: undefined;
-  // HistoricoConta: { idHistorico: string | undefined };
+  LoginRestaurante: undefined;
+  LoginGerente: undefined;
+  Config: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -40,6 +41,24 @@ enableScreens();
 export default function StackRoutes() {
   return (
     <Stack.Navigator>
+      {/* <Stack.Screen
+        name="Config"
+        component={Config}
+        options={{ headerShown: false }}
+      /> */}
+
+      <Stack.Screen
+        name="LoginRestaurante"
+        component={LoginRestaurante}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="LoginGerente"
+        component={LoginGerente}
+        options={{ headerShown: false }}
+      />
+      
       <Stack.Screen
         name="Tabs"
         component={BottomTabsRoutes}

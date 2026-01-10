@@ -1,21 +1,22 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { authFirebase } from "../config/firebase.config";
 import { COLLECTIONS } from "../enums/firebase.enum";
 import { PatternFirestore } from "../firestore/pattern.firestore";
+import { Restaurante } from "../schema/restaurante.schema";
+import { auth } from "../config/firebase.config";
 
-export class AuthSerivce extends PatternFirestore {
+export class RestauranteSerivce extends PatternFirestore {
 
   constructor() {
-    super(COLLECTIONS.GERENTES);
+    super(COLLECTIONS.RESTAURENTES);
   }
 
   private setupAuth() {
-    return authFirebase;
+    return auth;
   }
 
   public async logar(email: string, senha: string) {
-    await signInWithEmailAndPassword(this.setupAuth(), email, senha);
+    return (await signInWithEmailAndPassword(this.setupAuth(), email, senha)).user;
   }
 
   public async registrar(nome: string, senha: string) {
@@ -24,27 +25,26 @@ export class AuthSerivce extends PatternFirestore {
 
       const authResult = (await createUserWithEmailAndPassword(this.setupAuth(), email, senha)).user;
 
-      const gerenteToSave = {
-        estabelecimento_nome: 'Café Ilhas Java',
-        nome: nome,
-        email: email,
-        data_criacao: new Date,
+      const restauranteToSave: Restaurante = {
+        ativo: true,
+        data_criacao: new Date(),
+        email,
+        nome_fantasia: 'Café Ilhas Java'
       }
 
-      await setDoc(doc(this.setup(), authResult.uid), gerenteToSave);
-      console.info('registrado com sucesso')
+      await setDoc(doc(this.setup(), authResult.uid), restauranteToSave);
     } catch (error: any) {
       console.error(error)
       throw new Error(error)
     }
   }
 
-  public getUsuarioLogado() {
+  public getRestauranteLogado() {
     return this.setupAuth().currentUser;
   }
 
   public getRef() {
-    return doc(this.setup(), '5ZgfLpdgaEZbAlq5Bf9Bs0qf5Fw1')
+    return doc(this.setup(), '')
   }
 
 }

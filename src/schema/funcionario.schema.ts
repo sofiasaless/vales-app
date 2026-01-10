@@ -17,7 +17,7 @@ export type Funcionario = {
   incentivo: Incentivo[]
   primeiro_dia_pagamento: number,
   segundo_dia_pagamento: number,
-  gerente_ref: string,
+  restaurante_ref: string,
   data_cadastro: Date,
 }
 
