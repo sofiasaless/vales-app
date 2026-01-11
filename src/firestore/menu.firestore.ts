@@ -68,6 +68,10 @@ export class MenuFirestore extends PatternFirestore {
       preco: body.preco
     })
   }
+
+  public getRef(id: string) {
+    return doc(this.setup(), id);
+  }
 }
 
 export const menuFirestore = new MenuFirestore()

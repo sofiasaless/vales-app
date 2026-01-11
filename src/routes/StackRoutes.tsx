@@ -27,7 +27,7 @@ export type RootStackParamList = {
   Detalhes: { idFunc: string };
   Historico: undefined;
   Mensalidades: undefined;
-  Cardapio: undefined;
+  Cardapio: { idFunc: string };
   EditarFuncionario: { funcObj: Funcionario };
   LoginRestaurante: undefined;
   LoginGerente: undefined;

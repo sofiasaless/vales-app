@@ -40,7 +40,7 @@ export const ItemVale: React.FC<VoucherItemCardProps> = ({
 
           <Text appearance="hint" category="c2">
             {item.quantidade}x{' '}
-            <Text category='s2'>{totalValue}</Text>
+            <Text category='s2'>{item.preco_unit}</Text>
           </Text>
 
           <Text category="c2" style={{color: customTheme['text-hint-color']}} numberOfLines={1}>
@@ -50,7 +50,7 @@ export const ItemVale: React.FC<VoucherItemCardProps> = ({
 
         {/* Right side */}
         <View style={styles.right}>
-          <Text category='s2'>R$ {totalValue}</Text>
+          <Text category='s2'>R$ {totalValue.toFixed(2)}</Text>
 
             {showControls && 
               <TouchableOpacity onPress={() => onExclude!(item)} style={styles.removeButton}>

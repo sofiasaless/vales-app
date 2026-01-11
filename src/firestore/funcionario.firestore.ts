@@ -2,12 +2,14 @@ import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, o
 import { Funcionario, FuncionarioPostRequestBody } from "../schema/funcionario.schema";
 import { PatternFirestore } from "./pattern.firestore";
 import { COLLECTIONS } from "../enums/firebase.enum";
-import { Vale } from "../schema/vale.shema";
+import { Vale, ValeFirestorePostRequestBody } from "../schema/vale.shema";
 import { RestauranteSerivce } from "../auth/restaurante.service";
+import { MenuFirestore } from "./menu.firestore";
 
 export class FuncionarioFirestore extends PatternFirestore {
 
   private readonly restauranteService = new RestauranteSerivce()
+  private readonly menuFirestore = new MenuFirestore()
 
   constructor() {
     super(COLLECTIONS.FUNCIONARIOS)
@@ -52,8 +54,30 @@ export class FuncionarioFirestore extends PatternFirestore {
   }
 
   public async adicionarVale(id: string, body: Vale) {
+    let valeToSave: ValeFirestorePostRequestBody = {
+      ...body,
+      produto_ref: null
+    }
+
+    if (body.produto_ref) {
+      valeToSave.produto_ref = this.menuFirestore.getRef(body.produto_ref)
+    }
+    
     await updateDoc(doc(this.setup(), id), {
-      vales: arrayUnion(body)
+      vales: arrayUnion(valeToSave)
+    })
+  }
+
+  public async adicionarMultiplosVales(id: string, body: Vale[]) {
+    let valesToSave: ValeFirestorePostRequestBody[] = body.map((v) => {
+      return {
+        ...v,
+        produto_ref: (v.produto_ref) ? this.menuFirestore.getRef(v.produto_ref) : null
+      }
+    })
+
+    await updateDoc(doc(this.setup(), id), {
+      vales: arrayUnion(valesToSave)
     })
   }
 
@@ -74,3 +98,5 @@ export class FuncionarioFirestore extends PatternFirestore {
   }
 
 }
+
+export const funcionarioFirestore = new FuncionarioFirestore()

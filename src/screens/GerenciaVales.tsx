@@ -10,11 +10,11 @@ import {
   Modal,
   Text
 } from '@ui-kitten/components';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
+import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { FlatList } from 'react-native-gesture-handler';
 import { ItemVale } from '../components/ItemVale';
 import { useFuncionarios } from '../hooks/useFuncionarios';
@@ -24,6 +24,7 @@ import { Vale, ValeDinheiroPostRequestBody } from '../schema/vale.shema';
 import { customTheme } from '../theme/custom.theme';
 import { calcularTotalVales } from '../util/calculos.util';
 import { AvatarIniciais } from '../components/AvatarIniciais';
+import { alert } from '../util/alertfeedback.util';
 
 type RouteParams = {
   idFunc: string;
@@ -50,7 +51,6 @@ export const GerenciaVales = () => {
   const { adicionarVale, isLoading: carregando, removerVale, isLoadingVales, listarVales, vales } = useVales()
 
   const handleRemoveItem = async (valeToRemove: Vale) => {
-    console.info('apagando...')
     await removerVale(idFunc, valeToRemove);
     listarVales(idFunc);
   };
@@ -67,13 +67,17 @@ export const GerenciaVales = () => {
       return;
     }
 
-    if (await adicionarVale(idFunc, {
+    const res = await adicionarVale(idFunc, {
       id: Math.random().toString(),
       data_adicao: new Date(),
       quantidade: 1,
       ...formVale
-    })) {
+    })
+
+    if (res.ok) {
       listarVales(idFunc);
+    } else {
+      alert('Ocorreu um erro ao adicionar os vales', res.message)
     }
 
     setModalVisible(false)
@@ -82,12 +86,13 @@ export const GerenciaVales = () => {
   };
 
   const valesRevertidos = vales?.reverse()
-  
 
-  useEffect(() => {
-    encontrarPorId(idFunc);
-    listarVales(idFunc)
-  }, [idFunc])
+  useFocusEffect(
+    useCallback(() => {
+      encontrarPorId(idFunc);
+      listarVales(idFunc)
+    }, [idFunc])
+  )
 
   return (
     (isLoadingF) ?
@@ -102,7 +107,7 @@ export const GerenciaVales = () => {
           <Layout level='1' style={styles.card}>
             <View style={styles.employeeHeader}>
               {/* <Avatar size='giant' source={{ uri: 'https://static.vecteezy.com/ti/vetor-gratis/p1/7319933-black-avatar-person-icons-user-profile-icon-vetor.jpg' }} /> */}
-              <AvatarIniciais name={funcionarioFoco?.nome || ''}/>
+              <AvatarIniciais name={funcionarioFoco?.nome || ''} />
               <View style={styles.employeeInfo}>
                 <Text category="h6">{funcionarioFoco?.nome}</Text>
                 <Text appearance="hint">{funcionarioFoco?.cargo}</Text>
@@ -126,7 +131,7 @@ export const GerenciaVales = () => {
             <Button
               size="small"
               accessoryLeft={<AntDesign name="plus" size={15} color="black" />}
-              onPress={() => navigation.navigate('Cardapio')}
+              onPress={() => navigation.navigate('Cardapio', { idFunc: idFunc })}
             >
               Itens
             </Button>

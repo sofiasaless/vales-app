@@ -1,6 +1,6 @@
 import Feather from '@expo/vector-icons/Feather';
 import { Button, Input, Layout, Spinner, Text } from '@ui-kitten/components';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -12,8 +12,21 @@ import { useCardapio } from '../hooks/useCardapio';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
 import { customTheme } from '../theme/custom.theme';
 import { useItensValesActions, useItensValesState } from '../context/ItensValeContext';
+import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { RootStackParamList } from '../routes/StackRoutes';
+import { useVales } from '../hooks/useVales';
+import { alert } from '../util/alertfeedback.util';
+
+interface RouteParams {
+  idFunc: string
+}
 
 export default function Cardapio() {
+  const route = useRoute();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { idFunc } = route.params as RouteParams;
+
+  const [search, setSearch] = useState('');
 
   const { data: res, isLoading: carregandoRest } = useRestauranteConectado()
 
@@ -26,10 +39,42 @@ export default function Cardapio() {
   const { tamanho, itensVales } = useItensValesState();
   const { limparItens } = useItensValesActions();
 
+  const itensFiltrados = useMemo(() => {
+    if (!itensCardapio || search.trim() === '') {
+      return itensCardapio;
+    }
+
+    const texto = search.toLowerCase();
+
+    return itensCardapio.filter(item =>
+      item.descricao.toLowerCase().includes(texto)
+    );
+  }, [itensCardapio, search]);
+
+
+  const { adicionarVales, isLoading: carregadnoAdicaoVales } = useVales()
+
+  const handleAdicionarItems = async () => {
+    const valesFormatados = Array.from(itensVales.values())
+
+    const res = await adicionarVales(idFunc, valesFormatados);
+    if (res.ok) {
+      limparItens()
+      navigation.goBack()
+    } else {
+      alert('Ocorreu um erro ao adicionar os vales', res.message)
+    }
+  }
+
   useEffect(() => {
     refetch()
   }, [carregandoRest])
 
+  useFocusEffect(
+    useCallback(() => {
+      limparItens()
+    }, [])
+  )
 
   return (
     <Layout style={styles.container}>
@@ -38,15 +83,16 @@ export default function Cardapio() {
           size="large"
           status='primary'
           placeholder="Pesquisar por produto...."
+          onChangeText={setSearch}
           accessoryLeft={<Feather name="search" size={22} color={customTheme['color-primary-500']} />}
-        />
+        />p
       </Layout>
       {
         (isLoading) ?
           <Spinner />
           :
           <FlatList
-            data={itensCardapio}
+            data={itensFiltrados}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.content}
             renderItem={({ item }) => (
@@ -56,7 +102,11 @@ export default function Cardapio() {
             )}
             ListEmptyComponent={
               <View style={styles.empty}>
-                <Text appearance="hint">Nenhum produto no cardápio</Text>
+                <Text appearance="hint">
+                  {search
+                    ? 'Nenhum produto encontrado'
+                    : 'Nenhum produto no cardápio'}
+                </Text>
               </View>
             }
             removeClippedSubviews
@@ -70,18 +120,11 @@ export default function Cardapio() {
         <Button
           size="giant"
           style={styles.actionButton}
-          onPress={() => console.info(itensVales)}
+          onPress={handleAdicionarItems}
+          disabled={(tamanho === 0 || carregadnoAdicaoVales)}
         >
-          Adicionar ({tamanho})
-          {/* <Text style={styles.dot}> • </Text>
-            <DinheiroDisplay
-              value={totalItens}
-              size="md"
-              variant="black"
-            /> */}
+          {(carregadnoAdicaoVales) ? 'Adicionadno...' : `Adicionar (${tamanho})`}
         </Button>
-
-        <Button status='danger' onPress={limparItens}>limpar</Button>
       </View>
     </Layout>
   );
