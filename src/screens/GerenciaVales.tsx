@@ -2,7 +2,6 @@ import Entypo from '@expo/vector-icons/Entypo';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import {
-  Avatar,
   Button,
   Card,
   Input,
@@ -10,21 +9,22 @@ import {
   Modal,
   Text
 } from '@ui-kitten/components';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { FlatList } from 'react-native-gesture-handler';
+import { AvatarIniciais } from '../components/AvatarIniciais';
 import { ItemVale } from '../components/ItemVale';
 import { useFuncionarios } from '../hooks/useFuncionarios';
 import { useVales } from '../hooks/useVales';
 import { RootStackParamList } from '../routes/StackRoutes';
 import { Vale, ValeDinheiroPostRequestBody } from '../schema/vale.shema';
 import { customTheme } from '../theme/custom.theme';
-import { calcularTotalVales } from '../util/calculos.util';
-import { AvatarIniciais } from '../components/AvatarIniciais';
 import { alert } from '../util/alertfeedback.util';
+import { calcularTotalVales } from '../util/calculos.util';
+import { useEventoAlteracoesContext } from '../context/EventoAlteracaoContext';
 
 type RouteParams = {
   idFunc: string;
@@ -85,14 +85,12 @@ export const GerenciaVales = () => {
     setCashError('');
   };
 
-  const valesRevertidos = vales?.reverse()
+  const { novaAdicaoVale } = useEventoAlteracoesContext()
 
-  useFocusEffect(
-    useCallback(() => {
-      encontrarPorId(idFunc);
-      listarVales(idFunc)
-    }, [idFunc])
-  )
+  useEffect(() => {
+    encontrarPorId(idFunc);
+    listarVales(idFunc)
+  }, [idFunc, novaAdicaoVale])
 
   return (
     (isLoadingF) ?
@@ -103,7 +101,7 @@ export const GerenciaVales = () => {
       </Layout>
       :
       <Layout style={styles.container}>
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView nestedScrollEnabled contentContainerStyle={styles.content}>
           <Layout level='1' style={styles.card}>
             <View style={styles.employeeHeader}>
               {/* <Avatar size='giant' source={{ uri: 'https://static.vecteezy.com/ti/vetor-gratis/p1/7319933-black-avatar-person-icons-user-profile-icon-vetor.jpg' }} /> */}
@@ -138,14 +136,14 @@ export const GerenciaVales = () => {
           </View>
 
           <View style={{ maxHeight: 290, minHeight: 190 }}>
-            {(valesRevertidos) ?
+            {(vales) ?
               (isLoadingVales)
                 ?
                 <Text>Carregando vales...</Text>
                 :
-                valesRevertidos?.length > 0 ? (
+                vales?.length > 0 ? (
                   <FlatList
-                    data={valesRevertidos}
+                    data={vales}
                     keyExtractor={(_, index) => index.toString()}
                     renderItem={({ item }) => (
                       <ItemVale item={item} showControls onExclude={handleRemoveItem} />
@@ -176,7 +174,10 @@ export const GerenciaVales = () => {
             size="medium"
             // disabled={voucherTotal === 0}
             onPress={() =>
-              navigation.navigate('ResumoPagamento', { funcObj: funcionarioFoco! })
+              navigation.navigate('ResumoPagamento', { funcObj: {
+                ...funcionarioFoco!,
+                vales: vales!
+              } })
             }
             accessoryLeft={<Entypo name="credit-card" size={20} color="black" />}
           >
@@ -204,7 +205,7 @@ export const GerenciaVales = () => {
               style={styles.actionButton}
               accessoryLeft={<MaterialCommunityIcons name="history" size={16} color={customTheme['text-basic-color']} />}
               onPress={() =>
-                navigation.navigate('Historico')
+                navigation.navigate('Historico', { idFunc })
               }
             >
               Histórico

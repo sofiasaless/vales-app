@@ -1,4 +1,4 @@
-import { collection } from "firebase/firestore";
+import { collection, doc } from "firebase/firestore";
 import { firestore } from "../config/firebase.config";
 
 export abstract class PatternFirestore {
@@ -16,6 +16,10 @@ export abstract class PatternFirestore {
 
   firestore() {
     return firestore
+  }
+
+  public getRef(id: string) {
+    return doc(this.setup(), id);
   }
 
 }

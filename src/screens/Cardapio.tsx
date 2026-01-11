@@ -16,6 +16,7 @@ import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-
 import { RootStackParamList } from '../routes/StackRoutes';
 import { useVales } from '../hooks/useVales';
 import { alert } from '../util/alertfeedback.util';
+import { useEventoAlteracoesContext } from '../context/EventoAlteracaoContext';
 
 interface RouteParams {
   idFunc: string
@@ -29,6 +30,8 @@ export default function Cardapio() {
   const [search, setSearch] = useState('');
 
   const { data: res, isLoading: carregandoRest } = useRestauranteConectado()
+
+  const { eventoNovaAdicaoVale } = useEventoAlteracoesContext()
 
   const {
     data: itensCardapio,
@@ -60,6 +63,7 @@ export default function Cardapio() {
     const res = await adicionarVales(idFunc, valesFormatados);
     if (res.ok) {
       limparItens()
+      eventoNovaAdicaoVale()
       navigation.goBack()
     } else {
       alert('Ocorreu um erro ao adicionar os vales', res.message)

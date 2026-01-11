@@ -6,7 +6,6 @@ import { ResumoPagamento } from '../screens/ResumoPagamento';
 import { customTheme } from '../theme/custom.theme';
 import { BottomTabsRoutes } from './BottomRoutes';
 import { DetalhesFuncionario } from '../screens/DetalhesFuncionario';
-import { HIstoricoPagamentos } from '../screens/HIstoricoPagamentos';
 import Mensalidades from '../screens/Mensalidades';
 import Cardapio from '../screens/Cardapio';
 import { GerenciaCardapio } from '../screens/GerenciaCardapio';
@@ -15,6 +14,7 @@ import { EditarFuncionario } from '../screens/EditarFuncionario';
 import { Config } from '../screens/Config';
 import { LoginRestaurante } from '../screens/LoginRestaurante';
 import { LoginGerente } from '../screens/LoginGerente';
+import { HistoricoPagamentos } from '../screens/HIstoricoPagamentos';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -25,7 +25,7 @@ export type RootStackParamList = {
   Assinatura: undefined;
   GerenciaCardapio: undefined;
   Detalhes: { idFunc: string };
-  Historico: undefined;
+  Historico: { idFunc: string };
   Mensalidades: undefined;
   Cardapio: { idFunc: string };
   EditarFuncionario: { funcObj: Funcionario };
@@ -97,7 +97,7 @@ export default function StackRoutes() {
 
       <Stack.Screen
         name="Historico"
-        component={HIstoricoPagamentos}
+        component={HistoricoPagamentos}
         options={optionsHeader('Histórico de pagamentos')}
       />
 

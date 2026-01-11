@@ -1,19 +1,23 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { Button, Card, Layout, Text } from '@ui-kitten/components';
-import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Button, Card, Layout, Spinner, Text } from '@ui-kitten/components';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { mockEmployees } from '../mocks/mockData';
-import { formatDateTime } from '../util/formatadores.util';
+import { converterParaIsoDate, formatDateTime } from '../util/formatadores.util';
 import { ItemVale } from '../components/ItemVale';
 import { customTheme } from '../theme/custom.theme';
+import { useHistoricoPagamentos } from '../hooks/usePagamentos';
+import { Pagamento } from '../schema/pagamento.schema';
+import { calcularTotalVales } from '../util/calculos.util';
+import { FlatList } from 'react-native-gesture-handler';
 
-export const HIstoricoPagamentos = () => {
-  // const route = useRoute<any>();
+export const HistoricoPagamentos = () => {
+  const route = useRoute<any>();
   const navigation = useNavigation<any>();
-  // const { id } = route.params;
+  const { idFunc } = route.params as { idFunc: string };
 
   const employee = mockEmployees[0];
 
@@ -43,124 +47,142 @@ export const HIstoricoPagamentos = () => {
     );
   };
 
+  const ItemHistorico = ({ historicoPagamento }: { historicoPagamento: Pagamento }) => {
+    const isExpanded = expandedPayment === historicoPagamento.id;
+
+    return (
+      <Card style={styles.card}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => toggleExpand(historicoPagamento.id)}
+          style={styles.cardHeader}
+        >
+          <View style={styles.headerLeft}>
+            <Text appearance="hint" category="c1">
+              {converterParaIsoDate(historicoPagamento.data_pagamento)}
+            </Text>
+
+            <View style={styles.amountRow}>
+              <DinheiroDisplay
+                value={historicoPagamento.valor_pago}
+                size="md"
+                variant="positive"
+              />
+              <Text appearance="hint" category="c1">
+                pago
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.headerRight}>
+            <View style={styles.voucherInfo}>
+              <Text appearance="hint" category="c1">
+                Vale descontado
+              </Text>
+              <DinheiroDisplay
+                value={-(calcularTotalVales(historicoPagamento.vales))}
+                size="sm"
+                variant="negative"
+              />
+            </View>
+
+            {isExpanded ? (
+              <MaterialIcons name="keyboard-arrow-up" size={24} color="#8f9bb3" />
+            ) : (
+              <MaterialIcons name="keyboard-arrow-down" size={24} color="#8f9bb3" />
+            )}
+          </View>
+        </TouchableOpacity>
+
+        {/* Expanded content */}
+        {isExpanded && (
+          <View style={styles.expanded}>
+            <View style={styles.summaryRow}>
+              <View style={styles.summaryCard}>
+                <Text appearance="hint" category="c1">
+                  Salário Base
+                </Text>
+                <DinheiroDisplay
+                  value={historicoPagamento.salario_atual}
+                  size="sm"
+                />
+              </View>
+
+              <View style={[styles.summaryCard, styles.dangerCard]}>
+                <Text appearance="hint" category="c1">
+                  Desconto Vale
+                </Text>
+                <DinheiroDisplay
+                  value={-(calcularTotalVales(historicoPagamento.vales))}
+                  size="sm"
+                  variant="negative"
+                />
+              </View>
+            </View>
+
+            <View style={styles.voucherSection}>
+              <View style={styles.voucherTitle}>
+                <MaterialIcons name="receipt-long" size={15} color="#8f9bb3" />
+                <Text category="s2">
+                  Itens do Vale
+                </Text>
+              </View>
+
+              <View>
+                {historicoPagamento.vales.map((item) => (
+                  <ItemVale
+                    key={item.id}
+                    item={item}
+                    showControls={false}
+                  // style={styles.voucherItem}
+                  />
+                ))}
+              </View>
+            </View>
+          </View>
+        )}
+      </Card>
+    )
+  }
+
+  const { data: historico, isLoading } = useHistoricoPagamentos(idFunc)
+
   return (
     <Layout style={styles.container}>
 
       <View style={styles.content}>
-        {employee.paymentHistory.length > 0 ? (
-          employee.paymentHistory.map((payment) => {
-            const isExpanded = expandedPayment === payment.id;
-
-            return (
-              <Card key={payment.id} style={styles.card}>
-                <TouchableOpacity
-                  activeOpacity={0.7}
-                  onPress={() => toggleExpand(payment.id)}
-                  style={styles.cardHeader}
-                >
-                  <View style={styles.headerLeft}>
-                    <Text appearance="hint" category="c1">
-                      {formatDateTime(payment.date)}
-                    </Text>
-
-                    <View style={styles.amountRow}>
-                      <DinheiroDisplay
-                        value={payment.amountPaid}
-                        size="md"
-                        variant="positive"
-                      />
-                      <Text appearance="hint" category="c1">
-                        pago
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.headerRight}>
-                    <View style={styles.voucherInfo}>
-                      <Text appearance="hint" category="c1">
-                        Vale descontado
-                      </Text>
-                      <DinheiroDisplay
-                        value={-payment.voucherTotal}
-                        size="sm"
-                        variant="negative"
-                      />
-                    </View>
-
-                    {isExpanded ? (
-                      <MaterialIcons name="keyboard-arrow-up" size={24} color="#8f9bb3" />
-                    ) : (
-                      <MaterialIcons name="keyboard-arrow-down" size={24} color="#8f9bb3" />
-                    )}
-                  </View>
-                </TouchableOpacity>
-
-                {/* Expanded content */}
-                {isExpanded && (
-                  <View style={styles.expanded}>
-                    <View style={styles.summaryRow}>
-                      <View style={styles.summaryCard}>
-                        <Text appearance="hint" category="c1">
-                          Salário Base
-                        </Text>
-                        <DinheiroDisplay
-                          value={payment.baseSalary}
-                          size="sm"
-                        />
-                      </View>
-
-                      <View style={[styles.summaryCard, styles.dangerCard]}>
-                        <Text appearance="hint" category="c1">
-                          Desconto Vale
-                        </Text>
-                        <DinheiroDisplay
-                          value={-payment.voucherTotal}
-                          size="sm"
-                          variant="negative"
-                        />
-                      </View>
-                    </View>
-
-                    <View style={styles.voucherSection}>
-                      <View style={styles.voucherTitle}>
-                        <MaterialIcons name="receipt-long" size={15} color="#8f9bb3" />
-                        <Text category="s2">
-                          Itens do Vale
-                        </Text>
-                      </View>
-
-                      <View>
-                        {employee.currentVoucher.map((item) => (
-                          <ItemVale
-                            key={item.id}
-                            item={item}
-                            showControls={false}
-                          // style={styles.voucherItem}
-                          />
-                        ))}
-                      </View>
-                    </View>
-                  </View>
-                )}
-              </Card>
-            );
-          })
-        ) : (
-          <View style={styles.empty}>
-            <MaterialIcons name="history" size={48} color="#8f9bb3" />
-            <Text appearance="hint" style={styles.mt}>
-              Nenhum pagamento registrado
-            </Text>
-            <Text appearance="hint" category="c1">
-              O histórico aparecerá após o primeiro pagamento
-            </Text>
-          </View>
-        )}
+        {
+          (isLoading) ?
+            <Spinner />
+            :
+            <FlatList
+              data={historico}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.content}
+              renderItem={({ item }) => (
+                <ItemHistorico historicoPagamento={item} />
+              )}
+              ListEmptyComponent={
+                <View style={styles.empty}>
+                  <MaterialIcons name="history" size={48} color="#8f9bb3" />
+                  <Text appearance="hint" style={styles.mt}>
+                    Nenhum pagamento registrado
+                  </Text>
+                  <Text appearance="hint" category="c1" style={{ textAlign: 'center' }}>
+                    O histórico aparecerá após o primeiro pagamento
+                  </Text>
+                </View>
+              }
+              removeClippedSubviews
+              windowSize={5}
+              maxToRenderPerBatch={10}
+              initialNumToRender={10}
+            />
+        }
       </View>
     </Layout>
   );
 };
-
 
 
 export const styles = StyleSheet.create({

@@ -11,6 +11,7 @@ import './src/services/pushNotification';
 import { customMapping, customTheme } from "./src/theme/custom.theme";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ItenValesProvider } from './src/context/ItensValeContext';
+import { EventoAlteracoesProvider } from './src/context/EventoAlteracaoContext';
 
 const queryClient = new QueryClient();
 
@@ -73,10 +74,12 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ItenValesProvider>
-        <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
-          <Routes />
-          <StatusBar style="light" />
-        </ApplicationProvider>
+        <EventoAlteracoesProvider>
+          <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
+            <Routes />
+            <StatusBar style="light" />
+          </ApplicationProvider>
+        </EventoAlteracoesProvider>
       </ItenValesProvider>
     </QueryClientProvider>
   )
