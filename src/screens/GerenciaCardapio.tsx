@@ -188,6 +188,10 @@ export const GerenciaCardapio = () => {
               keyExtractor={(item) => item.id}
               contentContainerStyle={styles.list}
               renderItem={renderItem}
+              removeClippedSubviews
+              windowSize={5}
+              maxToRenderPerBatch={10}
+              initialNumToRender={10}
             />
           ) : (
             <View style={styles.empty}>

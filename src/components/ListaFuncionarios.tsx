@@ -3,13 +3,14 @@ import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useFocusEffect } from '@react-navigation/native';
 import { Layout, Text, useTheme } from '@ui-kitten/components';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useFuncionarios, useFuncionariosRestaurante } from '../hooks/useFuncionarios';
 import { CardGradient } from './CardGradient';
 import { FuncionarioCard } from './FuncionarioCard';
 import { DinheiroDisplay } from './DinheiroDisplay';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
+import { calcularTotalVales } from '../util/calculos.util';
 
 export const ListaFuncionarios = () => {
   const theme = useTheme();
@@ -29,6 +30,21 @@ export const ListaFuncionarios = () => {
   const { data: res, isLoading: carregandoRes } = useRestauranteConectado()
 
   const { data: funcionarios, isLoading, refetch } = useFuncionariosRestaurante(res?.id || '')
+
+  const valesAbertos = useMemo(() => {
+    return funcionarios?.reduce((acc, func) => {
+      return acc + calcularTotalVales(func.vales)
+    }, 0)
+  }, [funcionarios])
+
+  const funcComVales = useMemo(() => {
+    return funcionarios?.reduce((acc, func) => {
+      if (func.vales.length > 0) {
+        return acc + 1
+      }
+      return acc + 0
+    }, 0)
+  }, [funcionarios])
 
   useFocusEffect(
     useCallback(() => {
@@ -67,10 +83,10 @@ export const ListaFuncionarios = () => {
             </Text>
           </View>
 
-          <DinheiroDisplay value={40239} variant='negative' size='md' />
+          <DinheiroDisplay value={valesAbertos || 0} variant='negative' size='md' />
 
           <Text category="c1" appearance="hint" style={styles.mt4}>
-            32 funcionário(s)
+            {funcComVales} funcionário(s)
           </Text>
         </CardGradient>
       </View>

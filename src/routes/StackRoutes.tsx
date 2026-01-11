@@ -47,7 +47,7 @@ export default function StackRoutes() {
         options={{ headerShown: false }}
       /> */}
 
-      {/* <Stack.Screen
+      <Stack.Screen
         name="LoginRestaurante"
         component={LoginRestaurante}
         options={{ headerShown: false }}
@@ -57,7 +57,7 @@ export default function StackRoutes() {
         name="LoginGerente"
         component={LoginGerente}
         options={{ headerShown: false }}
-      /> */}
+      />
       
       <Stack.Screen
         name="Tabs"

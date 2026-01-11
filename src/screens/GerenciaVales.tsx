@@ -131,7 +131,7 @@ export const GerenciaVales = () => {
               accessoryLeft={<AntDesign name="plus" size={15} color="black" />}
               onPress={() => navigation.navigate('Cardapio', { idFunc: idFunc })}
             >
-              Itens
+              Selecionar itens
             </Button>
           </View>
 
