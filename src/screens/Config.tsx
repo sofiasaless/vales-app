@@ -1,6 +1,7 @@
 import { Button, Layout } from "@ui-kitten/components"
 import { RestauranteSerivce } from "../auth/restaurante.service"
 import { GerenteFirestore } from "../firestore/gerente.firestore"
+import { MenuFirestore } from "../firestore/menu.firestore"
 
 export const Config = () => {
   return (
@@ -23,6 +24,11 @@ export const Config = () => {
           })
         }}
       >Registrar gerente</Button>
+
+      <Button onPress={() => {
+        const menuFir = new MenuFirestore()
+        menuFir.cadastrar()
+      }}>registrar cardápio</Button>
     </Layout>
   )
 }

@@ -6,35 +6,46 @@ import {
   Input,
   Layout,
   Modal,
+  Spinner,
   Text
 } from '@ui-kitten/components';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   FlatList,
   StyleSheet,
   View
 } from 'react-native';
 
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
+import { menuFirestore, MenuFirestore } from '../firestore/menu.firestore';
 import { useCardapio } from '../hooks/useCardapio';
+import { useRestauranteConectado } from '../hooks/useRestaurante';
 import { ItemMenu, ItemMenuPostRequestBody } from '../schema/menu.schema';
 import { customTheme } from '../theme/custom.theme';
-import { parseCurrencyInput } from '../util/formatadores.util';
 
 export const GerenciaCardapio = () => {
   const styles = createStyles();
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<ItemMenuPostRequestBody | null>(null);
-  const [deleteProduct, setDeleteProduct] = useState<ItemMenuPostRequestBody | null>(null);
+  const [editingProduct, setEditingProduct] = useState<ItemMenu | null>(null);
+
+  const { data: res, isLoading: carregandoRest } = useRestauranteConectado()
+
+  const {
+    data: itensCardapio,
+    isLoading,
+    refetch
+  } = useCardapio(res?.id || '')
 
   const [formData, setFormData] = useState<ItemMenuPostRequestBody>({
     descricao: '',
     preco: 0,
+    restaurante_ref: '',
   });
 
   const resetForm = () => {
-    setFormData({ descricao: '', preco: 0 });
+    setFormData({ descricao: '', preco: 0, restaurante_ref: '' });
     setEditingProduct(null);
   };
 
@@ -47,68 +58,65 @@ export const GerenciaCardapio = () => {
     setFormData({
       descricao: product.descricao,
       preco: product.preco,
+      restaurante_ref: ''
     });
     setEditingProduct(product);
     setModalVisible(true);
   };
 
-  const handleSave = () => {
-    if (!formData.descricao.trim() || !formData.preco) {
-      // toast.error('Preencha todos os campos');
-      return;
-    }
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const price = parseCurrencyInput(formData.preco.toString());
-    if (price <= 0) {
-      // toast.error('Preço inválido');
-      return;
-    }
+  const validateNovoProduto = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (formData.descricao === '') newErrors.descricao = 'Nome do produto é obrigatório';
+
+    if (formData.preco <= 0) newErrors.preco = 'Preço precisa ser maior que zero';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateAtualizacaoProduto = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (editingProduct?.descricao === '') newErrors.descricao = 'Nome do produto é obrigatório';
+
+    if (editingProduct?.preco === undefined || editingProduct?.preco <= 0) newErrors.preco = 'Preço precisa ser maior que zero';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+  const handleSave = async () => {
 
     if (editingProduct) {
-      // dispatch({
-      //   type: 'UPDATE_MENU_PRODUCT',
-      //   payload: {
-      //     ...editingProduct,
-      //     name: formData.name.trim(),
-      //     price,
-      //     available: formData.available,
-      //   },
-      // });
-      // toast.success('Produto atualizado');
+      if (!validateAtualizacaoProduto()) return;
+      await menuFirestore.atualizar(editingProduct.id, editingProduct);
+      refetch()
+      setModalVisible(false);
+      resetForm();
     } else {
-      // dispatch({
-      //   type: 'ADD_MENU_PRODUCT',
-      //   payload: {
-      //     id: `prod-${Date.now()}`,
-      //     name: formData.name.trim(),
-      //     price,
-      //     available: formData.available,
-      //     category: 'Geral',
-      //   },
-      // });
-      // toast.success('Produto adicionado');
+      if (!validateNovoProduto()) return;
+      if (res?.id) {
+        formData.restaurante_ref = res?.id
+        await menuFirestore.adicionar(formData)
+        refetch()
+        setModalVisible(false);
+        resetForm();
+      }
     }
 
-    setModalVisible(false);
-    resetForm();
   };
 
   const handleDelete = () => {
-    if (!deleteProduct) return;
 
-    // dispatch({
-    //   type: 'DELETE_MENU_PRODUCT',
-    //   payload: deleteProduct.id,
-    // });
-
-    // toast.success('Produto removido');
-    setDeleteProduct(null);
   };
 
-  const {
-    data: itensCardapio,
-    isLoading
-  } = useCardapio('5ZgfLpdgaEZbAlq5Bf9Bs0qf5Fw1')
+  useEffect(() => {
+    refetch()
+  }, [carregandoRest])
 
   const renderItem = ({ item }: { item: ItemMenu }) => (
     <Card
@@ -118,11 +126,6 @@ export const GerenciaCardapio = () => {
         <View style={styles.cardInfo}>
           <Text category="s1">{item.descricao}</Text>
           <DinheiroDisplay value={item.preco} size="tn" />
-          {/* {!item.available && (
-            <Text status="warning" category="c1">
-              Indisponível
-            </Text>
-          )} */}
         </View>
 
         <View style={styles.actions}>
@@ -138,7 +141,23 @@ export const GerenciaCardapio = () => {
             size="small"
             appearance="ghost"
             status="danger"
-            onPress={() => setDeleteProduct(item)}
+            onPress={() => {
+              Alert.alert('Remover produto', 'Tem certeza que quer remover o produto?', [
+                {
+                  text: 'Cancelar',
+                  style: 'cancel'
+                },
+                {
+                  text: 'Confirmar exclusão',
+                  style: 'destructive',
+                  onPress: async () => {
+                    const menuFir = new MenuFirestore()
+                    await menuFir.remover(item.id);
+                    refetch()
+                  }
+                }
+              ])
+            }}
           >
             <MaterialCommunityIcons name="trash-can" size={24} />
           </Button>
@@ -159,15 +178,29 @@ export const GerenciaCardapio = () => {
         >Novo produto</Button>
       </Layout>
 
-      {(itensCardapio) ?
-        itensCardapio.length > 0 ? (
-          <FlatList
-            data={itensCardapio}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.list}
-            renderItem={renderItem}
-          />
-        ) : (
+      {(isLoading) ?
+        <Spinner />
+        :
+        (itensCardapio) ?
+          itensCardapio.length > 0 ? (
+            <FlatList
+              data={itensCardapio}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.list}
+              renderItem={renderItem}
+            />
+          ) : (
+            <View style={styles.empty}>
+              <Text appearance="hint" style={styles.emptyText}>
+                Nenhum produto cadastrado
+              </Text>
+              <Button onPress={openAdd} style={styles.emptyButton}>
+                {/* <Ionicons name="add" size={18} /> */}
+                <Text>Adicionar Produto</Text>
+              </Button>
+            </View>
+          )
+          :
           <View style={styles.empty}>
             <Text appearance="hint" style={styles.emptyText}>
               Nenhum produto cadastrado
@@ -177,12 +210,8 @@ export const GerenciaCardapio = () => {
               <Text>Adicionar Produto</Text>
             </Button>
           </View>
-        )
-        :
-        <Text>Ocorreu um erro ao carregar o cardápio</Text>
       }
 
-      {/* Add / Edit Modal */}
       <Modal
         visible={modalVisible}
         backdropStyle={styles.backdrop}
@@ -199,7 +228,8 @@ export const GerenciaCardapio = () => {
             onChangeText={(name) =>
               setFormData({ ...formData, descricao: name })
             }
-            style={styles.input}
+            status={errors.descricao ? 'danger' : 'basic'}
+            caption={errors.descricao}
           />
 
           <Input
@@ -213,7 +243,8 @@ export const GerenciaCardapio = () => {
                 preco: Number(price),
               })
             }
-            style={styles.input}
+            status={errors.preco ? 'danger' : 'basic'}
+            caption={errors.preco}
           />
 
           <View style={styles.modalActions}>
@@ -231,28 +262,6 @@ export const GerenciaCardapio = () => {
         </Card>
       </Modal>
 
-      {/* Delete Confirmation */}
-      <Modal
-        visible={!!deleteProduct}
-        backdropStyle={styles.backdrop}
-        onBackdropPress={() => setDeleteProduct(null)}
-      >
-        <Card disabled>
-          <Text category="h6">Remover Produto</Text>
-          <Text appearance="hint" style={styles.deleteText}>
-            Tem certeza que deseja remover este produto?
-          </Text>
-
-          <View style={styles.modalActions}>
-            <Button size='small' appearance="outline" onPress={() => setDeleteProduct(null)}>
-              Cancelar
-            </Button>
-            <Button size='small' status="danger" onPress={handleDelete}>
-              Remover
-            </Button>
-          </View>
-        </Card>
-      </Modal>
     </Layout>
   );
 };
