@@ -1,3 +1,5 @@
+import { DocumentReference } from "firebase/firestore";
+
 export type Vale = {
   id: string,
   quantidade: number,
@@ -8,3 +10,7 @@ export type Vale = {
 }
 
 export type ValeDinheiroPostRequestBody = Omit<Vale, "id" | "quantidade" | "data_adicao" | "produto_ref">
+
+export type ValeFirestorePostRequestBody = Omit<Vale, "produto_ref"> & {
+  produto_ref?: DocumentReference | null
+}

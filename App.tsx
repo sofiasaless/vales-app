@@ -9,6 +9,11 @@ import { usePushNotifications } from './src/hooks/usePushNotifications';
 import Routes from './src/routes';
 import './src/services/pushNotification';
 import { customMapping, customTheme } from "./src/theme/custom.theme";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ItenValesProvider } from './src/context/ItensValeContext';
+import { EventoAlteracoesProvider } from './src/context/EventoAlteracaoContext';
+
+const queryClient = new QueryClient();
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -67,11 +72,15 @@ export default function App() {
   }
 
   return (
-    <>
-      <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
-        <Routes />
-        <StatusBar style="light" />
-      </ApplicationProvider>
-    </>
+    <QueryClientProvider client={queryClient}>
+      <ItenValesProvider>
+        <EventoAlteracoesProvider>
+          <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
+            <Routes />
+            <StatusBar style="light" />
+          </ApplicationProvider>
+        </EventoAlteracoesProvider>
+      </ItenValesProvider>
+    </QueryClientProvider>
   )
 }

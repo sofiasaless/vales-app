@@ -1,142 +1,149 @@
-import React from 'react';
+import { Button, Text } from '@ui-kitten/components';
+import React, { memo, useState } from 'react';
 import {
-  View,
   StyleSheet,
   TouchableOpacity,
+  View
 } from 'react-native';
-import { Text, Button, useTheme } from '@ui-kitten/components';
-import { Ionicons } from '@expo/vector-icons';
 
-import { MenuProduct } from '../types';
-import { DinheiroDisplay } from './DinheiroDisplay';
+import { ItemMenu } from '../schema/menu.schema';
 import { customTheme } from '../theme/custom.theme';
+import { DinheiroDisplay } from './DinheiroDisplay';
+import { useItensValesActions } from '../context/ItensValeContext';
 
 interface MenuItemCardProps {
-  product: MenuProduct;
-  selected: boolean;
-  quantity: number;
-  onToggle: () => void;
-  onQuantityChange: (quantity: number) => void;
+  product: ItemMenu;
 }
 
-export const ItemCardapio = ({
-  product,
-  selected,
-  quantity,
-  onToggle,
-  onQuantityChange,
-}: MenuItemCardProps) => {
-  const theme = useTheme();
-  const styles = createStyles(theme, selected);
+export const ItemCardapio = memo(({ product }: MenuItemCardProps) => {
+  const [selecionado, setSelecionado] = useState(false);
+  const [qtd, setQtd] = useState(0);
+
+  const {
+    adicionarItem,
+    removerItem,
+    atualizarQuantidade,
+  } = useItensValesActions();
+
+  const selecionarItem = (acao: boolean) => {
+    setSelecionado(acao);
+
+    if (acao) {
+      setQtd(1);
+      adicionarItem({
+        data_adicao: new Date(),
+        descricao: product.descricao,
+        preco_unit: product.preco,
+        produto_ref: product.id,
+        id: Math.random().toString(),
+        quantidade: 1,
+      });
+    } else {
+      setQtd(0);
+      removerItem(product.id);
+    }
+  };
 
   return (
     <TouchableOpacity
-      activeOpacity={0.85}
-      onPress={onToggle}
-      style={styles.container}
+      style={[
+        styles.container,
+        { 
+          backgroundColor: selecionado ? customTheme["color-primary-900"] : customTheme["color-basic-800"], 
+          borderColor: selecionado ? customTheme['color-primary-300'] : customTheme['color-basic-600']
+        },
+      ]}
+      onPress={() => selecionarItem(!selecionado)}
     >
-      <View style={styles.checkbox}>
-        {selected && (
-          <Ionicons
-            name="checkmark"
-            size={14}
-            color={theme['color-primary-500']}
-          />
-        )}
-      </View>
+      <Text style={styles.info} category="s2">
+        {product.descricao}
+      </Text>
 
-      {/* Info */}
-      <View style={styles.info}>
-        <Text category="s1">{product.name}</Text>
-        <Text category="c1" appearance="hint">
-          {product.category}
-        </Text>
-      </View>
-
-      {/* Price + Controls */}
       <View style={styles.right}>
-        <DinheiroDisplay value={product.price} size="md" />
+        <DinheiroDisplay value={product.preco} size="sm" />
 
-        {selected && (
-          <View style={styles.quantityContainer}>
-            <Button
-              size="tiny"
-              appearance="ghost"
-              onPress={() =>
-                quantity > 1 && onQuantityChange(quantity - 1)
+        <View style={styles.quantityContainer}>
+          <Button
+            size="tiny"
+            appearance="ghost"
+            disabled={!selecionado}
+            onPress={() => {
+              if (qtd === 1) {
+                selecionarItem(false);
+              } else {
+                setQtd(q => q - 1);
+                atualizarQuantidade(product.id, -1);
               }
-              disabled={quantity <= 1}
-            >
-              <Ionicons name="remove" size={16} />
-            </Button>
+            }}
+          >
+            -
+          </Button>
 
-            <Text style={styles.quantityText}>{quantity}</Text>
+          <Text style={styles.quantityText}>{qtd}</Text>
 
-            <Button
-              size="tiny"
-              appearance="ghost"
-              onPress={() => onQuantityChange(quantity + 1)}
-            >
-              <Ionicons name="add" size={16} />
-            </Button>
-          </View>
-        )}
+          <Button
+            size="tiny"
+            appearance="ghost"
+            disabled={!selecionado}
+            onPress={() => {
+              setQtd(q => q + 1);
+              atualizarQuantidade(product.id, 1);
+            }}
+          >
+            +
+          </Button>
+        </View>
       </View>
     </TouchableOpacity>
   );
-};
+});
 
-const createStyles = (theme: any, selected: boolean) =>
-  StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-      padding: 16,
-      borderRadius: 16,
-      borderWidth: 1,
-      backgroundColor: selected
-        ? customTheme['color-primary-900']
-        : theme['color-basic-800'],
-      borderColor: selected
-        ? theme['color-primary-300']
-        : theme['color-basic-600'],
-    },
 
-    checkbox: {
-      width: 20,
-      height: 20,
-      borderRadius: 4,
-      borderWidth: 2,
-      borderColor: selected
-        ? theme['color-primary-500']
-        : theme['color-basic-600'],
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    backgroundColor: customTheme['color-basic-800'],
+    borderColor: customTheme['color-basic-600'],
+  },
 
-    info: {
-      flex: 1,
-      minWidth: 0,
-    },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: customTheme['color-basic-600'],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
-    right: {
-      alignItems: 'flex-end',
-      gap: 6,
-    },
+  info: {
+    flex: 1,
+    minWidth: 0,
+  },
 
-    quantityContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme['color-basic-700'],
-      borderRadius: 999,
-      paddingHorizontal: 4,
-    },
+  right: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
 
-    quantityText: {
-      width: 28,
-      textAlign: 'center',
-      fontWeight: '600',
-    },
-  }
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: customTheme['color-basic-700'],
+    borderRadius: 999,
+    paddingHorizontal: 4,
+  },
+
+  quantityText: {
+    width: 28,
+    textAlign: 'center',
+    fontWeight: '600',
+    color: 'white'
+  },
+}
 );

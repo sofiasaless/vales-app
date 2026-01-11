@@ -15,11 +15,17 @@ import { NavigationProp, useNavigation, useRoute } from '@react-navigation/nativ
 import { CardGradient } from '../components/CardGradient';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { ItemVale } from '../components/ItemVale';
+import { usePagamentos } from '../hooks/usePagamentos';
+import { useRestauranteId } from '../hooks/useRestaurante';
 import { mockEmployees } from '../mocks/mockData';
 import { RootStackParamList } from '../routes/StackRoutes';
 import { Funcionario } from '../schema/funcionario.schema';
 import { customTheme } from '../theme/custom.theme';
+import { alert } from '../util/alertfeedback.util';
 import { calcularTotalVales } from '../util/calculos.util';
+import { converterTimestamp } from '../util/formatadores.util';
+import { formatarDataVales } from '../util/datas.util';
+import { useEventoAlteracoesContext } from '../context/EventoAlteracaoContext';
 
 interface RouteParams {
   funcObj: Funcionario
@@ -31,10 +37,11 @@ export const ResumoPagamento = () => {
   const navigator = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const employee = mockEmployees[0];
   const paymentDetails = 932;
+
+  const totalParaPagar = (funcObj.salario - calcularTotalVales(funcObj.vales))
 
   if (!employee || !paymentDetails) {
     return (
@@ -55,29 +62,28 @@ export const ResumoPagamento = () => {
     );
   }
 
+  const { eventoNovaAdicaoVale } = useEventoAlteracoesContext()
+
+  const { data: res_ } = useRestauranteId()
+
+  const { isLoading, pagarFuncionario } = usePagamentos()
+
   const handleConfirmPayment = async () => {
-    setIsProcessing(true);
+    const res = await pagarFuncionario(funcObj.id, {
+      incentivo: [],
+      vales: formatarDataVales(funcObj.vales),
+      valor_pago: totalParaPagar,
+      restaurante_ref: res_?.uid || '',
+      salario_atual: funcObj.salario
+    })
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // const payment: Payment = {
-    //   id: `pay-${Date.now()}`,
-    //   employeeId: employee.id,
-    //   date: new Date(),
-    //   baseSalary: paymentDetails.baseSalary,
-    //   voucherTotal: paymentDetails.voucherTotal,
-    //   amountPaid: paymentDetails.amountPaid,
-    //   voucherItems: [...employee.currentVoucher],
-    // };
-
-    // dispatch({
-    //   type: 'CONFIRM_PAYMENT',
-    //   payload: { employeeId: employee.id, payment },
-    // });
-
-    setIsProcessing(false);
-    setShowConfirmModal(false);
-    // navigation.navigate('Home' as never);
+    if (res.ok) {
+      eventoNovaAdicaoVale()
+      navigator.navigate('Tabs')
+      setShowConfirmModal(false);
+    } else {
+      alert('Ocorreu um erro ao pagar o funcionário', res.message);
+    }
   };
 
   return (
@@ -119,7 +125,7 @@ export const ResumoPagamento = () => {
             variant="negative"
           />
 
-          <View style={{ maxHeight: 150, marginTop: 10 }}>
+          <View style={{ maxHeight: 180, marginTop: 10 }}>
             {
               funcObj?.vales?.length > 0 ? (
                 <FlatList
@@ -159,7 +165,7 @@ export const ResumoPagamento = () => {
           </View>
 
           <DinheiroDisplay
-            value={(funcObj.salario - calcularTotalVales(funcObj.vales))}
+            value={totalParaPagar}
             size="xl"
             variant="positive"
           />
@@ -199,12 +205,12 @@ export const ResumoPagamento = () => {
 
           <Text appearance="s1" style={styles.modalText}>
             Você está prestes a confirmar o pagamento de {employee.name}.
-            Certifique-se de coletar a assinatura do funcionário e compartilhar o comprovante de vales.
+            Certifique-se de coletar a assinatura do funcionário e compartilhar o comprovante de vales antes de confirmar.
           </Text>
 
           <View style={styles.modalAmount}>
             <DinheiroDisplay
-              value={(funcObj.salario - calcularTotalVales(funcObj.vales))}
+              value={totalParaPagar}
               size="xl"
               variant="positive"
             />
@@ -219,7 +225,7 @@ export const ResumoPagamento = () => {
           <View style={styles.modalActions}>
             <Button
               appearance="outline"
-              disabled={isProcessing}
+              disabled={isLoading}
               onPress={() => setShowConfirmModal(false)}
             >
               Cancelar
@@ -227,10 +233,10 @@ export const ResumoPagamento = () => {
 
             <Button
               status="success"
-              disabled={isProcessing}
+              disabled={isLoading}
               onPress={handleConfirmPayment}
             >
-              {isProcessing ? 'Processando...' : 'Confirmar'}
+              {isLoading ? 'Processando...' : 'Confirmar'}
             </Button>
           </View>
         </Card>

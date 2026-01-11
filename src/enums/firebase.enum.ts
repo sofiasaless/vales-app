@@ -1,4 +1,7 @@
 export enum COLLECTIONS {
   FUNCIONARIOS = "funcionarios",
-  RESTAURANTES = "restaurantes"
+  GERENTES = "gerentes",
+  PAGAMENTOS = "pagamentos",
+  MENU = "menu",
+  RESTAURENTES = "restaurantes"
 }

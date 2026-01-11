@@ -6,17 +6,18 @@ import {
   Layout,
   Text
 } from '@ui-kitten/components';
-import React, { ReactNode, useCallback, useEffect } from 'react';
+import React, { ReactNode, useCallback } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
 import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { AvatarIniciais } from '../components/AvatarIniciais';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
+import { FuncionarioFirestore } from '../firestore/funcionario.firestore';
 import { useFuncionarios } from '../hooks/useFuncionarios';
+import { RootStackParamList } from '../routes/StackRoutes';
 import { customTheme } from '../theme/custom.theme';
 import { converterParaIsoDate, formatCPF } from '../util/formatadores.util';
-import { RootStackParamList } from '../routes/StackRoutes';
-import { FuncionarioFirestore } from '../firestore/funcionario.firestore';
+import { BottomTabParamList } from '../routes/BottomRoutes';
 
 interface RouteParams {
   idFunc: string
@@ -26,6 +27,7 @@ export const DetalhesFuncionario = () => {
   const route = useRoute();
   const { idFunc } = route.params as RouteParams;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const navBottom = useNavigation<NavigationProp<BottomTabParamList>>();
 
   const InfoRow = ({
     icon,
@@ -62,7 +64,7 @@ export const DetalhesFuncionario = () => {
     try {
       const funcFir = new FuncionarioFirestore()
       await funcFir.excluir(idFunc)
-      navigation.navigate('Funcionario')
+      navBottom.navigate('Funcionarios')
     } catch (error) {
       console.error('erro ao excluir funcionário ', error)
     }

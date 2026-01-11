@@ -32,7 +32,7 @@ export const Funcionarios = () => {
 
   return (
     <Container>
-      <Header title="Funcionários" subtitle="3 cadastrados" />
+      <Header title="Funcionários" subtitle="Visão geral" />
       <ListaFuncionarios />
     </Container>
   )
