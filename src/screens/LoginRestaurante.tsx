@@ -1,10 +1,14 @@
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Button, Input, Text } from '@ui-kitten/components';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
 import { useLoginRestaurante } from '../hooks/useLoginRestaurante';
 import { RootStackParamList } from '../routes/StackRoutes';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.hideAsync()
 
 export const LoginRestaurante: React.FC = () => {
   const [email, setEmail] = useState('');
