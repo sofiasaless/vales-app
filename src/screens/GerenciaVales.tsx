@@ -174,10 +174,12 @@ export const GerenciaVales = () => {
             size="medium"
             // disabled={voucherTotal === 0}
             onPress={() =>
-              navigation.navigate('ResumoPagamento', { funcObj: {
-                ...funcionarioFoco!,
-                vales: vales!
-              } })
+              navigation.navigate('ResumoPagamento', {
+                funcObj: {
+                  ...funcionarioFoco!,
+                  vales: vales!
+                }
+              })
             }
             accessoryLeft={<Entypo name="credit-card" size={20} color="black" />}
           >
