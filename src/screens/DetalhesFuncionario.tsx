@@ -146,6 +146,16 @@ export const DetalhesFuncionario = () => {
                 value={<DinheiroDisplay value={funcionarioFoco?.salario || 0} />}
               />
 
+              {
+                funcionarioFoco?.tipo === 'DIARISTA' &&
+                <InfoRow
+                  
+                  icon={<Entypo name="wallet" size={22} color={customTheme['text-hint-color']} />}
+                  label={'Salário Base (Mensal)'}
+                  value={<DinheiroDisplay value={(funcionarioFoco?.salario * 3 * 4)} />}
+                />
+              }
+
               <InfoRow
                 icon={<Entypo name="calendar" size={22} color={customTheme['text-hint-color']} />}
                 label="Data de Admissão"

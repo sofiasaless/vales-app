@@ -10,6 +10,7 @@ export type Funcionario = {
   cpf?: string,
   cargo: string,
   tipo: TipoFuncionario,
+  dias_trabalhados_semanal?: number;
   foto_url?: string,
   data_nascimento?: Date,
   data_admissao: Date,

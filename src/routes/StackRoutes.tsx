@@ -1,20 +1,19 @@
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import { enableScreens } from 'react-native-screens';
+import { Funcionario } from '../schema/funcionario.schema';
 import { Assinatura } from '../screens/Assinatura';
+import Cardapio from '../screens/Cardapio';
+import { DetalhesFuncionario } from '../screens/DetalhesFuncionario';
+import { EditarFuncionario } from '../screens/EditarFuncionario';
+import { GerenciaCardapio } from '../screens/GerenciaCardapio';
 import { GerenciaVales } from '../screens/GerenciaVales';
+import { HistoricoPagamentos } from '../screens/HIstoricoPagamentos';
+import { LoginGerente } from '../screens/LoginGerente';
+import { LoginRestaurante } from '../screens/LoginRestaurante';
+import Mensalidades from '../screens/Mensalidades';
 import { ResumoPagamento } from '../screens/ResumoPagamento';
 import { customTheme } from '../theme/custom.theme';
 import { BottomTabsRoutes } from './BottomRoutes';
-import { DetalhesFuncionario } from '../screens/DetalhesFuncionario';
-import Mensalidades from '../screens/Mensalidades';
-import Cardapio from '../screens/Cardapio';
-import { GerenciaCardapio } from '../screens/GerenciaCardapio';
-import { Funcionario } from '../schema/funcionario.schema';
-import { EditarFuncionario } from '../screens/EditarFuncionario';
-import { Config } from '../screens/Config';
-import { LoginRestaurante } from '../screens/LoginRestaurante';
-import { LoginGerente } from '../screens/LoginGerente';
-import { HistoricoPagamentos } from '../screens/HIstoricoPagamentos';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -38,7 +37,12 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 enableScreens();
 
-export default function StackRoutes() {
+type Props = {
+  isAuthenticated: boolean;
+  hasGerente: boolean;
+};
+
+export default function StackRoutes({isAuthenticated, hasGerente}: Props) {
   return (
     <Stack.Navigator>
       {/* <Stack.Screen
@@ -47,7 +51,7 @@ export default function StackRoutes() {
         options={{ headerShown: false }}
       /> */}
 
-      <Stack.Screen
+      {/* <Stack.Screen
         name="LoginRestaurante"
         component={LoginRestaurante}
         options={{ headerShown: false }}
@@ -63,7 +67,15 @@ export default function StackRoutes() {
         name="Tabs"
         component={BottomTabsRoutes}
         options={{ headerShown: false }}
-      />
+      /> */}
+
+      {!isAuthenticated ? (
+        <Stack.Screen name="LoginRestaurante" component={LoginRestaurante} options={{ headerShown: false }} />
+      ) : !hasGerente ? (
+        <Stack.Screen name="LoginGerente" component={LoginGerente} options={{ headerShown: false }} />
+      ) : (
+        <Stack.Screen name="Tabs" component={BottomTabsRoutes} options={{ headerShown: false }} />
+      )}
 
       <Stack.Screen
         name="Vale"

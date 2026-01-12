@@ -9,23 +9,21 @@ import {
   Text
 } from '@ui-kitten/components';
 import React, { useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 
 import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { CardGradient } from '../components/CardGradient';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { ItemVale } from '../components/ItemVale';
+import { useEventoAlteracoesContext } from '../context/EventoAlteracaoContext';
 import { usePagamentos } from '../hooks/usePagamentos';
 import { useRestauranteId } from '../hooks/useRestaurante';
-import { mockEmployees } from '../mocks/mockData';
 import { RootStackParamList } from '../routes/StackRoutes';
 import { Funcionario } from '../schema/funcionario.schema';
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
 import { calcularTotalVales } from '../util/calculos.util';
-import { converterTimestamp } from '../util/formatadores.util';
 import { formatarDataVales } from '../util/datas.util';
-import { useEventoAlteracoesContext } from '../context/EventoAlteracaoContext';
 
 interface RouteParams {
   funcObj: Funcionario
@@ -38,29 +36,11 @@ export const ResumoPagamento = () => {
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const employee = mockEmployees[0];
-  const paymentDetails = 932;
-
-  const totalParaPagar = (funcObj.salario - calcularTotalVales(funcObj.vales))
-
-  if (!employee || !paymentDetails) {
-    return (
-      <Layout style={styles.centered}>
-        {/* <Icon
-          name="alert-circle-outline"
-          style={[styles.errorIcon, { tintColor: theme['color-danger-500'] }]}
-        /> */}
-        <Text category="h6">Erro ao carregar pagamento</Text>
-        <Button
-          appearance="outline"
-          style={styles.backButton}
-        // onPress={() => navigation.goBack()}
-        >
-          Voltar
-        </Button>
-      </Layout>
-    );
+  const salarioBase = () => {
+    return (funcObj.tipo === 'FIXO')?(funcObj.salario / 2):(funcObj.salario * 3)
   }
+
+  const totalParaPagar = (salarioBase() - calcularTotalVales(funcObj.vales));
 
   const { eventoNovaAdicaoVale } = useEventoAlteracoesContext()
 
@@ -88,109 +68,114 @@ export const ResumoPagamento = () => {
 
   return (
     <Layout style={styles.container}>
-      <Layout style={styles.content}>
-        <CardGradient colors_one='2' colors_two='1' styles={[styles.card, styles.basicCard]}>
-          <View style={styles.row}>
-            <View
-              style={[
-                styles.iconWrapper,
-                { backgroundColor: '#3ac28938' },
-              ]}
-            >
-              <AntDesign name="wallet" size={14} color={customTheme['color-primary-400']} />
+      <ScrollView>
+
+        <Layout style={styles.content}>
+          <CardGradient colors_one='2' colors_two='1' styles={[styles.card, styles.basicCard]}>
+            <View style={styles.row}>
+              <View
+                style={[
+                  styles.iconWrapper,
+                  { backgroundColor: '#3ac28938' },
+                ]}
+              >
+                <AntDesign name="wallet" size={14} color={customTheme['color-primary-400']} />
+              </View>
+              <View style={{flexDirection: 'row', alignItems: 'center', gap: 40}}>
+                <Text category="s1">{(funcObj.tipo === 'FIXO')?'Quinzena':'Diárias'}</Text>
+                <Text category='c2' appearance='hint'>(Base) R$ {salarioBase().toFixed(2)}</Text>
+              </View>
             </View>
-            <Text appearance="s1">Salário Base</Text>
-          </View>
+            <DinheiroDisplay size='lg' value={salarioBase()} />
+          </CardGradient>
 
-          <DinheiroDisplay size='lg' value={funcObj.salario} />
-        </CardGradient>
-
-        {/* Vale */}
-        <CardGradient colors_one='2' colors_two='1' styles={[styles.card, styles.dangerCard]}>
-          <View style={styles.row}>
-            <View
-              style={[
-                styles.iconWrapper,
-                { backgroundColor: '#ef6a5b3b' },
-              ]}
-            >
-              <MaterialCommunityIcons name="receipt-text-minus-outline" size={16} color={customTheme['color-danger-600']} />
+          {/* Vale */}
+          <CardGradient colors_one='2' colors_two='1' styles={[styles.card, styles.dangerCard]}>
+            <View style={styles.row}>
+              <View
+                style={[
+                  styles.iconWrapper,
+                  { backgroundColor: '#ef6a5b3b' },
+                ]}
+              >
+                <MaterialCommunityIcons name="receipt-text-minus-outline" size={16} color={customTheme['color-danger-600']} />
+              </View>
+              <Text category="s1">Total do Vale a Descontar</Text>
             </View>
-            <Text appearance="s1">Total do Vale a Descontar</Text>
-          </View>
 
-          <DinheiroDisplay
-            value={-calcularTotalVales(funcObj.vales)}
-            size="lg"
-            variant="negative"
-          />
+            <DinheiroDisplay
+              value={-calcularTotalVales(funcObj.vales)}
+              size="lg"
+              variant="negative"
+            />
 
-          <View style={{ maxHeight: 180, marginTop: 10 }}>
-            {
-              funcObj?.vales?.length > 0 ? (
-                <FlatList
-                  data={funcObj.vales}
-                  keyExtractor={(_, index) => index.toString()}
-                  renderItem={({ item }) => (
-                    <ItemVale key={item.id} item={item} showControls={false} dangerStyle/>
-                  )}
-                  nestedScrollEnabled
-                  showsVerticalScrollIndicator={false}
-                />
-              ) : (
-                <Card style={styles.emptyCard}>
-                  <Text appearance="hint" style={styles.emptyText}>
-                    Nenhum item no vale
-                  </Text>
-                </Card>
-              )
-            }
-          </View>
-        </CardGradient>
-
-        {/* Total a pagar */}
-        <Card style={styles.successCard}>
-          <View style={styles.row}>
-            <View
-              style={[
-                styles.iconWrapper,
-                { backgroundColor: '#6fe0cb2f' },
-              ]}
-            >
-              <MaterialIcons name="payments" size={16} color={customTheme['color-success-600']} />
+            <View style={{ maxHeight: 180, marginTop: 10 }}>
+              {
+                funcObj?.vales?.length > 0 ? (
+                  <FlatList
+                    data={funcObj.vales}
+                    keyExtractor={(_, index) => index.toString()}
+                    renderItem={({ item }) => (
+                      <ItemVale key={item.id} item={item} showControls={false} dangerStyle />
+                    )}
+                    nestedScrollEnabled
+                    showsVerticalScrollIndicator={false}
+                  />
+                ) : (
+                  <Card style={styles.emptyCard}>
+                    <Text appearance="hint" style={styles.emptyText}>
+                      Nenhum item no vale
+                    </Text>
+                  </Card>
+                )
+              }
             </View>
-            <Text status="success" category="s1">
-              Total a Pagar
-            </Text>
-          </View>
+          </CardGradient>
 
-          <DinheiroDisplay
-            value={totalParaPagar}
-            size="xl"
-            variant="positive"
-          />
-        </Card>
+          {/* Total a pagar */}
+          <Card style={styles.successCard}>
+            <View style={styles.row}>
+              <View
+                style={[
+                  styles.iconWrapper,
+                  { backgroundColor: '#6fe0cb2f' },
+                ]}
+              >
+                <MaterialIcons name="payments" size={16} color={customTheme['color-success-600']} />
+              </View>
+              <Text status="success" category="s1">
+                Total a Pagar
+              </Text>
+            </View>
 
-        {/* Confirmar */}
-        <Button
-          size="medium"
-          appearance='outline'
-          onPress={() => {
-            navigator.navigate('Assinatura');
-          }}
-          accessoryLeft={<AntDesign name="signature" size={18} color={customTheme['color-primary-400']} />}
-        >
-          Assinatura do funcinoário
-        </Button>
+            <DinheiroDisplay
+              value={totalParaPagar}
+              size="xl"
+              variant="positive"
+            />
+          </Card>
 
-        <Button
-          size="medium"
-          onPress={() => setShowConfirmModal(true)}
-          accessoryLeft={<MaterialIcons name="payment" size={18} color="black" />}
-        >
-          Confirmar pagamento
-        </Button>
-      </Layout>
+          {/* Confirmar */}
+          <Button
+            size="medium"
+            appearance='outline'
+            onPress={() => {
+              navigator.navigate('Assinatura');
+            }}
+            accessoryLeft={<AntDesign name="signature" size={18} color={customTheme['color-primary-400']} />}
+          >
+            Assinatura do funcinoário
+          </Button>
+
+          <Button
+            size="medium"
+            onPress={() => setShowConfirmModal(true)}
+            accessoryLeft={<MaterialIcons name="payment" size={18} color="black" />}
+          >
+            Confirmar pagamento
+          </Button>
+        </Layout>
+      </ScrollView>
 
       {/* Modal de confirmação */}
       <Modal
@@ -203,8 +188,8 @@ export const ResumoPagamento = () => {
             Confirmar Pagamento
           </Text>
 
-          <Text appearance="s1" style={styles.modalText}>
-            Você está prestes a confirmar o pagamento de {employee.name}.
+          <Text category="s2" style={styles.modalText}>
+            Você está prestes a confirmar o pagamento.
             Certifique-se de coletar a assinatura do funcionário e compartilhar o comprovante de vales antes de confirmar.
           </Text>
 
@@ -255,7 +240,8 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: 16,
-    borderRadius: 16
+    borderRadius: 16,
+    gap: 5
   },
   basicCard: {
     borderColor: customTheme['text-disabled-color'],
@@ -268,7 +254,7 @@ const styles = StyleSheet.create({
   },
   successCard: {
     backgroundColor: 'rgba(46, 184, 114, 0.12)',
-    borderColor: 'rgba(46, 184, 114, 0.3)',
+    borderColor: 'rgba(46, 184, 115, 0.46)',
     borderWidth: 1,
     borderRadius: 18,
   },

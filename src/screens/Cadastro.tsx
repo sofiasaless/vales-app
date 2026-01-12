@@ -16,6 +16,7 @@ const emptyFuncionario: FuncionarioPostRequestBody = {
   cargo: '',
   salario: 0,
   tipo: 'FIXO' as TipoFuncionario,
+  dias_trabalhados_semanal: 0,
   cpf: '',
   data_admissao: new Date(),
   primeiro_dia_pagamento: 0,
@@ -103,6 +104,12 @@ export const Cadastro = () => {
 
     if (formData.nome === '') newErrors.nome = 'Nome é obrigatório';
     if (formData.cargo === '') newErrors.cargo = 'Cargo é obrigatório';
+
+    if (formData.tipo === 'DIARISTA') {
+      if (formData.dias_trabalhados_semanal! <= 0) {
+        newErrors.dias_trabalhados_semanal = 'Obrigatório';
+      }
+    }
 
     if (!formData.salario) {
       newErrors.salario = 'Salário é obrigatório';
@@ -197,23 +204,37 @@ export const Cadastro = () => {
               </View>
 
               {/* Salário */}
-              <Input
-                size="small"
-                label={
-                  formData.tipo === 'DIARISTA'
-                    ? 'Valor da Diária *'
-                    : 'Salário Base *'
-                }
-                placeholder="0,00"
-                keyboardType="numeric"
-                value={formData.salario.toString()}
-                onChangeText={handleSalaryChange}
-                status={errors.salario ? 'danger' : 'basic'}
-                caption={errors.salario}
-                accessoryLeft={() => (
-                  <Text style={{ marginHorizontal: 8 }}>R$</Text>
-                )}
-              />
+              <View style={{flexDirection: 'row', justifyContent: 'space-between', gap: 10}}>
+                <Input
+                  style={{flex: 1}}
+                  size="small"
+                  label={
+                    formData.tipo === 'DIARISTA'
+                      ? 'Valor da Diária *'
+                      : 'Salário Base *'
+                  }
+                  placeholder="0,00"
+                  keyboardType="numeric"
+                  value={formData.salario.toString()}
+                  onChangeText={handleSalaryChange}
+                  status={errors.salario ? 'danger' : 'basic'}
+                  caption={errors.salario}
+                  accessoryLeft={() => (
+                    <Text style={{ marginHorizontal: 8 }}>R$</Text>
+                  )}
+                />
+
+                <Input
+                  size="small"
+                  label={"Dias de trabalho p/ semana *"}
+                  placeholder="0"
+                  keyboardType="numeric"
+                  value={formData.dias_trabalhados_semanal?.toString() || ''}
+                  onChangeText={(v) => handleChange('dias_trabalhados_semanal', Number(v))}
+                  status={errors.dias_trabalhados_semanal ? 'danger' : 'basic'}
+                  caption={errors.dias_trabalhados_semanal}
+                />
+              </View>
 
               {/* CPF */}
               <Input

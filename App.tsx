@@ -1,17 +1,23 @@
 import * as eva from '@eva-design/eva';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ApplicationProvider } from '@ui-kitten/components';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from "expo-status-bar";
 import * as Updates from 'expo-updates';
 import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, View } from 'react-native';
+import { enableScreens } from 'react-native-screens';
+import { EventoAlteracoesProvider } from './src/context/EventoAlteracaoContext';
+import { ItenValesProvider } from './src/context/ItensValeContext';
 import { usePushNotifications } from './src/hooks/usePushNotifications';
 import Routes from './src/routes';
 import './src/services/pushNotification';
 import { customMapping, customTheme } from "./src/theme/custom.theme";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ItenValesProvider } from './src/context/ItensValeContext';
-import { EventoAlteracoesProvider } from './src/context/EventoAlteracaoContext';
+import * as SplashScreen from 'expo-splash-screen';
+import { AuthProvider } from './src/context/AuthContext';
+
+SplashScreen.hideAsync()
+enableScreens();
 
 const queryClient = new QueryClient();
 
@@ -76,7 +82,9 @@ export default function App() {
       <ItenValesProvider>
         <EventoAlteracoesProvider>
           <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
-            <Routes />
+            <AuthProvider>
+              <Routes />
+            </AuthProvider>
             <StatusBar style="light" />
           </ApplicationProvider>
         </EventoAlteracoesProvider>
