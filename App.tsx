@@ -14,6 +14,7 @@ import Routes from './src/routes';
 import './src/services/pushNotification';
 import { customMapping, customTheme } from "./src/theme/custom.theme";
 import * as SplashScreen from 'expo-splash-screen';
+import { AuthProvider } from './src/context/AuthContext';
 
 SplashScreen.hideAsync()
 enableScreens();
@@ -81,7 +82,9 @@ export default function App() {
       <ItenValesProvider>
         <EventoAlteracoesProvider>
           <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
-            <Routes />
+            <AuthProvider>
+              <Routes />
+            </AuthProvider>
             <StatusBar style="light" />
           </ApplicationProvider>
         </EventoAlteracoesProvider>

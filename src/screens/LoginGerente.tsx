@@ -14,6 +14,7 @@ import { CardGradient } from '../components/CardGradient';
 import { useLoginGerente } from '../hooks/useLoginGerente';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
 import { RootStackParamList } from '../routes/StackRoutes';
+import { useGerenteConectado } from '../hooks/useGerente';
 
 export const LoginGerente: React.FC = () => {
 
@@ -41,19 +42,21 @@ export const LoginGerente: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const { refetch } = useGerenteConectado()
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
     const restauranteId = await AsyncStorage.getItem('uid')
     if (restauranteId && gerentes) {
       const res = await entrarComGerente(restauranteId, gerentes.at(selectedIndex)?.id || '', password)
-      if (res.ok) {
-        navigator.navigate('Tabs')
-        return
+      if (!res.ok) {
+        const newErrors: { manager?: string; password?: string } = {};
+        newErrors.password = res.message
+        setErrors(newErrors);
+      } else {
+        refetch()
       }
-      const newErrors: { manager?: string; password?: string } = {};
-      newErrors.password = res.message
-      setErrors(newErrors);
     }
 
   };

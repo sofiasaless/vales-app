@@ -7,6 +7,7 @@ import { useLoginRestaurante } from '../hooks/useLoginRestaurante';
 import { RootStackParamList } from '../routes/StackRoutes';
 
 import * as SplashScreen from 'expo-splash-screen';
+import { useGerenteConectado } from '../hooks/useGerente';
 
 SplashScreen.hideAsync()
 
@@ -38,11 +39,13 @@ export const LoginRestaurante: React.FC = () => {
 
   const { entrarComRestaurante, isLoading: carregandoLogin } = useLoginRestaurante()
 
+  const { refetch } = useGerenteConectado()
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
     
     if ((await entrarComRestaurante(email, password)).ok) {
-      navigator.navigate('LoginGerente')
+      refetch()
     }
 
   };

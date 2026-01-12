@@ -10,7 +10,8 @@ export function useGerenteConectado() {
       if (string_res) {
         const res = JSON.parse(string_res) as Gerente
         return res
-      }    
+      }
+      return null
     },
     refetchOnReconnect: true,
     refetchInterval: 30 * 60 * 1000
