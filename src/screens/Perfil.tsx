@@ -120,7 +120,7 @@ export const Perfil = () => {
           <MenuItem
             icon={<MaterialCommunityIcons name="finance" size={20} color={iconColor} />}
             label="Finanças"
-            onPress={() => { }}
+            onPress={() => navigation.navigate('Financas', { idRest: rest_conectado?.id! })}
           />
           <View style={styles.divider} />
           <MenuItem
@@ -160,9 +160,6 @@ export const Perfil = () => {
         <View style={styles.footer}>
           <Text appearance="hint" category="c1">
             Vale Restaurante v1.0.0
-          </Text>
-          <Text appearance="hint" category="c1" style={styles.footerText}>
-            Feito com ❤️ para gerentes
           </Text>
         </View>
       </View>
