@@ -1,7 +1,11 @@
+import Entypo from '@expo/vector-icons/Entypo';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
   Button,
+  ButtonGroup,
+  Divider,
   Input,
   Layout,
   Spinner,
@@ -16,16 +20,17 @@ import {
   View,
 } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
+import { DatePicker } from '../components/DatePicker';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
+import { useTotalDespesasContext } from '../context/TotalDespesasContext';
 import { categoriaFinancas } from '../firestore/categoriaFinanca.firestore';
 import { useListarCategorias } from '../hooks/useCategoriaFinancas';
-import { useListarDespesasDoMes } from '../hooks/useDespesaFinancas';
 import { colorMap, iconMap } from '../maps/financas.map';
 import { RootStackParamList } from '../routes/StackRoutes';
 import { CategoriaPostRequestBodyFinancas } from '../schema/financa.schema';
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
-import { useTotalDespesasContext } from '../context/TotalDespesasContext';
+import { converterParaDate } from '../util/datas.util';
 
 export default function Financas() {
   const route = useRoute();
@@ -41,7 +46,7 @@ export default function Financas() {
     cor: 'blue' as keyof typeof colorMap
   });
 
-  const { totalDespesas } = useTotalDespesasContext()
+  const { totalDespesas, filtrarPorDatas, resetarDatas } = useTotalDespesasContext()
 
   const totalGeral = useMemo(() => {
     return totalDespesas?.reduce((acumulador, despesa) => {
@@ -65,6 +70,21 @@ export default function Financas() {
     }
   };
 
+  const [dataInicio, setDataInicio] = useState(new Date(new Date().setDate(1)))
+  const settingInicio = (tipo: 'DATA' | 'HORA', dado?: string) => {
+    if (tipo === 'DATA' && dado != undefined) setDataInicio(converterParaDate(dado))
+  }
+  const [dataFim, setDataFim] = useState(new Date())
+  const settingFim = (tipo: 'DATA' | 'HORA', dado?: string) => {
+    if (tipo === 'DATA' && dado != undefined) setDataFim(converterParaDate(dado))
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      resetarDatas()
+    }, [])
+  )
+
   return (
     <Layout style={styles.container}>
       <CardGradient styles={styles.totalCard}>
@@ -72,15 +92,46 @@ export default function Financas() {
         <DinheiroDisplay size='lg' variant='negative' value={totalGeral || 0} />
       </CardGradient>
 
-      {/* BOTÃO */}
-      <Button
-        appearance="outline"
-        style={styles.addButton}
-        onPress={() => setModalOpen(true)}
-        accessoryLeft={<Feather name="plus" size={18} color={customTheme['color-primary-500']} />}
-      >
-        Registrar Categoria
-      </Button>
+      <View style={styles.grupoBotoes}>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <DatePicker status='warning' setarData={settingInicio} tamanBtn='small' tipo='date' dataPreEstabelecida={dataInicio} />
+          <Text style={{ textAlign: 'center', alignSelf: 'center', fontSize: 12 }} category='s1'>até</Text>
+          <DatePicker status='warning' setarData={settingFim} tamanBtn='small' tipo='date' dataPreEstabelecida={dataFim} />
+        </View>
+
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Button
+            size='small'
+            status='warning'
+            appearance='outline'
+            accessoryRight={<AntDesign name="reload" size={16} color={customTheme['color-warning-500']} />}
+            onPress={() => {
+              setDataFim(new Date())
+              setDataInicio(new Date(new Date().setDate(1)))
+            }}
+          >
+            Resetar datas
+          </Button>
+
+          <Button
+            size='small'
+            status='warning'
+            appearance='outline'
+            accessoryRight={<AntDesign name="aim" size={16} color={customTheme['color-warning-500']} />}
+            onPress={() => {
+              filtrarPorDatas({ dataFim, dataInicio })
+            }}
+          >
+            Filtrar
+          </Button>
+
+        </View>
+        <Button appearance='outline' status='info'
+          accessoryRight={<Entypo name="share" size={20} color={customTheme['color-info-500']} />}
+        >Compartilhar relatório</Button>
+      </View>
+
+      <Divider style={{ marginBlock: 10, padding: 3, borderRadius: 10 }} />
 
       {
         (isLoading) ?
@@ -117,7 +168,15 @@ export default function Financas() {
           />
       }
 
-      {/* MODAL */}
+      <Button
+        appearance="outline"
+        style={styles.addButton}
+        onPress={() => setModalOpen(true)}
+        accessoryLeft={<Feather name="plus" size={18} color={customTheme['color-primary-500']} />}
+      >
+        Registrar Categoria
+      </Button>
+
       <Modal visible={modalOpen} transparent animationType="slide">
         <View style={styles.modalBackdrop}>
           <CardGradient colors_one='4' colors_two='2' styles={styles.modalContent}>
@@ -174,6 +233,7 @@ export default function Financas() {
             </Button>
 
             <Button
+              status='danger'
               appearance="ghost"
               onPress={() => setModalOpen(false)}
             >
@@ -276,5 +336,10 @@ const styles = StyleSheet.create({
 
   modalButton: {
     marginTop: 8,
+  },
+
+  grupoBotoes: {
+    alignItems: 'center',
+    gap: 10
   },
 });

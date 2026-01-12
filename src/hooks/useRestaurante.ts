@@ -21,7 +21,7 @@ export function useRestauranteConectado() {
 export function useRestauranteId() {
   return useQuery({
     queryKey: ["restaurante_id"],
-    queryFn: async () => {
+    queryFn: () => {
       const restServ = new RestauranteSerivce()
       return restServ.getRestauranteLogado()
     }

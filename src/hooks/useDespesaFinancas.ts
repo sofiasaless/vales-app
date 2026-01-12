@@ -18,7 +18,11 @@ export function useListarDespesas(idCategoria: string, filtro: DateFilterProps) 
 
 export function useListarDespesasDoMes(idRestaurante: string, filtro: DateFilterProps) {
   return useQuery({
-    queryKey: ['despesas_mes'],
+    queryKey: [
+      'despesas_mes',
+      filtro.dataFim,
+      filtro.dataInicio
+    ],
     queryFn: async () => {
       const res = despesaFirestore.listarDeTodasCategorias(idRestaurante, filtro);
       return res;

@@ -145,7 +145,7 @@ export default function StackRoutes({isAuthenticated, hasGerente}: Props) {
       <Stack.Screen
         name="FinancasDetalhes"
         component={FinancasDetalhe}
-        options={optionsHeader('Despesas dessa categoria')}
+        options={optionsHeader('Despesas por categoria')}
       />
     </Stack.Navigator>
   );

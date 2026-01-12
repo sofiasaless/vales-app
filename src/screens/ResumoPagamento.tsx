@@ -37,7 +37,12 @@ export const ResumoPagamento = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const salarioBase = () => {
-    return (funcObj.tipo === 'FIXO')?(funcObj.salario / 2):(funcObj.salario * 3)
+    return (funcObj.tipo === 'FIXO')?(funcObj.salario / 2):(funcObj.salario * (funcObj.dias_trabalhados_semanal || 1))
+  }
+
+  const getBaseSalario = () => {
+    let txt = (funcObj.tipo === 'FIXO')?`(Salário Base) R$ `:`(Diária Base) R$ `
+    return txt += funcObj.salario.toFixed(2)
   }
 
   const totalParaPagar = (salarioBase() - calcularTotalVales(funcObj.vales));
@@ -81,9 +86,9 @@ export const ResumoPagamento = () => {
               >
                 <AntDesign name="wallet" size={14} color={customTheme['color-primary-400']} />
               </View>
-              <View style={{flexDirection: 'row', alignItems: 'center', gap: 40}}>
+              <View style={{flexDirection: 'row', alignItems: 'center', gap: 30}}>
                 <Text category="s1">{(funcObj.tipo === 'FIXO')?'Quinzena':'Diárias'}</Text>
-                <Text category='c2' appearance='hint'>(Base) R$ {salarioBase().toFixed(2)}</Text>
+                <Text category='c2' appearance='hint'>{getBaseSalario()}</Text>
               </View>
             </View>
             <DinheiroDisplay size='lg' value={salarioBase()} />

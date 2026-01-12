@@ -1,7 +1,10 @@
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Entypo from '@expo/vector-icons/Entypo';
 import Feather from '@expo/vector-icons/Feather';
 import { useRoute } from '@react-navigation/native';
 import {
   Button,
+  ButtonGroup,
   Card,
   Input,
   Layout,
@@ -17,6 +20,7 @@ import {
 } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
+import { useTotalDespesasContext } from '../context/TotalDespesasContext';
 import { despesaFirestore } from '../firestore/despesa.firestore';
 import { useListarDespesas } from '../hooks/useDespesaFinancas';
 import { colorMap, iconMap } from '../maps/financas.map';
@@ -24,7 +28,8 @@ import { CategoriaFinancas, DespesaPostRequestBody } from '../schema/financa.sch
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
 import { converterParaIsoDate, formatCurrency } from '../util/formatadores.util';
-import { useTotalDespesasContext } from '../context/TotalDespesasContext';
+import { DatePicker } from '../components/DatePicker';
+import { converterParaDate } from '../util/datas.util';
 
 export default function FinancasDetalhe() {
   const route = useRoute<any>();
@@ -38,7 +43,17 @@ export default function FinancasDetalhe() {
   const [valor, setValor] = useState('')
 
   const [dataInicio, setDataInicio] = useState(new Date(new Date().setDate(1)))
+  const settingInicio = (tipo: 'DATA' | 'HORA', dado?: string) => {
+    if (tipo === 'DATA' && dado != undefined) {
+      setDataInicio(converterParaDate(dado))
+    }
+  }
   const [dataFim, setDataFim] = useState(new Date())
+  const settingFim = (tipo: 'DATA' | 'HORA', dado?: string) => {
+    if (tipo === 'DATA' && dado != undefined) {
+      setDataFim(converterParaDate(dado))
+    }
+  }
 
   const { data: despesas, isLoading, refetch } = useListarDespesas(categoriaObj.id, { dataFim, dataInicio })
 
@@ -145,6 +160,33 @@ export default function FinancasDetalhe() {
           />
       }
 
+      <View style={styles.grupoBotoes}>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <DatePicker status='warning' setarData={settingInicio} tamanBtn='small' tipo='date' dataPreEstabelecida={dataInicio} />
+          <Text style={{ textAlign: 'center', alignSelf: 'center', fontSize: 12 }} category='s1'>até</Text>
+          <DatePicker status='warning' setarData={settingFim} tamanBtn='small' tipo='date' dataPreEstabelecida={dataFim} />
+        </View>
+
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <Button
+            size='small'
+            status='warning'
+            appearance='outline'
+            accessoryRight={<AntDesign name="reload" size={16} color={customTheme['color-warning-500']} />}
+            onPress={() => {
+              setDataFim(new Date())
+              setDataInicio(new Date(new Date().setDate(1)))
+            }}
+          >
+            Resetar datas
+          </Button>
+
+          <Button size='small' appearance='outline' status='info'
+            accessoryRight={<Entypo name="share" size={20} color={customTheme['color-info-500']} />}
+          >Compartilhar relatório</Button>
+        </View>
+      </View>
+
       <Modal
         visible={modalOpen}
         backdropStyle={styles.backdrop}
@@ -187,7 +229,7 @@ export default function FinancasDetalhe() {
           </View>
         </Card>
       </Modal>
-    </Layout>
+    </Layout >
   );
 }
 
@@ -195,13 +237,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-  },
-
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 16,
   },
 
   summary: {
@@ -230,7 +265,6 @@ const styles = StyleSheet.create({
 
   list: {
     gap: 8,
-    paddingBottom: 120,
   },
 
   expenseCard: {
@@ -265,4 +299,10 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 16,
   },
+
+  grupoBotoes: {
+    paddingBlock: 15,
+    alignItems: 'center',
+    gap: 15
+  }
 });
