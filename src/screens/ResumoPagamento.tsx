@@ -24,6 +24,7 @@ import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
 import { calcularTotalVales } from '../util/calculos.util';
 import { formatarDataVales } from '../util/datas.util';
+import { useVales } from '../hooks/useVales';
 
 interface RouteParams {
   funcObj: Funcionario
@@ -37,21 +38,21 @@ export const ResumoPagamento = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const salarioBase = () => {
-    return (funcObj.tipo === 'FIXO')?(funcObj.salario / 2):(funcObj.salario * (funcObj.dias_trabalhados_semanal || 1))
+    return (funcObj.tipo === 'FIXO') ? (funcObj.salario / 2) : (funcObj.salario * (funcObj.dias_trabalhados_semanal || 1))
   }
 
   const getBaseSalario = () => {
-    let txt = (funcObj.tipo === 'FIXO')?`(Salário Base) R$ `:`(Diária Base) R$ `
+    let txt = (funcObj.tipo === 'FIXO') ? `(Salário Base) R$ ` : `(Diária Base) R$ `
     return txt += funcObj.salario.toFixed(2)
   }
 
   const totalParaPagar = (salarioBase() - calcularTotalVales(funcObj.vales));
 
-  const { eventoNovaAdicaoVale } = useEventoAlteracoesContext()
-
   const { data: res_ } = useRestauranteId()
 
   const { isLoading, pagarFuncionario } = usePagamentos()
+
+  const { adicionarVale } = useVales()
 
   const handleConfirmPayment = async () => {
     const res = await pagarFuncionario(funcObj.id, {
@@ -63,7 +64,16 @@ export const ResumoPagamento = () => {
     })
 
     if (res.ok) {
-      eventoNovaAdicaoVale()
+      // verificar se o pagamento foi negativo e se for adicionar como novo vale
+      if (totalParaPagar < 0) {
+        await adicionarVale(funcObj.id, {
+          id: Math.random().toString(),
+          descricao: 'Negativo última quinzena',
+          data_adicao: new Date(),
+          preco_unit: totalParaPagar * -1,
+          quantidade: 1
+        })
+      }
       navigator.navigate('Tabs')
       setShowConfirmModal(false);
     } else {
@@ -86,8 +96,8 @@ export const ResumoPagamento = () => {
               >
                 <AntDesign name="wallet" size={14} color={customTheme['color-primary-400']} />
               </View>
-              <View style={{flexDirection: 'row', alignItems: 'center', gap: 30}}>
-                <Text category="s1">{(funcObj.tipo === 'FIXO')?'Quinzena':'Diárias'}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 30 }}>
+                <Text category="s1">{(funcObj.tipo === 'FIXO') ? 'Quinzena' : 'Diárias'}</Text>
                 <Text category='c2' appearance='hint'>{getBaseSalario()}</Text>
               </View>
             </View>
@@ -156,7 +166,7 @@ export const ResumoPagamento = () => {
             <DinheiroDisplay
               value={totalParaPagar}
               size="xl"
-              variant="positive"
+              variant={(totalParaPagar >= 0) ? "positive" : "negative"}
             />
           </Card>
 

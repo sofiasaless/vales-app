@@ -53,17 +53,15 @@ export class FuncionarioFirestore extends PatternFirestore {
     } as Funcionario
   }
 
-  public async adicionarVale(id: string, body: Vale) {
+  public async adicionarVale(idFuncionario: string, body: Vale) {
     let valeToSave: ValeFirestorePostRequestBody = {
       ...body,
       produto_ref: null
     }
 
-    if (body.produto_ref) {
-      valeToSave.produto_ref = this.menuFirestore.getRef(body.produto_ref)
-    }
+    if (body.produto_ref) valeToSave.produto_ref = this.menuFirestore.getRef(body.produto_ref);
     
-    await updateDoc(doc(this.setup(), id), {
+    await updateDoc(doc(this.setup(), idFuncionario), {
       vales: arrayUnion(valeToSave)
     })
   }

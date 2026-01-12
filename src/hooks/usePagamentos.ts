@@ -10,7 +10,7 @@ export function usePagamentos() {
   const pagarFuncionario = async (idFunc: string, body: PagamentoPostRequestBody) => {
     try {
       setIsLoading(true)
-      pagamentoFirestore.criar(idFunc, body);
+      await pagamentoFirestore.criar(idFunc, body);
       return successHookResponse()
     } catch (error) {
       return errorHookResponse(error)
