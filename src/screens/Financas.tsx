@@ -31,6 +31,8 @@ import { CategoriaPostRequestBodyFinancas } from '../schema/financa.schema';
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
 import { converterParaDate } from '../util/datas.util';
+import { gerarRelatorioDespesas } from '../util/relatorios.util';
+import { useRestauranteConectado } from '../hooks/useRestaurante';
 
 export default function Financas() {
   const route = useRoute();
@@ -47,6 +49,8 @@ export default function Financas() {
   });
 
   const { totalDespesas, filtrarPorDatas, resetarDatas } = useTotalDespesasContext()
+
+  const { data: restaurante } = useRestauranteConectado()
 
   const totalGeral = useMemo(() => {
     return totalDespesas?.reduce((acumulador, despesa) => {
@@ -128,6 +132,7 @@ export default function Financas() {
         </View>
         <Button appearance='outline' status='info'
           accessoryRight={<Entypo name="share" size={20} color={customTheme['color-info-500']} />}
+          onPress={async () => gerarRelatorioDespesas(totalDespesas || [], restaurante!, {dataFim, dataInicio})}
         >Compartilhar relatório</Button>
       </View>
 

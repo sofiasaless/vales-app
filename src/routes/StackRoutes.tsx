@@ -24,10 +24,10 @@ export type RootStackParamList = {
   Funcionario: undefined;
   Cadastro: undefined;
   ResumoPagamento: { funcObj: Funcionario };
-  Assinatura: undefined;
+  Assinatura: { funcObj: Funcionario };
   GerenciaCardapio: undefined;
   Detalhes: { idFunc: string };
-  Historico: { idFunc: string };
+  Historico: { funcObj: Funcionario };
   Mensalidades: undefined;
   Cardapio: { idFunc: string };
   EditarFuncionario: { funcObj: Funcionario };

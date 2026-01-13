@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PagamentoPostRequestBody } from "../schema/pagamento.schema";
+import { Pagamento, PagamentoPostRequestBody } from "../schema/pagamento.schema";
 import { errorHookResponse, successHookResponse } from "../types/hookResponse.type";
 import { pagamentoFirestore } from "../firestore/pagamento.firestore";
 import { useQuery } from "@tanstack/react-query";

@@ -207,7 +207,7 @@ export const GerenciaVales = () => {
               style={styles.actionButton}
               accessoryLeft={<MaterialCommunityIcons name="history" size={16} color={customTheme['text-basic-color']} />}
               onPress={() =>
-                navigation.navigate('Historico', { idFunc })
+                navigation.navigate('Historico', { funcObj: funcionarioFoco! })
               }
             >
               Histórico

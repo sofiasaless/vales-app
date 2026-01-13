@@ -15,11 +15,13 @@ import { Pagamento } from '../schema/pagamento.schema';
 import { customTheme } from '../theme/custom.theme';
 import { calcularTotalVales } from '../util/calculos.util';
 import { converterParaDate } from '../util/datas.util';
-import { converterParaIsoDate } from '../util/formatadores.util';
+import { converterParaIsoDate, converterTimestamp } from '../util/formatadores.util';
+import { gerarRelatorioVales } from '../util/relatorios.util';
+import { Funcionario } from '../schema/funcionario.schema';
 
 export const HistoricoPagamentos = () => {
   const route = useRoute<any>();
-  const { idFunc } = route.params as { idFunc: string };
+  const { funcObj } = route.params as { funcObj: Funcionario };
 
   const [expandedPayment, setExpandedPayment] = useState<string | null>(null);
 
@@ -134,13 +136,26 @@ export const HistoricoPagamentos = () => {
                 ))}
               </View>
             </View>
+
+            <View style={{gap: 8}}>
+              <Button style={{ display: (historicoPagamento.assinatura)?'flex':'none' }}
+                status='info'
+                onPress={async () => gerarRelatorioVales(funcObj, historicoPagamento, converterTimestamp(historicoPagamento.data_pagamento))}
+                accessoryRight={<Entypo name="share" size={20} color={'black'} />}
+              >Ver relatório com assinatura</Button>
+
+              <Button appearance='outline' status='info'
+                onPress={async () => gerarRelatorioVales(funcObj, historicoPagamento, converterTimestamp(historicoPagamento.data_pagamento))}
+                accessoryRight={<Entypo name="share" size={20} color={customTheme['color-info-500']} />}
+              >Relatório para assinar</Button>
+            </View>
           </View>
         )}
       </Card>
     )
   }
 
-  const { data: historico, isLoading } = useHistoricoPagamentos(idFunc, { dataFim, dataInicio })
+  const { data: historico, isLoading } = useHistoricoPagamentos(funcObj.id, { dataFim, dataInicio })
 
   return (
     <Layout style={styles.container}>
@@ -173,7 +188,7 @@ export const HistoricoPagamentos = () => {
             <FlatList
               data={historico}
               keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.content}
+              contentContainerStyle={styles.contentList}
               renderItem={({ item }) => (
                 <ItemHistorico historicoPagamento={item} />
               )}
@@ -203,11 +218,15 @@ export const HistoricoPagamentos = () => {
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom: 24,
+    paddingBottom: 110,
   },
 
   content: {
     padding: 16,
+    gap: 12,
+  },
+
+  contentList: {
     gap: 12,
   },
 
@@ -229,7 +248,6 @@ export const styles = StyleSheet.create({
   },
 
   cardHeader: {
-    // padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

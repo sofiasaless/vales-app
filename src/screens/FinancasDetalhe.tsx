@@ -30,6 +30,8 @@ import { alert } from '../util/alertfeedback.util';
 import { converterParaIsoDate, formatCurrency } from '../util/formatadores.util';
 import { DatePicker } from '../components/DatePicker';
 import { converterParaDate } from '../util/datas.util';
+import { useRestauranteConectado } from '../hooks/useRestaurante';
+import { gerarRelatorioDespesas } from '../util/relatorios.util';
 
 export default function FinancasDetalhe() {
   const route = useRoute<any>();
@@ -54,6 +56,8 @@ export default function FinancasDetalhe() {
       setDataFim(converterParaDate(dado))
     }
   }
+
+  const { data: restaurante } = useRestauranteConectado()
 
   const { data: despesas, isLoading, refetch } = useListarDespesas(categoriaObj.id, { dataFim, dataInicio })
 
@@ -182,7 +186,8 @@ export default function FinancasDetalhe() {
           </Button>
 
           <Button size='small' appearance='outline' status='info'
-            accessoryRight={<Entypo name="share" size={20} color={customTheme['color-info-500']} />}
+            accessoryRight={<Entypo name="share" size={16} color={customTheme['color-info-500']} />}
+            onPress={async () => gerarRelatorioDespesas(despesas || [], restaurante!, {dataFim, dataInicio}, categoriaObj.descricao)}
           >Compartilhar relatório</Button>
         </View>
       </View>

@@ -75,6 +75,7 @@ export class DespesaFirestore extends PatternFirestore {
           despesas.push({
             id: d.id,
             ...(d.data() as Omit<Despesa, "id">),
+            categoria_ref: d.data().categoria_ref?.id
           })
         })
       })

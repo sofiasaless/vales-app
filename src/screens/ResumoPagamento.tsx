@@ -173,21 +173,21 @@ export const ResumoPagamento = () => {
           {/* Confirmar */}
           <Button
             size="medium"
-            appearance='outline'
             onPress={() => {
-              navigator.navigate('Assinatura');
+              navigator.navigate('Assinatura', { funcObj });
             }}
-            accessoryLeft={<AntDesign name="signature" size={18} color={customTheme['color-primary-400']} />}
+            accessoryLeft={<AntDesign name="signature" size={18} color={'black'} />}
           >
-            Assinatura do funcinoário
+            Coletar Assinatura
           </Button>
 
           <Button
             size="medium"
+            appearance='outline'
             onPress={() => setShowConfirmModal(true)}
-            accessoryLeft={<MaterialIcons name="payment" size={18} color="black" />}
+            accessoryLeft={<MaterialIcons name="payment" size={18} color={customTheme['color-primary-400']} />}
           >
-            Confirmar pagamento
+            Confirmar pagamento (sem assinatura)
           </Button>
         </Layout>
       </ScrollView>
@@ -204,8 +204,7 @@ export const ResumoPagamento = () => {
           </Text>
 
           <Text category="s2" style={styles.modalText}>
-            Você está prestes a confirmar o pagamento.
-            Certifique-se de coletar a assinatura do funcionário e compartilhar o comprovante de vales antes de confirmar.
+            Você está prestes a confirmar o pagamento SEM COLETAR A ASSINATURA. Apenas o relatório comum estará disponível para compartilhar.
           </Text>
 
           <View style={styles.modalAmount}>

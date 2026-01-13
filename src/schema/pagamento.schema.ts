@@ -10,6 +10,7 @@ export type Pagamento = {
   salario_atual: number,
   vales: Vale[],
   incentivo: Incentivo[],
+  assinatura?: string,
   data_pagamento: Date
 }
 
