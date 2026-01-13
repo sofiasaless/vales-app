@@ -104,8 +104,7 @@ export const GerenciaVales = () => {
         <ScrollView nestedScrollEnabled contentContainerStyle={styles.content}>
           <Layout level='1' style={styles.card}>
             <View style={styles.employeeHeader}>
-              {/* <Avatar size='giant' source={{ uri: 'https://static.vecteezy.com/ti/vetor-gratis/p1/7319933-black-avatar-person-icons-user-profile-icon-vetor.jpg' }} /> */}
-              <AvatarIniciais name={funcionarioFoco?.nome || ''} />
+              <AvatarIniciais img_url={funcionarioFoco?.foto_url} name={funcionarioFoco?.nome || ''} />
               <View style={styles.employeeInfo}>
                 <Text category="h6">{funcionarioFoco?.nome}</Text>
                 <Text appearance="hint">{funcionarioFoco?.cargo}</Text>

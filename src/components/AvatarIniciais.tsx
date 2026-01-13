@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { useTheme } from '@ui-kitten/components';
+import { Avatar, useTheme } from '@ui-kitten/components';
 
 interface AvatarInitialsProps {
   name: string;
   size?: 'sm' | 'md' | 'lg';
   style?: StyleProp<ViewStyle>;
+  img_url?: string
 }
 
 const SIZE_MAP = {
@@ -18,6 +19,7 @@ export const AvatarIniciais: React.FC<AvatarInitialsProps> = ({
   name,
   size = 'md',
   style,
+  img_url
 }) => {
   const theme = useTheme();
 
@@ -64,6 +66,9 @@ export const AvatarIniciais: React.FC<AvatarInitialsProps> = ({
   const config = SIZE_MAP[size];
 
   return (
+    (img_url)?
+    <Avatar size='giant' source={{uri: img_url}} />
+    :
     <View
       style={[
         styles.container,

@@ -10,6 +10,8 @@ import { customTheme } from "../theme/custom.theme";
 import { converterParaDate } from "../util/datas.util";
 import { validateCPF } from "../util/formatadores.util";
 import { useRestauranteId } from "../hooks/useRestaurante";
+import { AvatarUpload } from "../components/AvatarUpload";
+import { uploadImage } from "../services/cloudnary.serivce";
 
 const emptyFuncionario: FuncionarioPostRequestBody = {
   nome: '',
@@ -23,7 +25,8 @@ const emptyFuncionario: FuncionarioPostRequestBody = {
   segundo_dia_pagamento: 0,
   vales: [],
   incentivo: [],
-  restaurante_ref: ''
+  restaurante_ref: '',
+  foto_url: undefined
 }
 
 export const Cadastro = () => {
@@ -139,6 +142,8 @@ export const Cadastro = () => {
       formData.restaurante_ref = id_res.uid;
     }
 
+    if (formData.foto_url) formData.foto_url = await uploadImage(formData.foto_url);
+
     try {
       const funcSer = new FuncionarioFirestore()
       await funcSer.criar(formData);
@@ -165,6 +170,10 @@ export const Cadastro = () => {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.card}>
+              <AvatarUpload value={formData.foto_url}
+                onChange={(url) => handleChange('foto_url', url)} 
+              />
+
               <Input
                 size="small"
                 label="Nome Completo *"
@@ -203,10 +212,9 @@ export const Cadastro = () => {
                 </RadioGroup>
               </View>
 
-              {/* Salário */}
-              <View style={{flexDirection: 'row', justifyContent: 'space-between', gap: 10}}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
                 <Input
-                  style={{flex: 1}}
+                  style={{ flex: 1 }}
                   size="small"
                   label={
                     formData.tipo === 'DIARISTA'
@@ -225,6 +233,7 @@ export const Cadastro = () => {
                 />
 
                 <Input
+                  style={{ display: (formData.tipo === 'DIARISTA') ? 'flex' : 'none' }}
                   size="small"
                   label={"Dias de trabalho p/ semana *"}
                   placeholder="0"
@@ -269,18 +278,24 @@ export const Cadastro = () => {
                   style={{ flex: 1 }}
                   size="small"
                   label="1° Dia do Pagamento"
-                  placeholder="Todo dia 4"
+                  placeholder="4"
                   value={(formData.primeiro_dia_pagamento === 0) ? '' : formData.primeiro_dia_pagamento.toString()}
                   onChangeText={(v) => handleChange('primeiro_dia_pagamento', v)}
+                  accessoryLeft={() => (
+                    <Text category="s2" style={{ marginHorizontal: 4 }}>Todo dia </Text>
+                  )}
                 />
 
                 <Input
                   style={{ flex: 1 }}
                   size="small"
                   label="2° Dia do Pagamento"
-                  placeholder="Todo dia 19"
+                  placeholder="19"
                   value={(formData.segundo_dia_pagamento === 0) ? '' : formData.segundo_dia_pagamento.toString()}
                   onChangeText={(v) => handleChange('segundo_dia_pagamento', v)}
+                  accessoryLeft={() => (
+                    <Text category="s2" style={{ marginHorizontal: 4 }}>Todo dia </Text>
+                  )}
                 />
               </View>
 

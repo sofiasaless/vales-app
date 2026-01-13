@@ -11,6 +11,7 @@ import { FuncionarioCard } from './FuncionarioCard';
 import { DinheiroDisplay } from './DinheiroDisplay';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
 import { calcularTotalVales } from '../util/calculos.util';
+import { customTheme } from '../theme/custom.theme';
 
 export const ListaFuncionarios = () => {
   const theme = useTheme();
@@ -77,13 +78,13 @@ export const ListaFuncionarios = () => {
         {/* Open Vouchers */}
         <CardGradient styles={styles.summaryCard}>
           <View style={styles.row}>
-            <FontAwesome6 name="arrow-trend-down" size={16} color={theme['color-danger-500']} />
-            <Text category="c1" status="danger">
+            <FontAwesome6 name="arrow-trend-up" size={16} color={customTheme['color-primary-600']} />
+            <Text category="c1" status="primary">
               Vales Abertos
             </Text>
           </View>
 
-          <DinheiroDisplay value={valesAbertos || 0} variant='negative' size='md' />
+          <DinheiroDisplay value={valesAbertos || 0} variant='positive' size='md' />
 
           <Text category="c1" appearance="hint" style={styles.mt4}>
             {funcComVales} funcionário(s)

@@ -145,7 +145,10 @@ export const HistoricoPagamentos = () => {
               >Ver relatório com assinatura</Button>
 
               <Button appearance='outline' status='info'
-                onPress={async () => gerarRelatorioVales(funcObj, historicoPagamento, converterTimestamp(historicoPagamento.data_pagamento))}
+                onPress={async () => gerarRelatorioVales(funcObj, {
+                  ...historicoPagamento,
+                  assinatura: undefined
+                }, converterTimestamp(historicoPagamento.data_pagamento))}
                 accessoryRight={<Entypo name="share" size={20} color={customTheme['color-info-500']} />}
               >Relatório para assinar</Button>
             </View>

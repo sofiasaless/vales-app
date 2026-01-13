@@ -26,5 +26,5 @@ export type FuncionarioPostRequestBody = Omit<Funcionario, "id" | "data_cadastro
 
 export type FuncionarioUpdateRequestBody = Pick<
   Funcionario,
-  "nome" | "cargo" | 'cpf' | 'data_admissao' | 'data_nascimento' | 'primeiro_dia_pagamento' | 'segundo_dia_pagamento' | 'tipo' | 'salario'
+  "nome" | "cargo" | 'cpf' | 'data_admissao' | 'data_nascimento' | 'primeiro_dia_pagamento' | 'segundo_dia_pagamento' | 'tipo' | 'salario' | 'foto_url' | 'dias_trabalhados_semanal'
 >
