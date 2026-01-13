@@ -44,10 +44,6 @@ export class RestauranteSerivce extends PatternFirestore {
     return this.setupAuth().currentUser;
   }
 
-  public getRef(id: string) {
-    return doc(this.setup(), id);
-  }
-
   public async desconectar() {
     await AsyncStorage.clear()
     await this.setupAuth().signOut()

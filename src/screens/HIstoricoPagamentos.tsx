@@ -1,51 +1,48 @@
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Entypo from '@expo/vector-icons/Entypo';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 import { Button, Card, Layout, Spinner, Text } from '@ui-kitten/components';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
+import { FlatList } from 'react-native-gesture-handler';
+import { DatePicker } from '../components/DatePicker';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
-import { mockEmployees } from '../mocks/mockData';
-import { converterParaIsoDate, formatDateTime } from '../util/formatadores.util';
 import { ItemVale } from '../components/ItemVale';
-import { customTheme } from '../theme/custom.theme';
 import { useHistoricoPagamentos } from '../hooks/usePagamentos';
 import { Pagamento } from '../schema/pagamento.schema';
+import { customTheme } from '../theme/custom.theme';
 import { calcularTotalVales } from '../util/calculos.util';
-import { FlatList } from 'react-native-gesture-handler';
+import { converterParaDate } from '../util/datas.util';
+import { converterParaIsoDate, converterTimestamp } from '../util/formatadores.util';
+import { gerarRelatorioVales } from '../util/relatorios.util';
+import { Funcionario } from '../schema/funcionario.schema';
 
 export const HistoricoPagamentos = () => {
   const route = useRoute<any>();
-  const navigation = useNavigation<any>();
-  const { idFunc } = route.params as { idFunc: string };
-
-  const employee = mockEmployees[0];
+  const { funcObj } = route.params as { funcObj: Funcionario };
 
   const [expandedPayment, setExpandedPayment] = useState<string | null>(null);
-
-  if (!employee) {
-    return (
-      <Layout style={styles.center}>
-        {/* <AlertCircle size={48} color="#ff3d71" /> */}
-        <Text category="h6" style={styles.mt}>
-          Funcionário não encontrado
-        </Text>
-        <Button
-          appearance="outline"
-          style={styles.mt}
-          onPress={() => navigation.goBack()}
-        >
-          Voltar
-        </Button>
-      </Layout>
-    );
-  }
 
   const toggleExpand = (paymentId: string) => {
     setExpandedPayment((prev) =>
       prev === paymentId ? null : paymentId
     );
   };
+
+  const [dataInicio, setDataInicio] = useState(new Date(new Date().setDate(1)))
+  const settingInicio = (tipo: 'DATA' | 'HORA', dado?: string) => {
+    if (tipo === 'DATA' && dado != undefined) {
+      setDataInicio(converterParaDate(dado))
+    }
+  }
+  const [dataFim, setDataFim] = useState(new Date())
+  const settingFim = (tipo: 'DATA' | 'HORA', dado?: string) => {
+    if (tipo === 'DATA' && dado != undefined) {
+      setDataFim(converterParaDate(dado))
+    }
+  }
 
   const ItemHistorico = ({ historicoPagamento }: { historicoPagamento: Pagamento }) => {
     const isExpanded = expandedPayment === historicoPagamento.id;
@@ -139,18 +136,51 @@ export const HistoricoPagamentos = () => {
                 ))}
               </View>
             </View>
+
+            <View style={{gap: 8}}>
+              <Button style={{ display: (historicoPagamento.assinatura)?'flex':'none' }}
+                status='info'
+                onPress={async () => gerarRelatorioVales(funcObj, historicoPagamento, converterTimestamp(historicoPagamento.data_pagamento))}
+                accessoryRight={<Entypo name="share" size={20} color={'black'} />}
+              >Ver relatório com assinatura</Button>
+
+              <Button appearance='outline' status='info'
+                onPress={async () => gerarRelatorioVales(funcObj, historicoPagamento, converterTimestamp(historicoPagamento.data_pagamento))}
+                accessoryRight={<Entypo name="share" size={20} color={customTheme['color-info-500']} />}
+              >Relatório para assinar</Button>
+            </View>
           </View>
         )}
       </Card>
     )
   }
 
-  const { data: historico, isLoading } = useHistoricoPagamentos(idFunc)
+  const { data: historico, isLoading } = useHistoricoPagamentos(funcObj.id, { dataFim, dataInicio })
 
   return (
     <Layout style={styles.container}>
 
       <View style={styles.content}>
+        <View style={styles.grupoBotoes}>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <DatePicker status='warning' setarData={settingInicio} tamanBtn='small' tipo='date' dataPreEstabelecida={dataInicio} />
+            <Text style={{ textAlign: 'center', alignSelf: 'center', fontSize: 12 }} category='s1'>até</Text>
+            <DatePicker status='warning' setarData={settingFim} tamanBtn='small' tipo='date' dataPreEstabelecida={dataFim} />
+          </View>
+
+          <Button
+            size='small'
+            status='warning'
+            appearance='outline'
+            accessoryRight={<AntDesign name="reload" size={16} color={customTheme['color-warning-500']} />}
+            onPress={() => {
+              setDataFim(new Date())
+              setDataInicio(new Date(new Date().setDate(1)))
+            }}
+          >
+            Resetar datas
+          </Button>
+        </View>
         {
           (isLoading) ?
             <Spinner />
@@ -158,7 +188,7 @@ export const HistoricoPagamentos = () => {
             <FlatList
               data={historico}
               keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.content}
+              contentContainerStyle={styles.contentList}
               renderItem={({ item }) => (
                 <ItemHistorico historicoPagamento={item} />
               )}
@@ -188,11 +218,15 @@ export const HistoricoPagamentos = () => {
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingBottom: 24,
+    paddingBottom: 110,
   },
 
   content: {
     padding: 16,
+    gap: 12,
+  },
+
+  contentList: {
     gap: 12,
   },
 
@@ -214,7 +248,6 @@ export const styles = StyleSheet.create({
   },
 
   cardHeader: {
-    // padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -285,4 +318,10 @@ export const styles = StyleSheet.create({
     paddingVertical: 48,
     gap: 4,
   },
+
+  grupoBotoes: {
+    paddingBlock: 10,
+    alignItems: 'center',
+    gap: 15
+  }
 });

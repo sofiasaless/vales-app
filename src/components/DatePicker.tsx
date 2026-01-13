@@ -6,10 +6,11 @@ interface DatePickerProps {
   dataPreEstabelecida: Date,
   tipo: 'date' | 'time',
   tamanBtn: 'tiny' | 'small',
+  status?: 'primary' | 'warning' | 'danger'
   setarData: (tipo: 'DATA' | 'HORA', data?: string, hora?: string) => void
 }
 
-export const DatePicker: React.FC<DatePickerProps> = ({ dataPreEstabelecida, tipo, tamanBtn, setarData }) => {
+export const DatePicker: React.FC<DatePickerProps> = ({ dataPreEstabelecida, tipo, tamanBtn, setarData, status = 'primary' }) => {
 
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
@@ -37,7 +38,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ dataPreEstabelecida, tip
 
   return (
     <>
-      <Button size={tamanBtn} appearance="outline" onPress={showDatePicker}>
+      <Button status={status} size={tamanBtn} appearance="outline" onPress={showDatePicker}>
         {
           (tipo === 'date')?
           dataPreEstabelecida.toLocaleDateString()

@@ -5,6 +5,7 @@ import { Pagamento, PagamentoFirestorePostRequestBody, PagamentoPostRequestBody 
 import { converterTimestamp } from "../util/formatadores.util";
 import { FuncionarioFirestore } from "./funcionario.firestore";
 import { PatternFirestore } from "./pattern.firestore";
+import { DateFilterProps } from "./despesa.firestore";
 
 export class PagamentoFirestore extends PatternFirestore {
 
@@ -31,24 +32,31 @@ export class PagamentoFirestore extends PatternFirestore {
     })
   }
 
-  public async listar(idFunc: string): Promise<Pagamento[]> {
-    const queryResult = await getDocs(
-      query(
-        this.setup(),
-        where("funcionario_ref", "==", this.funcionarioFirestore.getRef(idFunc)),
-        orderBy('data_pagamento', 'desc')
-      )
-    );
-
-    const pagamentos: Pagamento[] = queryResult.docs.map((doc) => {
-      return {
-        id: doc.id,
-        data_pagamento: converterTimestamp(doc.data().data_pagamento),
-        ...doc.data()
-      } as Pagamento
-    })
-
-    return pagamentos
+  public async listar(idFunc: string, datas: DateFilterProps): Promise<Pagamento[]> {
+    try {
+      const queryResult = await getDocs(
+        query(
+          this.setup(),
+          where("funcionario_ref", "==", this.funcionarioFirestore.getRef(idFunc)),
+          where("data_pagamento", ">=", datas.dataInicio),
+          where("data_pagamento", "<=", datas.dataFim),
+          orderBy('data_pagamento', 'desc')
+        )
+      );
+  
+      const pagamentos: Pagamento[] = queryResult.docs.map((doc) => {
+        return {
+          id: doc.id,
+          data_pagamento: converterTimestamp(doc.data().data_pagamento),
+          ...doc.data()
+        } as Pagamento
+      })
+  
+      return pagamentos
+    } catch (error) {
+      console.error(error)
+      return []
+    }
   }
   
 }

@@ -14,6 +14,9 @@ import Mensalidades from '../screens/Mensalidades';
 import { ResumoPagamento } from '../screens/ResumoPagamento';
 import { customTheme } from '../theme/custom.theme';
 import { BottomTabsRoutes } from './BottomRoutes';
+import Financas from '../screens/Financas';
+import FinancasDetalhe from '../screens/FinancasDetalhe';
+import { CategoriaFinancas } from '../schema/financa.schema';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -21,16 +24,18 @@ export type RootStackParamList = {
   Funcionario: undefined;
   Cadastro: undefined;
   ResumoPagamento: { funcObj: Funcionario };
-  Assinatura: undefined;
+  Assinatura: { funcObj: Funcionario };
   GerenciaCardapio: undefined;
   Detalhes: { idFunc: string };
-  Historico: { idFunc: string };
+  Historico: { funcObj: Funcionario };
   Mensalidades: undefined;
   Cardapio: { idFunc: string };
   EditarFuncionario: { funcObj: Funcionario };
   LoginRestaurante: undefined;
   LoginGerente: undefined;
   Config: undefined;
+  Financas: { idRest: string };
+  FinancasDetalhes: { categoriaObj: CategoriaFinancas };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -129,6 +134,18 @@ export default function StackRoutes({isAuthenticated, hasGerente}: Props) {
         name="GerenciaCardapio"
         component={GerenciaCardapio}
         options={optionsHeader('Gerenciar itens do cardápio')}
+      />
+
+      <Stack.Screen
+        name="Financas"
+        component={Financas}
+        options={optionsHeader('Gerenciar finanças do restaurante')}
+      />
+
+      <Stack.Screen
+        name="FinancasDetalhes"
+        component={FinancasDetalhe}
+        options={optionsHeader('Despesas por categoria')}
       />
     </Stack.Navigator>
   );

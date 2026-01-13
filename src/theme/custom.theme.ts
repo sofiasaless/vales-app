@@ -129,6 +129,16 @@ export const customTheme = {
 
   /* Focus / Ring */
   'color-primary-focus': '#2EB8A2',
+
+  'color-info-100': '#F2F8FF',
+  'color-info-200': '#C7E2FF',
+  'color-info-300': '#94CBFF',
+  'color-info-400': '#42AAFF',
+  'color-info-500': '#0095FF',
+  'color-info-600': '#006FD6',
+  'color-info-700': '#0057C2',
+  'color-info-800': '#0041A8',
+  'color-info-900': '#002885'
 };
 
 export const customMapping = {

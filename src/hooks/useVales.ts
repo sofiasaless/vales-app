@@ -1,17 +1,16 @@
 import { useState } from "react"
-import { funcionarioFirestore, FuncionarioFirestore } from "../firestore/funcionario.firestore"
+import { funcionarioFirestore } from "../firestore/funcionario.firestore"
 import { Vale } from "../schema/vale.shema"
 import { errorHookResponse, successHookResponse } from "../types/hookResponse.type"
-import { useQuery } from "@tanstack/react-query"
 
 export function useVales() {
 
   const [isLoading, setIsLoading] = useState(false)
 
-  const adicionarVale = async (id: string, vale: Vale) => {
+  const adicionarVale = async (idFuncionario: string, vale: Vale) => {
     setIsLoading(true)
     try {
-      await funcionarioFirestore.adicionarVale(id, vale)
+      await funcionarioFirestore.adicionarVale(idFuncionario, vale)
       return successHookResponse()
     } catch (error: any) {
       return errorHookResponse(error)
