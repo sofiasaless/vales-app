@@ -1,10 +1,11 @@
-import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, runTransaction, setDoc, Transaction, updateDoc, where } from "firebase/firestore";
+import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, runTransaction, setDoc, Transaction, updateDoc, where, getCountFromServer } from "firebase/firestore";
 import { Funcionario, FuncionarioPostRequestBody } from "../schema/funcionario.schema";
 import { PatternFirestore } from "./pattern.firestore";
 import { COLLECTIONS } from "../enums/firebase.enum";
 import { Vale, ValeFirestorePostRequestBody } from "../schema/vale.shema";
 import { RestauranteSerivce } from "../auth/restaurante.service";
 import { MenuFirestore } from "./menu.firestore";
+import { GanhosIncentivo } from "../schema/incentivo.schema";
 
 export class FuncionarioFirestore extends PatternFirestore {
 
@@ -85,30 +86,11 @@ export class FuncionarioFirestore extends PatternFirestore {
     })
   }
 
-  public async incrementarIncentivo(idFuncionario: string, contador: number) {
-    await updateDoc(this.getRef(idFuncionario), {
-      "incentivo.contador": increment(contador)
+  public adicionarGanhoIncentivo(transaction: Transaction, idFuncionario: string, incentivo: GanhosIncentivo) {
+    transaction.update(this.getRef(idFuncionario), {
+      incentivo: arrayUnion(incentivo)
     })
-  }
 
-  public async adicionarIncentivo(idFuncionario: string) {
-    await updateDoc(this.getRef(idFuncionario), {
-      "incentivo.ganhador": true
-    })
-  }
-
-  public async removerIncentivos(transaction: Transaction) {
-    const docs = (await getDocs(this.setup())).docs
-
-    docs.map((doc) => {
-      transaction.update(this.getRef(doc.id), {
-        incentivo: {
-          contador: 0,
-          ganhador: false,
-          incentivo_ref: null
-        }
-      })
-    })
   }
 
   public async atualizar(id: string, payload: Partial<Funcionario>) {

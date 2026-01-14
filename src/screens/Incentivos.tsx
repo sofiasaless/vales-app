@@ -25,8 +25,7 @@ export const Incentivos = () => {
   const { data: incentivos, isLoading: carregandoIncentivo, refetch } = useListarIncentivos(idRest);
   const { data: incentivo_ativo, isLoading: carregandoIncentivoAtivo, refetch: recarregarAtivo } = useIncentivoAtivo(idRest);
 
-  const [relFu, setRelFu] = useState(false)
-  const { refetch: recarregarFuncinoarios } = useFuncionariosRestaurante(idRest, relFu)
+  const { data: funcionarios } = useFuncionariosRestaurante(idRest)
 
   const [dataExpiracao, setDataExpiracao] = useState<Date>(new Date)
   const settingExpiracao = (tipo: 'DATA' | 'HORA', dado?: string) => {
@@ -48,16 +47,18 @@ export const Incentivos = () => {
       setIsLoading(true)
       if (!form.descricao || !form.valor_incentivo || !form.meta) return;
 
-      await incentivoFirestore.criar(idRest, {
-        data_expiracao: dataExpiracao,
-        valor_incentivo: Number(form.valor_incentivo),
-        meta: Number(form.meta),
-        descricao: form.descricao
-      })
+      if (funcionarios) {
+        await incentivoFirestore.criar(idRest, {
+          data_expiracao: dataExpiracao,
+          valor_incentivo: Number(form.valor_incentivo),
+          meta: Number(form.meta),
+          descricao: form.descricao
+        }, funcionarios);
+      } else {
+        throw new Error("Necessário pelo menos 1 funcionário para começar incentivo")
+      }
 
-      setRelFu(true)
       await recarregarAtivo()
-      await recarregarFuncinoarios()
       setForm({ descricao: '', valor_incentivo: '', meta: ''});
       setVisible(false);
     } catch (error: any) {

@@ -1,20 +1,22 @@
-import { addDoc, doc, getDocs, orderBy, query, runTransaction, updateDoc, where } from "firebase/firestore";
+import { doc, getDocs, orderBy, query, runTransaction, updateDoc, where } from "firebase/firestore";
 import { RestauranteSerivce } from "../auth/restaurante.service";
 import { COLLECTIONS } from "../enums/firebase.enum";
+import { Funcionario } from "../schema/funcionario.schema";
 import { Incentivo, IncentivoFirestorePostRequestBody, IncentivoFirestoreUpdateRequestBody, IncentivoPostRequestBody } from "../schema/incentivo.schema";
-import { PatternFirestore } from "./pattern.firestore";
 import { FuncionarioFirestore } from "./funcionario.firestore";
+import { funcinoarioIncentivosFirestore } from "./funcionario.incentivo.firestore";
+import { PatternFirestore } from "./pattern.firestore";
 
 export class IncentivoFirestore extends PatternFirestore {
 
-  private readonly restauranteService = new RestauranteSerivce()
-  private readonly funcionarioFirestore = new FuncionarioFirestore()
-
-  constructor() {
+  constructor(
+    private readonly restauranteService = new RestauranteSerivce(),
+    private readonly funcionarioFirestore = new FuncionarioFirestore()
+  ) {
     super(COLLECTIONS.INCENTIVO);
   }
 
-  async criar(idRestaurante: string, body: IncentivoPostRequestBody) {    
+  async criar(idRestaurante: string, body: IncentivoPostRequestBody, funcionarios: Funcionario[]) {
     const toSave: IncentivoFirestorePostRequestBody = {
       ...body,
       restaurante_ref: this.restauranteService.getRef(idRestaurante),
@@ -23,13 +25,15 @@ export class IncentivoFirestore extends PatternFirestore {
     }
 
     await runTransaction(this.firestore(), async (transaction) => {
-      await this.funcionarioFirestore.removerIncentivos(transaction)
-      
-      transaction.set(doc(this.setup()), toSave);
+      const idIncentivo = doc(this.setup());
+      const ids = funcionarios.map((f) => f.id)
+      await funcinoarioIncentivosFirestore.criar(transaction, idIncentivo.id, ids);
+
+      transaction.set(idIncentivo, toSave);
     })
   }
 
-  async listar(idRestaurante: string, status: boolean = false) {    
+  async listar(idRestaurante: string, status: boolean = false) {
     const queryResult = await getDocs(
       query(
         this.setup(),
@@ -42,8 +46,9 @@ export class IncentivoFirestore extends PatternFirestore {
     const incentivos: Incentivo[] = queryResult.docs.map((doc) => {
       return {
         id: doc.id,
+        ...doc.data(),
         restaurante_ref: doc.data().restaurante_ref.id,
-        ...doc.data()
+        ganhador_ref: doc.data().ganhador_ref.id,
       } as Incentivo
     })
 
@@ -65,39 +70,33 @@ export class IncentivoFirestore extends PatternFirestore {
     const incentivos: Incentivo[] = queryResult.docs.map((doc) => {
       return {
         id: doc.id,
+        ...doc.data(),
         restaurante_ref: doc.data().restaurante_ref.id,
-        ...doc.data()
+        ganhador_ref: doc.data().ganhador_ref.id,
       } as Incentivo
     })
 
     return incentivos;
   }
 
-  public async declararGanhador(idIncentivo: string, nomeGanhador: string, idGanhador: string) {
+  public async declararGanhador(incentivoObj: Incentivo, funcionario: Funcionario, idGanhador: string) {
     const toUpdate: Partial<IncentivoFirestoreUpdateRequestBody> = {
-      ganhador_nome: nomeGanhador,
-      ganhador_ref: this.funcionarioFirestore.getRef(idGanhador)
+      ganhador_nome: funcionario.nome,
+      ganhador_ref: funcinoarioIncentivosFirestore.getRef(idGanhador)
     }
-    
-    await updateDoc(this.getRef(idIncentivo), {
-      ...toUpdate
-    })
 
-    await this.funcionarioFirestore.adicionarIncentivo(idGanhador);
+    await runTransaction(this.firestore(), async (transaction) => {
+      transaction.update(this.getRef(incentivoObj.id), {
+        ...toUpdate
+      })
+      await funcinoarioIncentivosFirestore.enviarIncentivo(transaction, idGanhador, incentivoObj.valor_incentivo)
+    })
   }
 
   public async encerrar(idIncentivo: string) {
     await updateDoc(this.getRef(idIncentivo), {
       status: false
     })
-    
-    // await runTransaction(this.firestore(), async (transaction) => {
-    //   await this.funcionarioFirestore.removerIncentivos(transaction, idGanhador)
-      
-    //   transaction.update(this.getRef(idIncentivo), {
-    //     status: false
-    //   })
-    // })
   }
 
 }

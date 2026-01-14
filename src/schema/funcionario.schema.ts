@@ -1,5 +1,5 @@
-import { Incentivo, IncentivoFuncionario } from "./incentivo.schema"
-import { Vale } from "./vale.shema"
+import { GanhosIncentivo } from "./incentivo.schema";
+import { Vale } from "./vale.shema";
 
 export type TipoFuncionario = 'DIARISTA' | 'FIXO'
 
@@ -15,7 +15,7 @@ export type Funcionario = {
   data_nascimento?: Date | null,
   data_admissao: Date,
   vales: Vale[],
-  incentivo: IncentivoFuncionario,
+  incentivo: GanhosIncentivo[],
   primeiro_dia_pagamento: number,
   segundo_dia_pagamento: number,
   restaurante_ref: string,

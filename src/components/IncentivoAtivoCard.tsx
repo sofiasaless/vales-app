@@ -63,7 +63,7 @@ export const IncentivoAtivoCard: React.FC<{ incentivo: Incentivo }> = ({ incenti
         {(incentivo.ganhador_nome) ?
           <View style={styles.winnerBadge}>
             <MaterialCommunityIcons name="crown" size={14} color="#16A34A" />
-            <Text category='c2' status='success'>Ganhador: {incentivo.ganhador_nome}</Text>
+            <Text category='c2' status='success'>{incentivo.ganhador_nome.split(' ')[0]}</Text>
           </View>
           :
           <Button size='small' appearance='outline'

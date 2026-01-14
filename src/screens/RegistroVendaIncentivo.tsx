@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect, useRoute } from '@react-navigation/native';
-import { Button, Layout, Text } from '@ui-kitten/components';
+import { Button, Layout, Spinner, Text } from '@ui-kitten/components';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 
@@ -9,16 +9,15 @@ import { AvatarIniciais } from '../components/AvatarIniciais';
 import { CardGradient } from '../components/CardGradient';
 import { CardGradientPrimary } from '../components/CardGradientPrimary';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
-import { funcionarioFirestore } from '../firestore/funcionario.firestore';
-import { useFuncionariosRestaurante } from '../hooks/useFuncionarios';
+import { useFuncionariosIncentivoContext } from '../context/FuncionariosIncentivoContext';
+import { funcinoarioIncentivosFirestore } from '../firestore/funcionario.incentivo.firestore';
+import { incentivoFirestore } from '../firestore/incentivo.firestore';
+import { useIncentivoAtivo, useListarFuncionariosDoIncentivo } from '../hooks/useIncentivo';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
+import { Funcionario } from '../schema/funcionario.schema';
 import { Incentivo } from '../schema/incentivo.schema';
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
-import { useFuncionariosIncentivoContext } from '../context/FuncionariosIncentivoContext';
-import { Funcionario } from '../schema/funcionario.schema';
-import { incentivoFirestore } from '../firestore/incentivo.firestore';
-import { useIncentivoAtivo } from '../hooks/useIncentivo';
 
 export default function RegistroVendaIncentivo() {
   const route = useRoute();
@@ -26,14 +25,14 @@ export default function RegistroVendaIncentivo() {
 
   const [incentivo, setIncentivo] = useState<Incentivo>(incentObj)
 
-  const { funcionariosIncentivo, incrementar } = useFuncionariosIncentivoContext()
-
   const { data: res, isLoading: carregandoRes } = useRestauranteConectado()
-  const { data: employees, isLoading, refetch } = useFuncionariosRestaurante(res?.id || '')
+  const { data: funcionarios, isLoading: carregandoFunc, refetch } = useListarFuncionariosDoIncentivo(incentivo.id);
 
   const { refetch: recarregarIncentivo } = useIncentivoAtivo(res?.id || '');
 
-  const exibirGanhador = (funcionario: Funcionario) => {
+  const { funcionariosIncentivo, incrementar } = useFuncionariosIncentivoContext()
+
+  const exibirGanhador = (funcionario: Funcionario, idFuncInce: string) => {
     Alert.alert('🎉 Temos um ganhador!',
       `${funcionario.nome} atingiu a meta de vendas do incentivo!`,
       [
@@ -45,12 +44,12 @@ export default function RegistroVendaIncentivo() {
           text: 'Confirmar ganhador',
           onPress: async () => {
             try {
-              incentivoFirestore.declararGanhador(incentivo.id, funcionario.nome, funcionario.id);
+              await incentivoFirestore.declararGanhador(incentivo, funcionario, idFuncInce);
 
               setIncentivo(prev => ({
                 ...prev,
                 ganhador_nome: funcionario.nome,
-                ganhador_ref: funcionario.id
+                ganhador_ref: idFuncInce
               }))
 
               recarregarIncentivo()
@@ -66,34 +65,28 @@ export default function RegistroVendaIncentivo() {
   const verificarGanhador = () => {
     funcionariosIncentivo.forEach((cont, key) => {
       if (cont >= incentivo.meta) {
-        const ganhador = employees?.find((f) => f.id === key)
+        const ganhador = funcionarios?.find((f) => f.id === key)
         if (ganhador) {
-          exibirGanhador(ganhador);
+          exibirGanhador(ganhador.funcionario_obj!, key);
         }
       }
     })
   }
 
   useEffect(() => {
-    if (!incentivo) return;
-
-    if (!employees) return;
-
-  }, [employees, incentivo]);
-
-  useEffect(() => {
     if (!incentivo.ganhador_nome) verificarGanhador();
   }, [])
 
   const [incrementando, setIncrementando] = useState(false)
-  const handleIncrementar = async (funcionario: Funcionario, valor: number, counter: number) => {
+  const handleIncrementar = async (idFuncInc: string, valor: number, counter: number) => {
     try {
       setIncrementando(true)
-      await funcionarioFirestore.incrementarIncentivo(funcionario.id, valor);
+      await funcinoarioIncentivosFirestore.incrementarContador(idFuncInc, valor);
       if (valor > 0 && (counter + valor) >= incentivo.meta) {
-        exibirGanhador(funcionario)
+        const ganhador = funcionarios?.find((f) => f.id === idFuncInc)?.funcionario_obj
+        if (ganhador) exibirGanhador(ganhador, idFuncInc);
       }
-      incrementar(funcionario.id, valor);
+      incrementar(idFuncInc, valor);
       refetch()
     } catch (error: any) {
       alert('Erro ao incrementar venda no funcionário', error)
@@ -104,6 +97,7 @@ export default function RegistroVendaIncentivo() {
 
   useFocusEffect(
     useCallback(() => {
+      recarregarIncentivo()
       refetch()
     }, [carregandoRes])
   );
@@ -138,89 +132,95 @@ export default function RegistroVendaIncentivo() {
         </View>
       )}
 
-      <FlatList
-        data={employees}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => {
-          const counter = funcionariosIncentivo.get(item.id) || 0;
-          const isWinner = incentivo?.ganhador_ref === item.id;
-          const progress = Math.min(
-            (counter / incentivo?.meta) * 100,
-            100
-          );
+      {
+        (carregandoFunc) ?
+          <Spinner />
+          :
+          <FlatList
+            data={funcionarios}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => {
+              const counter = funcionariosIncentivo.get(item.id)?.valueOf() || 0;
+              console.info(incentivo.ganhador_ref, item.id)
+              const isWinner = incentivo.ganhador_ref === item.id;
+              const progress = Math.min(
+                (counter / incentivo?.meta) * 100,
+                100
+              );
 
-          return (
-            <CardGradient
-              styles={[
-                styles.employeeCard,
-                isWinner && styles.employeeWinner,
-              ]}
-            >
-              <AvatarIniciais img_url={item.foto_url} name={item.nome} size="sm" />
-
-              <View style={styles.employeeInfo}>
-                <View style={styles.employeeHeader}>
-                  <Text category="s1" numberOfLines={1}>
-                    {item.nome}
-                  </Text>
-                  {isWinner && (
-                    <MaterialCommunityIcons name="crown"
-                      size={18}
-                      color="#16A34A"
-                    />
-                  )}
-                </View>
-
-                <Text appearance="hint" style={styles.role}>
-                  {item.cargo}
-                </Text>
-
-                <View style={styles.progressBar}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      {
-                        width: `${progress}%`,
-                        backgroundColor: isWinner
-                          ? '#16A34A'
-                          : customTheme['color-warning-500'],
-                      },
-                    ]}
-                  />
-                </View>
-
-                <Text appearance="hint" style={styles.progressText}>
-                  {counter} / {incentivo.meta} vendas
-                </Text>
-              </View>
-
-              <View style={styles.counterBox}>
-                <Button
-                  size="tiny"
-                  disabled={(incentivo.ganhador_nome !== undefined) || incrementando}
-                  onPress={() => handleIncrementar(item, 1, counter)}
+              return (
+                <CardGradient
+                  styles={[
+                    styles.employeeCard,
+                    isWinner && styles.employeeWinner,
+                  ]}
                 >
-                  <Feather name="plus" size={14} />
-                </Button>
+                  <AvatarIniciais img_url={item.funcionario_obj?.foto_url} name={item.funcionario_obj?.nome || ''} size="sm" />
 
-                <Text style={styles.counterValue}>
-                  {counter}
-                </Text>
+                  <View style={styles.employeeInfo}>
+                    <View style={styles.employeeHeader}>
+                      <Text category="s1" numberOfLines={1}>
+                        {item.funcionario_obj?.nome}
+                      </Text>
+                      {isWinner && (
+                        <MaterialCommunityIcons name="crown"
+                          size={18}
+                          color="#16A34A"
+                        />
+                      )}
+                    </View>
 
-                <Button
-                  size="tiny"
-                  appearance="outline"
-                  disabled={counter === 0 || (incentivo.ganhador_nome !== undefined) || incrementando}
-                  onPress={() => handleIncrementar(item, -1, counter)}
-                >
-                  <Feather name="minus" size={14} />
-                </Button>
-              </View>
-            </CardGradient>
-          );
-        }}
-      />
+                    <Text appearance="hint" style={styles.role}>
+                      {item.funcionario_obj?.cargo}
+                    </Text>
+
+                    <View style={styles.progressBar}>
+                      <View
+                        style={[
+                          styles.progressFill,
+                          {
+                            width: `${progress}%`,
+                            backgroundColor: isWinner
+                              ? '#16A34A'
+                              : customTheme['color-warning-500'],
+                          },
+                        ]}
+                      />
+                    </View>
+
+                    <Text appearance="hint" style={styles.progressText}>
+                      {item.contador} / {incentivo.meta} vendas
+                    </Text>
+                  </View>
+
+                  <View style={styles.counterBox}>
+                    <Button
+                      size="tiny"
+                      disabled={(incentivo.ganhador_nome !== undefined) || incrementando}
+                      onPress={() => handleIncrementar(item.id, 1, counter)}
+                    >
+                      <Feather name="plus" size={14} />
+                    </Button>
+
+                    <Text style={styles.counterValue}>
+                      {counter}
+                    </Text>
+
+                    <Button
+                      size="tiny"
+                      appearance="outline"
+                      disabled={counter === 0 || (incentivo.ganhador_nome !== undefined) || incrementando}
+                      onPress={() => handleIncrementar(item.id, -1, counter)}
+                    >
+                      <Feather name="minus" size={14} />
+                    </Button>
+                  </View>
+                </CardGradient>
+              );
+            }}
+          />
+      }
 
       {incentivo.ganhador_nome &&
         <View>

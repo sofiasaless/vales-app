@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { useIncentivoAtivo, useListarFuncionariosDoIncentivo } from "../hooks/useIncentivo";
 import { useRestauranteConectado } from "../hooks/useRestaurante";
-import { useFuncionariosRestaurante } from "../hooks/useFuncionarios";
 
 interface FuncionariosIncentivoContextType {
   funcionariosIncentivo: Map<string, number>,
@@ -22,20 +22,25 @@ export const FuncionariosIncentivoProvider = ({ children }: { children: ReactNod
   }
 
   const { data: res, isLoading: carregandoRes } = useRestauranteConectado()
-  const { data: funcionarios, isLoading, refetch } = useFuncionariosRestaurante(res?.id || '')
+  const { data: ince_ativo, isLoading: carregandoInc, refetch } = useIncentivoAtivo(res?.id || '');
+  const { data: funcionarios, isLoading: carregandoFuc, refetch: refetchFunc } = useListarFuncionariosDoIncentivo(ince_ativo?.id || '');
 
   useEffect(() => {
-    if (!funcionarios) return;
+    if (carregandoRes || carregandoInc) return;
 
-    funcionarios.map((f) => {
+    refetchFunc()
+
+    if (carregandoFuc) return;
+
+    funcionarios?.map((f) => {
       setFuncionariosIncentivo(prev => {
         const novo = new Map(prev);
-        novo.set(f.id, f.incentivo.contador);
+        novo.set(f.id, f.contador);
         return novo;
       });
     })
 
-  }, [funcionarios, carregandoRes]);
+  }, [carregandoInc, carregandoRes, carregandoFuc]);
 
   return (
     <FuncionariosIncentivoContext.Provider value={{

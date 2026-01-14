@@ -19,7 +19,9 @@ export type IncentivoFirestorePostRequestBody = Omit<Incentivo, "id" | "ganhador
   restaurante_ref: DocumentReference
 }
 
-export type IncentivoFirestoreUpdateRequestBody = IncentivoFirestorePostRequestBody & Pick<Incentivo, "ganhador_nome"> & {
+export type IncentivoUpdateRequestBody = Pick<Incentivo, "data_expiracao" | "descricao" | "valor_incentivo" | "meta" | "ganhador_nome" | "status" | "ganhador_ref">
+
+export type IncentivoFirestoreUpdateRequestBody = Omit<IncentivoUpdateRequestBody, "ganhador_ref"> & {
   ganhador_ref: DocumentReference
 }
 
@@ -31,5 +33,15 @@ export type IncentivoFuncionario = {
 }
 
 export type IncentivoFuncionarioFirestorePostRequestBody = Omit<IncentivoFuncionario, "incentivo_ref"> & {
+  incentivo_ref: DocumentReference
+}
+
+// atributos que ficará salvo no funcionário
+export type GanhosIncentivo = {
+  valor: number;
+  incentivo_ref: string;
+}
+
+export type GanhoIncentivoFirestorePostResquestBody = Omit<GanhosIncentivo, "incentivo_ref"> & {
   incentivo_ref: DocumentReference
 }

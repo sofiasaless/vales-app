@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { incentivoFirestore } from "../firestore/incentivo.firestore";
+import { funcinoarioIncentivosFirestore } from "../firestore/funcionario.incentivo.firestore";
 
 export function useListarIncentivos(idRestaurante: string) {
   return useQuery({
@@ -21,3 +22,13 @@ export function useIncentivoAtivo(idRestaurante: string) {
     }
   })
 } 
+
+export function useListarFuncionariosDoIncentivo(idIncentivo: string) {
+  return useQuery({
+    queryKey: ["funcionarios_incentivo"],
+    queryFn: async () => {
+      const res = await funcinoarioIncentivosFirestore.listar(idIncentivo);
+      return res;
+    }
+  })
+}
