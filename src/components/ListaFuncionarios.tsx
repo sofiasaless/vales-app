@@ -12,6 +12,7 @@ import { DinheiroDisplay } from './DinheiroDisplay';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
 import { calcularTotalVales } from '../util/calculos.util';
 import { customTheme } from '../theme/custom.theme';
+import { IncentivoAtivoCard } from './IncentivoAtivoCard';
 
 export const ListaFuncionarios = () => {
   const theme = useTheme();
@@ -55,7 +56,10 @@ export const ListaFuncionarios = () => {
 
   return (
     <Layout level="1" style={styles.screen}>
-      {/* Summary Cards */}
+      <View style={{ marginBottom: 10 }}>
+        <IncentivoAtivoCard />
+      </View>
+
       <View style={styles.summaryGrid}>
         {/* Total Employees */}
         <CardGradient styles={styles.summaryCard}>

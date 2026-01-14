@@ -15,6 +15,12 @@ const SIZE_MAP = {
   lg: { size: 80, fontSize: 24 },
 };
 
+const SIZE_MAP_IMG = {
+  sm: 'medium',
+  md: 'giant',
+  lg: 'large',
+};
+
 export const AvatarIniciais: React.FC<AvatarInitialsProps> = ({
   name,
   size = 'md',
@@ -67,7 +73,7 @@ export const AvatarIniciais: React.FC<AvatarInitialsProps> = ({
 
   return (
     (img_url)?
-    <Avatar size='giant' source={{uri: img_url}} />
+    <Avatar size={SIZE_MAP_IMG[size]} source={{uri: img_url}} />
     :
     <View
       style={[

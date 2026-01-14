@@ -17,6 +17,8 @@ import { BottomTabsRoutes } from './BottomRoutes';
 import Financas from '../screens/Financas';
 import FinancasDetalhe from '../screens/FinancasDetalhe';
 import { CategoriaFinancas } from '../schema/financa.schema';
+import { Incentivos } from '../screens/Incentivos';
+import RegistroVendaIncentivo from '../screens/RegistroVendaIncentivo';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -36,6 +38,8 @@ export type RootStackParamList = {
   Config: undefined;
   Financas: { idRest: string };
   FinancasDetalhes: { categoriaObj: CategoriaFinancas };
+  Incentivos: { idRest: string };
+  RegistroVendaIncentivo: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -146,6 +150,18 @@ export default function StackRoutes({isAuthenticated, hasGerente}: Props) {
         name="FinancasDetalhes"
         component={FinancasDetalhe}
         options={optionsHeader('Despesas por categoria')}
+      />
+
+      <Stack.Screen
+        name="Incentivos"
+        component={Incentivos}
+        options={optionsHeader('Incentivos aos funcionários')}
+      />
+
+      <Stack.Screen
+        name="RegistroVendaIncentivo"
+        component={RegistroVendaIncentivo}
+        options={optionsHeader('Registrar venda no incentivo')}
       />
     </Stack.Navigator>
   );

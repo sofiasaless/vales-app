@@ -31,7 +31,7 @@ export const Funcionarios = () => {
 
   return (
     <Container>
-      <Header title="Funcionários" subtitle="Visão geral" />
+      <Header title="Funcionários" />
       <ListaFuncionarios />
     </Container>
   )

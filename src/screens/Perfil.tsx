@@ -125,7 +125,7 @@ export const Perfil = () => {
           <View style={styles.divider} />
           <MenuItem
             icon={<MaterialIcons name="dining" size={20} color={iconColor} />}
-            label="Gerenciar Cardápio"
+            label="Cardápio"
             onPress={() => navigation.navigate('GerenciaCardapio')}
           />
           <View style={styles.divider} />
@@ -136,10 +136,15 @@ export const Perfil = () => {
           />
           <View style={styles.divider} />
           <MenuItem
+            icon={<MaterialCommunityIcons name="star-shooting" size={20} color={iconColor} />}
+            label="Incentivos"
+            onPress={() => navigation.navigate('Incentivos', { idRest: rest_conectado?.id! })}
+          />
+          {/* <MenuItem
             icon={<MaterialCommunityIcons name="bell" size={20} color={iconColor} />}
             label="Notificações"
             onPress={() => { }}
-          />
+          /> */}
         </CardGradient>
 
         {/* Logout */}

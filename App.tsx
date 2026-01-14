@@ -16,6 +16,7 @@ import { customMapping, customTheme } from "./src/theme/custom.theme";
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from './src/context/AuthContext';
 import { TotalDespesasProvider } from './src/context/TotalDespesasContext';
+import { IncentiveProvider } from './src/context/InvenctiveContext';
 
 SplashScreen.hideAsync()
 enableScreens();
@@ -83,12 +84,14 @@ export default function App() {
       <ItenValesProvider>
         <EventoAlteracoesProvider>
           <TotalDespesasProvider>
-            <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
-              <AuthProvider>
-                <Routes />
-              </AuthProvider>
-              <StatusBar style="light" />
-            </ApplicationProvider>
+            <IncentiveProvider>
+              <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
+                <AuthProvider>
+                  <Routes />
+                </AuthProvider>
+                <StatusBar style="light" />
+              </ApplicationProvider>
+            </IncentiveProvider>
           </TotalDespesasProvider>
         </EventoAlteracoesProvider>
       </ItenValesProvider>
