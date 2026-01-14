@@ -5,21 +5,25 @@ import { Button, Text } from '@ui-kitten/components';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { useIncentive } from '../context/InvenctiveContext';
 import { RootStackParamList } from '../routes/StackRoutes';
+import { Incentivo } from '../schema/incentivo.schema';
 import { customTheme } from '../theme/custom.theme';
 import { CardGradientPrimary } from './CardGradientPrimary';
 import { DinheiroDisplay } from './DinheiroDisplay';
+import { converterTimestamp } from '../util/formatadores.util';
 
-export const IncentivoAtivoCard: React.FC = () => {
+export const IncentivoAtivoCard: React.FC<{ incentivo: Incentivo }> = ({ incentivo }) => {
   const navigator = useNavigation<NavigationProp<RootStackParamList>>();
-  const { getActiveIncentive, getEmployeeCounter } = useIncentive();
 
-  const activeIncentive = getActiveIncentive();
-
-  if (!activeIncentive) return null;
-
-  const winner = ''
+  const getExpiracao = () => {
+    const data_expiracao = converterTimestamp(incentivo.data_expiracao)
+    const hoje = new Date()
+    if (data_expiracao < hoje) return `Incentivo expirado`
+    const dia_expiracao = data_expiracao.getDate()
+    const dias_ate_expirar = dia_expiracao - hoje.getDate()
+    if (dias_ate_expirar > 0) return `Termina em ${dias_ate_expirar} dias`;
+    if (dias_ate_expirar === 0) return `Termina hoje`;
+  }
 
   return (
     <CardGradientPrimary styles={styles.card}>
@@ -31,7 +35,7 @@ export const IncentivoAtivoCard: React.FC = () => {
           </Text>
         </View>
 
-        <DinheiroDisplay value={activeIncentive.valor_incentivo} />
+        <DinheiroDisplay value={incentivo.valor_incentivo} />
       </View>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -39,13 +43,13 @@ export const IncentivoAtivoCard: React.FC = () => {
           style={styles.description}
           numberOfLines={2}
         >
-          {activeIncentive.descricao}
+          {incentivo.descricao}
         </Text>
 
         <View style={styles.metaItem}>
-          <Feather name="target" size={14} color="#9CA3AF" />
+          <Feather name="target" size={12} color="#9CA3AF" />
           <Text appearance="hint" style={styles.metaText}>
-            Meta: {activeIncentive.meta}
+            Meta: {incentivo.meta}
           </Text>
         </View>
       </View>
@@ -53,18 +57,18 @@ export const IncentivoAtivoCard: React.FC = () => {
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
         <View style={styles.expiracaoBadge}>
-          <Text category='c2' status='warning'>Expira em 2 dias</Text>
+          <Text category='c2' status='warning'>{getExpiracao()}</Text>
         </View>
 
-        {(winner) ?
+        {(incentivo.ganhador_nome) ?
           <View style={styles.winnerBadge}>
             <MaterialCommunityIcons name="crown" size={14} color="#16A34A" />
-            <Text category='c2' status='success'>Ganhador: {winner}</Text>
+            <Text category='c2' status='success'>Ganhador: {incentivo.ganhador_nome}</Text>
           </View>
           :
           <Button size='small' appearance='outline'
             accessoryLeft={<MaterialCommunityIcons name="cart" size={14} color={customTheme['color-primary-500']} />}
-            onPress={() => navigator.navigate('RegistroVendaIncentivo')}
+            onPress={() => navigator.navigate('RegistroVendaIncentivo', { incentObj: incentivo })}
           >Registrar Venda</Button>
         }
       </View>

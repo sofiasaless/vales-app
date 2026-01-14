@@ -12,10 +12,10 @@ export type Funcionario = {
   tipo: TipoFuncionario,
   dias_trabalhados_semanal?: number;
   foto_url?: string,
-  data_nascimento?: Date,
+  data_nascimento?: Date | null,
   data_admissao: Date,
   vales: Vale[],
-  incentivo: IncentivoFuncionario[],
+  incentivo: IncentivoFuncionario,
   primeiro_dia_pagamento: number,
   segundo_dia_pagamento: number,
   restaurante_ref: string,

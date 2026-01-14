@@ -32,9 +32,11 @@ export function useFuncionarios() {
   }
 }
 
-export function useFuncionariosRestaurante(restauranteId: string) {
+export function useFuncionariosRestaurante(restauranteId: string, force: boolean = false) {
   return useQuery({
-    queryKey: ["funcionarios"],
+    queryKey: ["funcionarios",
+      force.valueOf()
+    ],
     queryFn: async () => {
       const funcFir = new FuncionarioFirestore()
       const res = await funcFir.listar(restauranteId)

@@ -19,6 +19,7 @@ import FinancasDetalhe from '../screens/FinancasDetalhe';
 import { CategoriaFinancas } from '../schema/financa.schema';
 import { Incentivos } from '../screens/Incentivos';
 import RegistroVendaIncentivo from '../screens/RegistroVendaIncentivo';
+import { Incentivo } from '../schema/incentivo.schema';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -39,7 +40,7 @@ export type RootStackParamList = {
   Financas: { idRest: string };
   FinancasDetalhes: { categoriaObj: CategoriaFinancas };
   Incentivos: { idRest: string };
-  RegistroVendaIncentivo: undefined;
+  RegistroVendaIncentivo: {incentObj: Incentivo};
 };
 
 const Stack = createStackNavigator<RootStackParamList>();

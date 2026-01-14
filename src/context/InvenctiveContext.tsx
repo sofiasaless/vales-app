@@ -143,7 +143,6 @@ function incentiveReducer(state: IncentiveState, action: IncentiveAction): Incen
 interface IncentiveContextType {
   state: IncentiveState;
   dispatch: React.Dispatch<IncentiveAction>;
-  getActiveIncentive: () => Incentivo;
   getEmployeeCounter: (employeeId: string) => number;
   addIncentive: (data: IncentivoPostRequestBody) => void;
   incrementCounter: (employeeId: string) => void;
@@ -212,7 +211,6 @@ export function IncentiveProvider({ children }: { children: ReactNode }) {
       value={{
         state,
         dispatch,
-        getActiveIncentive,
         getEmployeeCounter,
         addIncentive,
         incrementCounter,

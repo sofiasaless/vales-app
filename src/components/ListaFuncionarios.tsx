@@ -13,6 +13,7 @@ import { useRestauranteConectado } from '../hooks/useRestaurante';
 import { calcularTotalVales } from '../util/calculos.util';
 import { customTheme } from '../theme/custom.theme';
 import { IncentivoAtivoCard } from './IncentivoAtivoCard';
+import { useIncentivoAtivo } from '../hooks/useIncentivo';
 
 export const ListaFuncionarios = () => {
   const theme = useTheme();
@@ -33,6 +34,8 @@ export const ListaFuncionarios = () => {
 
   const { data: funcionarios, isLoading, refetch } = useFuncionariosRestaurante(res?.id || '')
 
+  const { data: incentivo_ativo, isLoading: carregandoIncentivoAtivo, refetch: recarregarIncentivo } = useIncentivoAtivo(res?.id || '');
+
   const valesAbertos = useMemo(() => {
     return funcionarios?.reduce((acc, func) => {
       return acc + calcularTotalVales(func.vales)
@@ -51,14 +54,17 @@ export const ListaFuncionarios = () => {
   useFocusEffect(
     useCallback(() => {
       refetch()
+      recarregarIncentivo()
     }, [carregandoRes])
   );
 
   return (
     <Layout level="1" style={styles.screen}>
-      <View style={{ marginBottom: 10 }}>
-        <IncentivoAtivoCard />
-      </View>
+      {incentivo_ativo &&
+        <View style={{ marginBottom: 10 }}>
+          <IncentivoAtivoCard incentivo={incentivo_ativo} />
+        </View>
+      }
 
       <View style={styles.summaryGrid}>
         {/* Total Employees */}

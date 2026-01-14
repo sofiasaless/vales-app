@@ -138,9 +138,11 @@ export const EditarFuncionario = () => {
       tipo: formData.tipo,
       cpf: formData.cpf,
       data_admissao: dataAdmissao,
-      data_nascimento: dataNascimento,
-      foto_url: formData.foto_url
+      foto_url: formData.foto_url || '',
+      dias_trabalhados_semanal: formData.dias_trabalhados_semanal || 0
     }
+
+    if (dataNascimento.toLocaleDateString() !== new Date().toLocaleDateString()) dataToUpdate.data_nascimento = dataNascimento;
 
     try {
       const funcSer = new FuncionarioFirestore()

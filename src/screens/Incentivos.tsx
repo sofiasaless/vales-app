@@ -1,75 +1,102 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Button, Card, Divider, Input, Layout, Modal, Text } from '@ui-kitten/components';
-import React, { useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
-import { DinheiroDisplay } from '../components/DinheiroDisplay';
-import { useIncentive } from '../context/InvenctiveContext';
-import { customTheme } from '../theme/custom.theme';
 import { CardGradientPrimary } from '../components/CardGradientPrimary';
+import { DatePicker } from '../components/DatePicker';
+import { DinheiroDisplay } from '../components/DinheiroDisplay';
+import { incentivoFirestore } from '../firestore/incentivo.firestore';
+import { useIncentivoAtivo, useListarIncentivos } from '../hooks/useIncentivo';
 import { RootStackParamList } from '../routes/StackRoutes';
+import { customTheme } from '../theme/custom.theme';
+import { alert } from '../util/alertfeedback.util';
+import { converterParaDate } from '../util/datas.util';
+import { converterTimestamp } from '../util/formatadores.util';
+import { useFuncionariosRestaurante } from '../hooks/useFuncionarios';
 
 export const Incentivos = () => {
   const navigator = useNavigation<NavigationProp<RootStackParamList>>();
-  const { state, addIncentive } = useIncentive();
+  const route = useRoute();
+  const { idRest } = route.params as { idRest: string };
+
+  const { data: incentivos, isLoading: carregandoIncentivo, refetch } = useListarIncentivos(idRest);
+  const { data: incentivo_ativo, isLoading: carregandoIncentivoAtivo, refetch: recarregarAtivo } = useIncentivoAtivo(idRest);
+
+  const [relFu, setRelFu] = useState(false)
+  const { refetch: recarregarFuncinoarios } = useFuncionariosRestaurante(idRest, relFu)
+
+  const [dataExpiracao, setDataExpiracao] = useState<Date>(new Date)
+  const settingExpiracao = (tipo: 'DATA' | 'HORA', dado?: string) => {
+    if (tipo === 'DATA' && dado != undefined) {
+      setDataExpiracao(converterParaDate(dado))
+    }
+  }
 
   const [visible, setVisible] = useState(false);
   const [form, setForm] = useState({
     descricao: '',
     valor_incentivo: '',
     meta: '',
-    data_expiracao: '',
   });
 
-  const activeIncentive = state.incentivos.find(i => i.status && !i.ganhador_ref);
-  const historyIncentives = state.incentivos.filter(i => !i.status || i.ganhador_ref);
+  const [isLoading, setIsLoading] = useState(false)
+  const handleAdicionarIncentivo = async () => {
+    try {
+      setIsLoading(true)
+      if (!form.descricao || !form.valor_incentivo || !form.meta) return;
 
-  const handleCreate = () => {
-    if (!form.descricao || !form.valor_incentivo || !form.meta || !form.data_expiracao) return;
+      await incentivoFirestore.criar(idRest, {
+        data_expiracao: dataExpiracao,
+        valor_incentivo: Number(form.valor_incentivo),
+        meta: Number(form.meta),
+        descricao: form.descricao
+      })
 
-    addIncentive({
-      descricao: form.descricao,
-      valor_incentivo: Number(form.valor_incentivo),
-      meta: Number(form.meta),
-      data_expiracao: new Date(form.data_expiracao),
-    });
-
-    setForm({ descricao: '', valor_incentivo: '', meta: '', data_expiracao: '' });
-    setVisible(false);
+      setRelFu(true)
+      await recarregarAtivo()
+      await recarregarFuncinoarios()
+      setForm({ descricao: '', valor_incentivo: '', meta: ''});
+      setVisible(false);
+    } catch (error: any) {
+      alert('Não foi possível começar incentivo', error)
+    } finally {
+      setIsLoading(false)
+    }
   };
 
   return (
     <Layout style={styles.container}>
       <View style={styles.content}>
-        {activeIncentive && (
+        {incentivo_ativo && (
           <CardGradientPrimary styles={styles.activeCard}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
                 <MaterialCommunityIcons name="star-shooting" size={20} color={customTheme['color-primary-500']} />
-                <Text category="s1" status='primary'>Incentivo do mês</Text>
+                <Text category="s1" status='primary'>Incentivo do momento</Text>
               </View>
-              <DinheiroDisplay value={activeIncentive.valor_incentivo} />
+              <DinheiroDisplay value={incentivo_ativo.valor_incentivo} />
             </View>
 
-            <Text category='s2'>{activeIncentive.descricao}</Text>
+            <Text category='s2'>{incentivo_ativo.descricao}</Text>
 
             <View style={{ flexDirection: 'row', gap: 15 }}>
               <View style={styles.subTxt}>
                 <MaterialIcons name="star-purple500" size={13} color={customTheme['text-hint-color']} />
-                <Text category='c1' appearance="hint">Meta: {activeIncentive.meta}</Text>
+                <Text category='c1' appearance="hint">Meta: {incentivo_ativo.meta}</Text>
               </View>
               <View style={styles.subTxt}>
                 <MaterialIcons name="calendar-month" size={13} color={customTheme['text-hint-color']} />
-                <Text category='c1' appearance="hint">Expira em {activeIncentive.data_expiracao.toLocaleDateString()}</Text>
+                <Text category='c1' appearance="hint">Expira em {converterTimestamp(incentivo_ativo.data_expiracao).toLocaleDateString()}</Text>
               </View>
             </View>
-        
-            {activeIncentive.ganhador_nome && 
+
+            {incentivo_ativo.ganhador_nome &&
               <View style={styles.badgeGanhador}>
                 <MaterialCommunityIcons name="crown" size={20} color={customTheme['color-success-600']} />
-                <Text category='s2' status='success'>{activeIncentive.ganhador_nome}</Text>
+                <Text category='s2' status='success'>{incentivo_ativo.ganhador_nome}</Text>
               </View>
             }
 
@@ -78,9 +105,31 @@ export const Incentivos = () => {
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <Button size='small' status='warning'
                 accessoryLeft={<MaterialCommunityIcons name="check-decagram" size={16} color="black" />}
+                onPress={() => {
+                  Alert.alert('Encerrar Incentivo',
+                    'Ao encerrar o incentivo, você não poderá editá-lo ou ver as vendas relacionadas a ele.',
+                    [
+                      {
+                        text: 'Cancelar'
+                      },
+                      {
+                        text: 'Confirmar',
+                        onPress: async () => {
+                          try {
+                            await incentivoFirestore.encerrar(incentivo_ativo.id);
+                            await refetch()
+                            await recarregarAtivo()
+                          } catch (error) {
+                            console.error(error)
+                          }
+                        }
+                      }
+                    ]
+                  )
+                }}
               >Encerrar</Button>
-              <Button size='small' onPress={() => navigator.navigate('RegistroVendaIncentivo')}
-                accessoryLeft={<MaterialIcons name="shopping-cart" size={16} color="black" />}
+              <Button appearance='outline' size='small' onPress={() => navigator.navigate('RegistroVendaIncentivo', { incentObj: incentivo_ativo })}
+                accessoryLeft={<MaterialIcons name="shopping-cart" size={16} color={customTheme['color-primary-500']} />}
               >Ver vendas</Button>
             </View>
           </CardGradientPrimary>
@@ -88,7 +137,7 @@ export const Incentivos = () => {
 
         <Button
           style={styles.button}
-          disabled={!!activeIncentive}
+          disabled={!!incentivo_ativo}
           onPress={() => setVisible(true)}
         >
           Começar Novo Incentivo
@@ -100,7 +149,7 @@ export const Incentivos = () => {
         </View>
 
         <FlatList
-          data={historyIncentives}
+          data={incentivos}
           keyExtractor={(item) => item.descricao}
           contentContainerStyle={{ gap: 10 }}
           renderItem={(incentivo) => (
@@ -113,11 +162,11 @@ export const Incentivos = () => {
               <View style={{ flexDirection: 'row', gap: 15 }}>
                 <View style={styles.subTxt}>
                   <MaterialIcons name="star-purple500" size={13} color={customTheme['text-hint-color']} />
-                  <Text category='c1' appearance="hint">Meta: {incentivo.item.meta}</Text>
+                  <Text category='s2' appearance="hint">Meta: {incentivo.item.meta}</Text>
                 </View>
                 <View style={styles.subTxt}>
                   <MaterialIcons name="calendar-month" size={13} color={customTheme['text-hint-color']} />
-                  <Text category='c1' appearance="hint">Expira em: {incentivo.item.data_expiracao.toLocaleDateString()}</Text>
+                  <Text category='s2' appearance="hint">Expira em: {converterTimestamp(incentivo.item.data_expiracao).toLocaleDateString()}</Text>
                 </View>
               </View>
 
@@ -127,13 +176,13 @@ export const Incentivos = () => {
                   <Text category='s2' status='success'>{incentivo.item.ganhador_nome}</Text>
                 </View>
               ) : (
-                <Text appearance="hint">Expirado sem ganhador</Text>
+                <Text category='c2' appearance="hint">Expirado sem ganhador</Text>
               )}
             </CardGradient>
           )}
           ListEmptyComponent={
             <Card style={styles.emptyCard}>
-              <Text appearance="hint">Nenhum incentivo registrado</Text>
+              <Text style={{textAlign: 'center'}} appearance="hint">Nenhum incentivo no histórico</Text>
             </Card>
           }
           removeClippedSubviews
@@ -148,18 +197,18 @@ export const Incentivos = () => {
         backdropStyle={styles.backdrop}
         onBackdropPress={() => setVisible(false)}
       >
-        <Card disabled>
+        <Card style={styles.cardModal}>
           <Text category="h6">Novo Incentivo</Text>
 
           <Input
-            label="Descrição"
+            label="Descrição *"
             value={form.descricao}
             onChangeText={v => setForm({ ...form, descricao: v })}
             style={styles.input}
           />
 
           <Input
-            label="Valor do prêmio"
+            label="Valor do prêmio *"
             keyboardType="numeric"
             value={form.valor_incentivo}
             onChangeText={v => setForm({ ...form, valor_incentivo: v })}
@@ -167,21 +216,20 @@ export const Incentivos = () => {
           />
 
           <Input
-            label="Meta"
+            label="Meta *"
             keyboardType="numeric"
             value={form.meta}
             onChangeText={v => setForm({ ...form, meta: v })}
             style={styles.input}
           />
 
-          <Input
-            label="Data de expiração (YYYY-MM-DD)"
-            value={form.data_expiracao}
-            onChangeText={v => setForm({ ...form, data_expiracao: v })}
-            style={styles.input}
-          />
+          <View style={[styles.input, { gap: 5 }]}>
+            <Text category='c1' appearance='hint'>Data de expiração *</Text>
+            <DatePicker dataPreEstabelecida={dataExpiracao} setarData={settingExpiracao} tamanBtn='small' tipo='date' />
+          </View>
 
-          <Button onPress={handleCreate}>Criar Incentivo</Button>
+          <Button onPress={handleAdicionarIncentivo} disabled={isLoading}
+          >{(isLoading) ? 'Adicionando...' : 'Criar Incentivo'}</Button>
         </Card>
       </Modal>
     </Layout>
@@ -206,7 +254,12 @@ const styles = StyleSheet.create({
   emptyCard: { padding: 24, alignItems: 'center' },
   input: { marginBottom: 12 },
   rowBetween: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
-  backdrop: { backgroundColor: 'rgba(0,0,0,0.5)' },
+  backdrop: {
+    backgroundColor: 'rgba(0,0,0,0.5)'
+  },
+  cardModal: {
+    width: 300, maxWidth: 300, minWidth: 200,
+  },
   subTxt: {
     flexDirection: 'row',
     gap: 3,

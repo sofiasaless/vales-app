@@ -1,4 +1,4 @@
-import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, runTransaction, setDoc, Transaction, updateDoc, where } from "firebase/firestore";
 import { Funcionario, FuncionarioPostRequestBody } from "../schema/funcionario.schema";
 import { PatternFirestore } from "./pattern.firestore";
 import { COLLECTIONS } from "../enums/firebase.enum";
@@ -60,7 +60,7 @@ export class FuncionarioFirestore extends PatternFirestore {
     }
 
     if (body.produto_ref) valeToSave.produto_ref = this.menuFirestore.getRef(body.produto_ref);
-    
+
     await updateDoc(doc(this.setup(), idFuncionario), {
       vales: arrayUnion(valeToSave)
     })
@@ -85,9 +85,40 @@ export class FuncionarioFirestore extends PatternFirestore {
     })
   }
 
+  public async incrementarIncentivo(idFuncionario: string, contador: number) {
+    await updateDoc(this.getRef(idFuncionario), {
+      "incentivo.contador": increment(contador)
+    })
+  }
+
+  public async adicionarIncentivo(idFuncionario: string) {
+    await updateDoc(this.getRef(idFuncionario), {
+      "incentivo.ganhador": true
+    })
+  }
+
+  public async removerIncentivos(transaction: Transaction) {
+    const docs = (await getDocs(this.setup())).docs
+
+    docs.map((doc) => {
+      transaction.update(this.getRef(doc.id), {
+        incentivo: {
+          contador: 0,
+          ganhador: false,
+          incentivo_ref: null
+        }
+      })
+    })
+  }
+
   public async atualizar(id: string, payload: Partial<Funcionario>) {
     await updateDoc(doc(this.setup(), id), {
-      ...payload
+      ...payload,
+      incentivo: {
+        contador: 0,
+        ganhador: false,
+        incentivo_ref: null
+      }
     })
   }
 
