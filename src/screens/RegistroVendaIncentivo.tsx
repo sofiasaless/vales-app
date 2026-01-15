@@ -32,8 +32,13 @@ export default function RegistroVendaIncentivo() {
 
   const { funcionariosIncentivo, incrementar } = useFuncionariosIncentivoContext()
 
+  const [isLoading, setIsLoading] = useState(false)
+
+  const [isConfirmando, setIsConfirmando] = useState(false)
+
   const confirmarGanhador = async (funcionario: Funcionario, idFuncInce: string) => {
     try {
+      setIsConfirmando(true)
       await incentivoFirestore.declararGanhador(incentivo, funcionario, idFuncInce);
 
       setIncentivo(prev => ({
@@ -45,6 +50,8 @@ export default function RegistroVendaIncentivo() {
       recarregarIncentivo()
     } catch (error: any) {
       alert('Não foi possível declarar ganhador', error)
+    } finally {
+      setIsConfirmando(false)
     }
   }
 
@@ -199,9 +206,10 @@ export default function RegistroVendaIncentivo() {
                     {
                       (counter === incentObj.meta) && (!isWinner) &&
                       <Button style={{ marginTop: 8 }} appearance='outline' status='warning' size='tiny'
+                        disabled={isConfirmando}
                         onPress={() => confirmarGanhador(item.funcionario_obj!, item.id)}
                         accessoryRight={<MaterialCommunityIcons name="trophy-variant" size={12} color={customTheme['color-warning-500']} />}
-                      >Confirmar ganhador</Button>
+                      >{(isConfirmando)?'Confirmando...':'Confirmar ganhador'}</Button>
                     }
                   </View>
 
@@ -235,9 +243,10 @@ export default function RegistroVendaIncentivo() {
 
       {incentivo.ganhador_nome &&
         <View>
-          <Button appearance='outline' status='danger' size='tiny'
+          <Button appearance='outline' status='danger' disabled={isLoading}
             onPress={async () => {
               try {
+                setIsLoading(true)
                 await incentivoFirestore.cancelarGanhador(incentivo, incentivo.ganhador_ref || '');
 
                 setIncentivo(prev => ({
@@ -249,9 +258,11 @@ export default function RegistroVendaIncentivo() {
                 recarregarIncentivo()
               } catch (error: any) {
                 alert('Não foi possível cancelar o ganhador', error)
+              } finally {
+                setIsLoading(false)
               }
             }}
-          >Cancelar ganhador</Button>
+          >{(isLoading)?'Cancelando...':'Cancelar ganhador'}</Button>
         </View>
       }
     </Layout>

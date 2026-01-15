@@ -96,7 +96,7 @@ export default function Financas() {
         <DinheiroDisplay size='lg' variant='negative' value={totalGeral || 0} />
       </CardGradient>
 
-      <View style={styles.grupoBotoes}>
+      {/* <View style={styles.grupoBotoes}>
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <DatePicker status='warning' setarData={settingInicio} tamanBtn='small' tipo='date' dataPreEstabelecida={dataInicio} />
           <Text style={{ textAlign: 'center', alignSelf: 'center', fontSize: 12 }} category='s1'>até</Text>
@@ -134,7 +134,7 @@ export default function Financas() {
           accessoryRight={<Entypo name="share" size={20} color={customTheme['color-info-500']} />}
           onPress={async () => gerarRelatorioDespesas(totalDespesas || [], restaurante!, {dataFim, dataInicio})}
         >Compartilhar relatório</Button>
-      </View>
+      </View> */}
 
       <Divider style={{ marginBlock: 10, padding: 3, borderRadius: 10 }} />
 

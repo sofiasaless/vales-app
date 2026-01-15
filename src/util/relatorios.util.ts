@@ -1,11 +1,12 @@
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+import { DateFilterProps } from "../firestore/despesa.firestore";
+import { Despesa } from "../schema/financa.schema";
 import { Funcionario } from "../schema/funcionario.schema";
 import { Pagamento, PagamentoPostRequestBody } from "../schema/pagamento.schema";
-import { converterTimestamp } from "./formatadores.util";
-import { Despesa } from "../schema/financa.schema";
 import { Restaurante } from "../schema/restaurante.schema";
-import { DateFilterProps } from "../firestore/despesa.firestore";
+import { calcularTotalIncentivos, calcularTotalVales } from "./calculos.util";
+import { converterTimestamp } from "./formatadores.util";
 
 function formatDate(date?: Date) {
   if (!date) return '-';
@@ -25,12 +26,23 @@ export async function gerarRelatorioVales(
   data_pag: Date
 ) {
   const vales = pagamento.vales || [];
-  const dataInicio = converterTimestamp(vales[0].data_adicao)
-  const totalVales = vales.reduce((acc, v) => acc + (v.quantidade * v.preco_unit), 0);
+  const incentivos = pagamento.incentivo || [];
+
+  const dataInicio = vales.length
+    ? converterTimestamp(vales[0].data_adicao)
+    : data_pag;
+
+  const totalVales = calcularTotalVales(pagamento.vales);
+
+  const totalIncentivos = calcularTotalIncentivos(pagamento.incentivo);
 
   const salarioBase = () => {
-    return (funcionario.tipo === 'FIXO') ? (funcionario.salario / 2) : (funcionario.salario * (funcionario.dias_trabalhados_semanal || 1))
-  }
+    return funcionario.tipo === 'FIXO'
+      ? funcionario.salario / 2
+      : funcionario.salario * (funcionario.dias_trabalhados_semanal || 1);
+  };
+
+  const salarioFinal = salarioBase() - totalVales + totalIncentivos;
 
   const html = `
   <html>
@@ -81,7 +93,6 @@ export async function gerarRelatorioVales(
         th, td {
           border: 1px solid #ccc;
           padding: 8px;
-          text-align: left;
         }
 
         th {
@@ -89,8 +100,21 @@ export async function gerarRelatorioVales(
         }
 
         .total {
-          text-align: right;
+          text-align: left;
           font-weight: bold;
+        }
+
+        .section-assinatura {
+          margin-top: 14px;
+          display: flex;
+          flex-direction: row;
+          gap: 10px;
+        }
+
+        .termo {
+          margin-top: 32px;
+          font-size: 14px;
+          line-height: 1.6;
         }
 
         .signature {
@@ -112,7 +136,7 @@ export async function gerarRelatorioVales(
     </head>
 
     <body>
-      <h1>Relatório de Pagamento</h1>
+      <hDinheiroDisplay1>Relatório de Pagamento</h1>
       <div class="subtitle">
         Período: ${formatDate(dataInicio)} até ${formatDate(data_pag)}
       </div>
@@ -124,24 +148,24 @@ export async function gerarRelatorioVales(
           <div><strong>Cargo:</strong> ${funcionario.cargo}</div>
           <div><strong>CPF:</strong> ${funcionario.cpf ?? '-'}</div>
           <div><strong>Tipo:</strong> ${funcionario.tipo}</div>
-          <div><strong>Salário Atual:</strong> ${formatMoney(funcionario.salario)}</div>
+          <div><strong>Salário Bruto:</strong> ${formatMoney(funcionario.salario)}</div>
           <div><strong>Data de Admissão:</strong> ${formatDate(converterTimestamp(funcionario.data_admissao))}</div>
         </div>
       </div>
 
       <div class="section">
-        <h2>Pagamento</h2>
+        <h2>Resumo do Pagamento</h2>
         <div class="info-grid">
           <div><strong>Data do Pagamento:</strong> ${formatDate(data_pag)}</div>
-          <div><strong>Valor Pago:</strong> ${formatMoney(pagamento.valor_pago)}</div>
           <div><strong>Salário Base:</strong> ${formatMoney(salarioBase())}</div>
           <div><strong>Total em Vales:</strong> ${formatMoney(totalVales)}</div>
+          <div><strong>Total em Incentivos:</strong> ${formatMoney(totalIncentivos)}</div>
+          <div><strong>Salário Pago:</strong> ${formatMoney(salarioFinal)}</div>
         </div>
       </div>
 
-      <div>
+      <div class="section">
         <h2>Vales</h2>
-
         <table>
           <thead>
             <tr>
@@ -155,16 +179,15 @@ export async function gerarRelatorioVales(
           <tbody>
             ${vales.length === 0
       ? `<tr><td colspan="5">Nenhum vale registrado</td></tr>`
-      : vales
-        .map(v => `
-          <tr>
-            <td>${formatDate(converterTimestamp(v.data_adicao))}</td>
-            <td>${v.descricao}</td>
-            <td>${v.quantidade}</td>
-            <td>${formatMoney(v.preco_unit)}</td>
-            <td>${formatMoney(v.preco_unit * v.quantidade)}</td>
-          </tr>`)
-        .join('')
+      : vales.map(v => `
+        <tr>
+          <td>${formatDate(converterTimestamp(v.data_adicao))}</td>
+          <td>${v.descricao}</td>
+          <td>${v.quantidade}</td>
+          <td>${formatMoney(v.preco_unit)}</td>
+          <td>${formatMoney(v.preco_unit * v.quantidade)}</td>
+        </tr>
+      `).join('')
     }
             <tr>
               <td colspan="4" class="total">Total</td>
@@ -174,15 +197,45 @@ export async function gerarRelatorioVales(
         </table>
       </div>
 
-      ${(pagamento.assinatura) ?
+      ${incentivos.length > 0
+      ? `
+        <div class="section">
+          <h2>Incentivos Recebidos</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${incentivos.map(i => `
+                <tr>
+                  <td>${formatMoney(i.valor)}</td>
+                </tr>
+              `).join('')}
+              <tr>
+                <td class="total">Total    ${formatMoney(totalIncentivos)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        `
+      : ''
+    }
+
+      <div class="termo">
+        Eu, <strong>${funcionario.nome}</strong>, declaro que recebi meu salário no valor de
+        <strong>${formatMoney(salarioFinal)}</strong>, referente ao período informado, já considerando os descontos de vales no valor total de <strong>${formatMoney(calcularTotalVales(pagamento.vales))},</strong>
+        ${incentivos.length > 0 ? ` e os incentivos recebidos no valor total de <strong>${formatMoney(calcularTotalIncentivos(pagamento.incentivo))}</strong>.` : '.'}
+      </div>
+
+      ${pagamento.assinatura
+      ?
+      `<div class="section-assinatura">
+        <h5>Assinatura do Funcionário</h5>
+        <img src="${pagamento.assinatura}" style="width: 120px;" />
+      </div>
       `
-      <div>
-        <h2>Assinatura do Funcionário</h2>
-        <img 
-          src="${pagamento.assinatura}" 
-          style="width: 110px;"
-        />
-      </div>`
       :
       `<div class="signature">
         <div>
@@ -193,17 +246,14 @@ export async function gerarRelatorioVales(
           <div class="signature-line"></div>
           Responsável
         </div>
-      </div>`
+      </div>
+      `
     }
     </body>
   </html>
   `;
 
-  const { uri } = await Print.printToFileAsync({
-    html,
-    base64: false,
-  });
-
+  const { uri } = await Print.printToFileAsync({ html });
   await Sharing.shareAsync(uri);
 }
 

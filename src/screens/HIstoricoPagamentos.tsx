@@ -13,7 +13,7 @@ import { ItemVale } from '../components/ItemVale';
 import { useHistoricoPagamentos } from '../hooks/usePagamentos';
 import { Pagamento } from '../schema/pagamento.schema';
 import { customTheme } from '../theme/custom.theme';
-import { calcularTotalVales } from '../util/calculos.util';
+import { calcularSalarioQuinzena, calcularTotalIncentivos, calcularTotalVales } from '../util/calculos.util';
 import { converterParaDate } from '../util/datas.util';
 import { converterParaIsoDate, converterTimestamp } from '../util/formatadores.util';
 import { gerarRelatorioVales } from '../util/relatorios.util';
@@ -43,6 +43,8 @@ export const HistoricoPagamentos = () => {
       setDataFim(converterParaDate(dado))
     }
   }
+
+  const { data: historico, isLoading } = useHistoricoPagamentos(funcObj.id, { dataFim, dataInicio })
 
   const ItemHistorico = ({ historicoPagamento }: { historicoPagamento: Pagamento }) => {
     const isExpanded = expandedPayment === historicoPagamento.id;
@@ -100,7 +102,7 @@ export const HistoricoPagamentos = () => {
                   Salário Base
                 </Text>
                 <DinheiroDisplay
-                  value={historicoPagamento.salario_atual}
+                  value={calcularSalarioQuinzena(funcObj)}
                   size="sm"
                 />
               </View>
@@ -115,6 +117,20 @@ export const HistoricoPagamentos = () => {
                   variant="negative"
                 />
               </View>
+
+              {
+                historicoPagamento.incentivo.length > 0 &&
+                <View style={[styles.summaryCard, styles.sucessCard]}>
+                  <Text appearance="hint" category="c1">
+                    Valores Incentivos
+                  </Text>
+                  <DinheiroDisplay
+                    value={(calcularTotalIncentivos(historicoPagamento.incentivo))}
+                    size="sm"
+                    variant="positive"
+                  />
+                </View>
+              }
             </View>
 
             <View style={styles.voucherSection}>
@@ -137,8 +153,8 @@ export const HistoricoPagamentos = () => {
               </View>
             </View>
 
-            <View style={{gap: 8}}>
-              <Button style={{ display: (historicoPagamento.assinatura)?'flex':'none' }}
+            <View style={{ gap: 8 }}>
+              <Button style={{ display: (historicoPagamento.assinatura) ? 'flex' : 'none' }}
                 status='info'
                 onPress={async () => gerarRelatorioVales(funcObj, historicoPagamento, converterTimestamp(historicoPagamento.data_pagamento))}
                 accessoryRight={<Entypo name="share" size={20} color={'black'} />}
@@ -158,8 +174,6 @@ export const HistoricoPagamentos = () => {
     )
   }
 
-  const { data: historico, isLoading } = useHistoricoPagamentos(funcObj.id, { dataFim, dataInicio })
-
   return (
     <Layout style={styles.container}>
 
@@ -169,20 +183,18 @@ export const HistoricoPagamentos = () => {
             <DatePicker status='warning' setarData={settingInicio} tamanBtn='small' tipo='date' dataPreEstabelecida={dataInicio} />
             <Text style={{ textAlign: 'center', alignSelf: 'center', fontSize: 12 }} category='s1'>até</Text>
             <DatePicker status='warning' setarData={settingFim} tamanBtn='small' tipo='date' dataPreEstabelecida={dataFim} />
+            <Button
+              size='small'
+              status='warning'
+              appearance='outline'
+              accessoryRight={<AntDesign name="reload" size={16} color={customTheme['color-warning-500']} />}
+              onPress={() => {
+                setDataFim(new Date())
+                setDataInicio(new Date(new Date().setDate(1)))
+              }}
+            >
+            </Button>
           </View>
-
-          <Button
-            size='small'
-            status='warning'
-            appearance='outline'
-            accessoryRight={<AntDesign name="reload" size={16} color={customTheme['color-warning-500']} />}
-            onPress={() => {
-              setDataFim(new Date())
-              setDataInicio(new Date(new Date().setDate(1)))
-            }}
-          >
-            Resetar datas
-          </Button>
         </View>
         {
           (isLoading) ?
@@ -299,6 +311,10 @@ export const styles = StyleSheet.create({
 
   dangerCard: {
     backgroundColor: 'rgba(255, 61, 113, 0.09)',
+  },
+
+  sucessCard: {
+    backgroundColor: 'rgba(46, 184, 114, 0.12)',
   },
 
   voucherSection: {

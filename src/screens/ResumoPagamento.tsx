@@ -16,16 +16,15 @@ import { NavigationProp, useNavigation, useRoute } from '@react-navigation/nativ
 import { CardGradient } from '../components/CardGradient';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { ItemVale } from '../components/ItemVale';
-import { useEventoAlteracoesContext } from '../context/EventoAlteracaoContext';
 import { usePagamentos } from '../hooks/usePagamentos';
 import { useRestauranteId } from '../hooks/useRestaurante';
+import { useVales } from '../hooks/useVales';
 import { RootStackParamList } from '../routes/StackRoutes';
 import { Funcionario } from '../schema/funcionario.schema';
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
-import { calcularTotalVales } from '../util/calculos.util';
+import { calcularSalarioQuinzena, calcularTotalParaPagar, calcularTotalVales } from '../util/calculos.util';
 import { formatarDataVales } from '../util/datas.util';
-import { useVales } from '../hooks/useVales';
 
 interface RouteParams {
   funcObj: Funcionario
@@ -38,16 +37,10 @@ export const ResumoPagamento = () => {
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  const salarioBase = () => {
-    return (funcObj.tipo === 'FIXO') ? (funcObj.salario / 2) : (funcObj.salario * (funcObj.dias_trabalhados_semanal || 1))
-  }
-
   const getBaseSalario = () => {
     let txt = (funcObj.tipo === 'FIXO') ? `(Salário Base) R$ ` : `(Diária Base) R$ `
     return txt += funcObj.salario.toFixed(2)
   }
-
-  const totalParaPagar = (salarioBase() - calcularTotalVales(funcObj.vales));
 
   const incentivos = () => {
     if (funcObj.incentivo.length === 0) return 0;
@@ -55,8 +48,6 @@ export const ResumoPagamento = () => {
       return acc + inc.valor
     }, 0)
   }
-
-  const totalParaPagarIncentivo = (totalParaPagar + incentivos());
 
   const { data: res_ } = useRestauranteId()
 
@@ -68,19 +59,19 @@ export const ResumoPagamento = () => {
     const res = await pagarFuncionario(funcObj.id, {
       incentivo: funcObj.incentivo,
       vales: formatarDataVales(funcObj.vales),
-      valor_pago: totalParaPagar,
+      valor_pago: calcularTotalParaPagar(funcObj),
       restaurante_ref: res_?.uid || '',
       salario_atual: funcObj.salario
     })
 
     if (res.ok) {
       // verificar se o pagamento foi negativo e se for adicionar como novo vale
-      if (totalParaPagar < 0) {
+      if (calcularTotalParaPagar(funcObj) < 0) {
         await adicionarVale(funcObj.id, {
           id: Math.random().toString(),
           descricao: 'Negativo última quinzena',
           data_adicao: new Date(),
-          preco_unit: totalParaPagar * -1,
+          preco_unit: calcularTotalParaPagar(funcObj) * -1,
           quantidade: 1
         })
       }
@@ -111,7 +102,7 @@ export const ResumoPagamento = () => {
                 <Text category='c2' appearance='hint'>{getBaseSalario()}</Text>
               </View>
             </View>
-            <DinheiroDisplay size='lg' value={salarioBase()} />
+            <DinheiroDisplay size='lg' value={calcularSalarioQuinzena(funcObj)} />
           </CardGradient>
 
           {/* Vale */}
@@ -179,9 +170,9 @@ export const ResumoPagamento = () => {
                   <View style={styles.linhaPagamento}>
                     <Text category='s2' style={{ fontStyle: 'italic', fontFamily: 'JetBrains-Italic' }}>Subtotal</Text>
                     <DinheiroDisplay
-                      value={totalParaPagar}
+                      value={calcularSalarioQuinzena(funcObj) - calcularTotalVales(funcObj.vales)}
                       size="lg"
-                      variant={(totalParaPagar >= 0) ? "positive" : "negative"}
+                      variant={"default"}
                     />
                   </View>
 
@@ -211,18 +202,18 @@ export const ResumoPagamento = () => {
                   <View style={styles.linhaPagamento}>
                     <Text category='s2' style={{ fontStyle: 'italic', fontFamily: 'JetBrains-Italic' }}>Total</Text>
                     <DinheiroDisplay
-                      value={totalParaPagarIncentivo}
+                      value={calcularTotalParaPagar(funcObj)}
                       size="xl"
-                      variant={(totalParaPagarIncentivo >= 0) ? "positive" : "negative"}
+                      variant={(calcularTotalParaPagar(funcObj) >= 0) ? "positive" : "negative"}
                     />
                   </View>
 
                 </View>
                 :
                 <DinheiroDisplay
-                  value={totalParaPagar}
+                  value={calcularTotalParaPagar(funcObj)}
                   size="xl"
-                  variant={(totalParaPagar >= 0) ? "positive" : "negative"}
+                  variant={(calcularTotalParaPagar(funcObj) >= 0) ? "positive" : "negative"}
                 />
             }
 
@@ -267,7 +258,7 @@ export const ResumoPagamento = () => {
 
           <View style={styles.modalAmount}>
             <DinheiroDisplay
-              value={totalParaPagar}
+              value={calcularTotalParaPagar(funcObj)}
               size="xl"
               variant="positive"
             />
