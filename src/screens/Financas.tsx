@@ -1,15 +1,12 @@
-import Entypo from '@expo/vector-icons/Entypo';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
   Button,
-  ButtonGroup,
-  Divider,
   Input,
   Layout,
   Spinner,
-  Text,
+  Text
 } from '@ui-kitten/components';
 import React, { useCallback, useMemo, useState } from 'react';
 import {
@@ -20,7 +17,6 @@ import {
   View,
 } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
-import { DatePicker } from '../components/DatePicker';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { useTotalDespesasContext } from '../context/TotalDespesasContext';
 import { categoriaFinancas } from '../firestore/categoriaFinanca.firestore';
@@ -30,9 +26,6 @@ import { RootStackParamList } from '../routes/StackRoutes';
 import { CategoriaPostRequestBodyFinancas } from '../schema/financa.schema';
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
-import { converterParaDate } from '../util/datas.util';
-import { gerarRelatorioDespesas } from '../util/relatorios.util';
-import { useRestauranteConectado } from '../hooks/useRestaurante';
 
 export default function Financas() {
   const route = useRoute();
@@ -48,9 +41,8 @@ export default function Financas() {
     cor: 'blue' as keyof typeof colorMap
   });
 
-  const { totalDespesas, filtrarPorDatas, resetarDatas } = useTotalDespesasContext()
+  const { totalDespesas, resetarDatas } = useTotalDespesasContext()
 
-  const { data: restaurante } = useRestauranteConectado()
 
   const totalGeral = useMemo(() => {
     return totalDespesas?.reduce((acumulador, despesa) => {
@@ -74,15 +66,6 @@ export default function Financas() {
     }
   };
 
-  const [dataInicio, setDataInicio] = useState(new Date(new Date().setDate(1)))
-  const settingInicio = (tipo: 'DATA' | 'HORA', dado?: string) => {
-    if (tipo === 'DATA' && dado != undefined) setDataInicio(converterParaDate(dado))
-  }
-  const [dataFim, setDataFim] = useState(new Date())
-  const settingFim = (tipo: 'DATA' | 'HORA', dado?: string) => {
-    if (tipo === 'DATA' && dado != undefined) setDataFim(converterParaDate(dado))
-  }
-
   useFocusEffect(
     useCallback(() => {
       resetarDatas()
@@ -92,51 +75,28 @@ export default function Financas() {
   return (
     <Layout style={styles.container}>
       <CardGradient styles={styles.totalCard}>
-        <Text appearance="hint">Total do mês</Text>
-        <DinheiroDisplay size='lg' variant='negative' value={totalGeral || 0} />
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={{ gap: 5 }}>
+            <Text appearance="hint">Total do mês</Text>
+            {(!totalGeral) ?
+              <Spinner status='danger' />
+              :
+              <DinheiroDisplay
+                size="lg"
+                variant="negative"
+                value={totalGeral || 0}
+              />
+            }
+          </View>
+
+          <View>
+            <Button size='small' status='info'
+              accessoryLeft={<Ionicons name="document-attach-sharp" size={16} color="black" />}
+              onPress={() => navigation.navigate('FinancasRelatorio', { idRest })}
+            >Relatório</Button>
+          </View>
+        </View>
       </CardGradient>
-
-      {/* <View style={styles.grupoBotoes}>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <DatePicker status='warning' setarData={settingInicio} tamanBtn='small' tipo='date' dataPreEstabelecida={dataInicio} />
-          <Text style={{ textAlign: 'center', alignSelf: 'center', fontSize: 12 }} category='s1'>até</Text>
-          <DatePicker status='warning' setarData={settingFim} tamanBtn='small' tipo='date' dataPreEstabelecida={dataFim} />
-        </View>
-
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Button
-            size='small'
-            status='warning'
-            appearance='outline'
-            accessoryRight={<AntDesign name="reload" size={16} color={customTheme['color-warning-500']} />}
-            onPress={() => {
-              setDataFim(new Date())
-              setDataInicio(new Date(new Date().setDate(1)))
-            }}
-          >
-            Resetar datas
-          </Button>
-
-          <Button
-            size='small'
-            status='warning'
-            appearance='outline'
-            accessoryRight={<AntDesign name="aim" size={16} color={customTheme['color-warning-500']} />}
-            onPress={() => {
-              filtrarPorDatas({ dataFim, dataInicio })
-            }}
-          >
-            Filtrar
-          </Button>
-
-        </View>
-        <Button appearance='outline' status='info'
-          accessoryRight={<Entypo name="share" size={20} color={customTheme['color-info-500']} />}
-          onPress={async () => gerarRelatorioDespesas(totalDespesas || [], restaurante!, {dataFim, dataInicio})}
-        >Compartilhar relatório</Button>
-      </View> */}
-
-      <Divider style={{ marginBlock: 10, padding: 3, borderRadius: 10 }} />
 
       {
         (isLoading) ?

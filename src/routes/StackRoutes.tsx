@@ -20,6 +20,7 @@ import { CategoriaFinancas } from '../schema/financa.schema';
 import { Incentivos } from '../screens/Incentivos';
 import RegistroVendaIncentivo from '../screens/RegistroVendaIncentivo';
 import { Incentivo } from '../schema/incentivo.schema';
+import RelatorioFinancas from '../screens/RelatorioFinancas';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -41,6 +42,7 @@ export type RootStackParamList = {
   FinancasDetalhes: { categoriaObj: CategoriaFinancas };
   Incentivos: { idRest: string };
   RegistroVendaIncentivo: {incentObj: Incentivo};
+  FinancasRelatorio: { idRest: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -151,6 +153,12 @@ export default function StackRoutes({isAuthenticated, hasGerente}: Props) {
         name="FinancasDetalhes"
         component={FinancasDetalhe}
         options={optionsHeader('Despesas por categoria')}
+      />
+
+      <Stack.Screen
+        name="FinancasRelatorio"
+        component={RelatorioFinancas}
+        options={optionsHeader('Relatório geral de finanças')}
       />
 
       <Stack.Screen

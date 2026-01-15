@@ -18,6 +18,7 @@ import { converterParaDate } from '../util/datas.util';
 import { converterParaIsoDate, converterTimestamp } from '../util/formatadores.util';
 import { gerarRelatorioVales } from '../util/relatorios.util';
 import { Funcionario } from '../schema/funcionario.schema';
+import { CardGradient } from '../components/CardGradient';
 
 export const HistoricoPagamentos = () => {
   const route = useRoute<any>();
@@ -178,11 +179,23 @@ export const HistoricoPagamentos = () => {
     <Layout style={styles.container}>
 
       <View style={styles.content}>
-        <View style={styles.grupoBotoes}>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+        <CardGradient styles={styles.filterCard}>
+          <View style={styles.filterHeader}>
+            <AntDesign name="calendar" size={18} color={customTheme['color-warning-500']} />
+            <Text category="s1" style={styles.filterTitle}>
+              Período
+            </Text>
+          </View>
+
+          <View style={styles.dateRow}>
             <DatePicker status='warning' setarData={settingInicio} tamanBtn='small' tipo='date' dataPreEstabelecida={dataInicio} />
-            <Text style={{ textAlign: 'center', alignSelf: 'center', fontSize: 12 }} category='s1'>até</Text>
+
+            <Text appearance="hint" style={styles.dateSeparator}>
+              até
+            </Text>
+
             <DatePicker status='warning' setarData={settingFim} tamanBtn='small' tipo='date' dataPreEstabelecida={dataFim} />
+
             <Button
               size='small'
               status='warning'
@@ -195,7 +208,7 @@ export const HistoricoPagamentos = () => {
             >
             </Button>
           </View>
-        </View>
+        </CardGradient>
         {
           (isLoading) ?
             <Spinner />
@@ -342,5 +355,36 @@ export const styles = StyleSheet.create({
     paddingBlock: 10,
     alignItems: 'center',
     gap: 15
-  }
+  },
+
+
+  filterCard: {
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: '#0F172A',
+    borderWidth: 1,
+    borderColor: 'rgba(245,158,11,0.25)',
+    gap: 14,
+  },
+
+  filterHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  filterTitle: {
+    fontWeight: '600',
+  },
+
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+
+  dateSeparator: {
+    fontSize: 12,
+  },
 });

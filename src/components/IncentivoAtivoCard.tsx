@@ -3,7 +3,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Button, Text } from '@ui-kitten/components';
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { RootStackParamList } from '../routes/StackRoutes';
 import { Incentivo } from '../schema/incentivo.schema';
@@ -26,54 +26,56 @@ export const IncentivoAtivoCard: React.FC<{ incentivo: Incentivo }> = ({ incenti
   }
 
   return (
-    <CardGradientPrimary styles={styles.card}>
-      <View style={styles.header}>
-        <View style={{ flexDirection: 'row', gap: 5 }}>
-          <MaterialCommunityIcons name="star-shooting" size={18} color={customTheme['color-primary-500']} />
-          <Text category="s2" status='primary'>
-            Incentivo do momento
-          </Text>
-        </View>
-
-        <DinheiroDisplay value={incentivo.valor_incentivo} />
-      </View>
-
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text
-          style={styles.description}
-          numberOfLines={2}
-        >
-          {incentivo.descricao}
-        </Text>
-
-        <View style={styles.metaItem}>
-          <Feather name="target" size={12} color="#9CA3AF" />
-          <Text appearance="hint" style={styles.metaText}>
-            Meta: {incentivo.meta}
-          </Text>
-        </View>
-      </View>
-
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-
-        <View style={styles.expiracaoBadge}>
-          <Text category='c2' status='warning'>{getExpiracao()}</Text>
-        </View>
-
-        {(incentivo.ganhador_nome) ?
-          <View style={styles.winnerBadge}>
-            <MaterialCommunityIcons name="crown" size={14} color="#16A34A" />
-            <Text category='c2' status='success'>{incentivo.ganhador_nome.split(' ')[0]}</Text>
+    <TouchableOpacity onPress={() => navigator.navigate('RegistroVendaIncentivo', { incentObj: incentivo })}>
+      <CardGradientPrimary styles={styles.card}>
+        <View style={styles.header}>
+          <View style={{ flexDirection: 'row', gap: 5 }}>
+            <MaterialCommunityIcons name="star-shooting" size={18} color={customTheme['color-primary-500']} />
+            <Text category="s2" status='primary'>
+              Incentivo do momento
+            </Text>
           </View>
-          :
-          <Button size='small' appearance='outline'
-            accessoryLeft={<MaterialCommunityIcons name="cart" size={14} color={customTheme['color-primary-500']} />}
-            onPress={() => navigator.navigate('RegistroVendaIncentivo', { incentObj: incentivo })}
-          >Registrar Venda</Button>
-        }
-      </View>
 
-    </CardGradientPrimary>
+          <DinheiroDisplay value={incentivo.valor_incentivo} />
+        </View>
+
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text
+            style={styles.description}
+            numberOfLines={2}
+          >
+            {incentivo.descricao}
+          </Text>
+
+          <View style={styles.metaItem}>
+            <Feather name="target" size={12} color="#9CA3AF" />
+            <Text appearance="hint" style={styles.metaText}>
+              Meta: {incentivo.meta}
+            </Text>
+          </View>
+        </View>
+
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+
+          <View style={styles.expiracaoBadge}>
+            <Text category='c2' status='warning'>{getExpiracao()}</Text>
+          </View>
+
+          {(incentivo.ganhador_nome) ?
+            <View style={styles.winnerBadge}>
+              <MaterialCommunityIcons name="crown" size={14} color="#16A34A" />
+              <Text category='c2' status='success'>{incentivo.ganhador_nome.split(' ')[0]}</Text>
+            </View>
+            :
+            <Button size='small' appearance='outline'
+              accessoryLeft={<MaterialCommunityIcons name="cart" size={14} color={customTheme['color-primary-500']} />}
+              onPress={() => navigator.navigate('RegistroVendaIncentivo', { incentObj: incentivo })}
+            >Registrar Venda</Button>
+          }
+        </View>
+
+      </CardGradientPrimary>
+    </TouchableOpacity>
   );
 };
 
