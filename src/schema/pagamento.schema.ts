@@ -1,5 +1,5 @@
 import { DocumentReference } from "firebase/firestore"
-import { Incentivo } from "./incentivo.schema"
+import { GanhosIncentivo, Incentivo } from "./incentivo.schema"
 import { Vale } from "./vale.shema"
 
 export type Pagamento = {
@@ -9,7 +9,7 @@ export type Pagamento = {
   valor_pago: number,
   salario_atual: number,
   vales: Vale[],
-  incentivo: Incentivo[],
+  incentivo: GanhosIncentivo[],
   assinatura?: string,
   data_pagamento: Date
 }

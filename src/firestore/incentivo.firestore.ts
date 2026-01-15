@@ -72,7 +72,7 @@ export class IncentivoFirestore extends PatternFirestore {
         id: doc.id,
         ...doc.data(),
         restaurante_ref: doc.data().restaurante_ref.id,
-        ganhador_ref: doc.data().ganhador_ref.id,
+        ganhador_ref: doc.data().ganhador_ref?.id || null,
       } as Incentivo
     })
 
@@ -93,9 +93,35 @@ export class IncentivoFirestore extends PatternFirestore {
     })
   }
 
-  public async encerrar(idIncentivo: string) {
+  public async cancelarGanhador(incentivoObj: Incentivo, idGanhador: string) {
+    const toUpdate = {
+      ganhador_nome: null,
+      ganhador_ref: null,
+    }
+
+    await runTransaction(this.firestore(), async (transaction) => {
+      // retirando as informações do ganhador do documento de incentivo
+      transaction.update(this.getRef(incentivoObj.id), {
+        ...toUpdate
+      })
+
+      // retirando o status de ganhador
+      funcinoarioIncentivosFirestore.atualizar_EmTransacao(transaction, idGanhador, {
+        ganhador: false,
+      });
+
+      const idFuncionario = (await funcinoarioIncentivosFirestore.encontrarPorId(idGanhador)).funcinoario_ref
+      // retirando o ganho que foi para o documento do funcionário
+      this.funcionarioFirestore.removerGanhoIncentivo(transaction, idFuncionario, {
+        valor: incentivoObj.valor_incentivo,
+        incentivo_ref: idGanhador
+      })
+    })
+  }
+
+  public async atualizar(idIncentivo: string, body: Partial<Incentivo>) {
     await updateDoc(this.getRef(idIncentivo), {
-      status: false
+      ...body
     })
   }
 

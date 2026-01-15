@@ -3,7 +3,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Button, Card, Divider, Input, Layout, Modal, Text } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
 import { CardGradientPrimary } from '../components/CardGradientPrimary';
 import { DatePicker } from '../components/DatePicker';
@@ -16,6 +16,7 @@ import { alert } from '../util/alertfeedback.util';
 import { converterParaDate } from '../util/datas.util';
 import { converterTimestamp } from '../util/formatadores.util';
 import { useFuncionariosRestaurante } from '../hooks/useFuncionarios';
+import { Incentivo } from '../schema/incentivo.schema';
 
 export const Incentivos = () => {
   const navigator = useNavigation<NavigationProp<RootStackParamList>>();
@@ -41,6 +42,8 @@ export const Incentivos = () => {
     meta: '',
   });
 
+  const [editingIncentivo, setEditingIncentivo] = useState<Incentivo | null>(null)
+
   const [isLoading, setIsLoading] = useState(false)
   const handleAdicionarIncentivo = async () => {
     try {
@@ -59,7 +62,7 @@ export const Incentivos = () => {
       }
 
       await recarregarAtivo()
-      setForm({ descricao: '', valor_incentivo: '', meta: ''});
+      setForm({ descricao: '', valor_incentivo: '', meta: '' });
       setVisible(false);
     } catch (error: any) {
       alert('Não foi possível começar incentivo', error)
@@ -67,6 +70,28 @@ export const Incentivos = () => {
       setIsLoading(false)
     }
   };
+
+  const handleEditarIncentivo = async () => {
+    try {
+      setIsLoading(true)
+      if (!form.descricao || !form.valor_incentivo || !form.meta) return;
+
+      await incentivoFirestore.atualizar(editingIncentivo?.id || '', {
+        data_expiracao: dataExpiracao,
+        valor_incentivo: Number(form.valor_incentivo),
+        meta: Number(form.meta),
+        descricao: form.descricao
+      })
+
+      await recarregarAtivo()
+      setForm({ descricao: '', valor_incentivo: '', meta: '' });
+      setVisible(false);
+    } catch (error: any) {
+      alert('Não foi possível começar incentivo', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <Layout style={styles.container}>
@@ -103,35 +128,54 @@ export const Incentivos = () => {
 
             <Divider style={{ backgroundColor: customTheme['border-color-primary'], marginBlock: 5 }} />
 
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Button size='small' status='warning'
-                accessoryLeft={<MaterialCommunityIcons name="check-decagram" size={16} color="black" />}
-                onPress={() => {
-                  Alert.alert('Encerrar Incentivo',
-                    'Ao encerrar o incentivo, você não poderá editá-lo ou ver as vendas relacionadas a ele.',
-                    [
-                      {
-                        text: 'Cancelar'
-                      },
-                      {
-                        text: 'Confirmar',
-                        onPress: async () => {
-                          try {
-                            await incentivoFirestore.encerrar(incentivo_ativo.id);
-                            await refetch()
-                            await recarregarAtivo()
-                          } catch (error) {
-                            console.error(error)
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <Button size='small' status='warning'
+                  accessoryLeft={<MaterialCommunityIcons name="check-decagram" size={16} color="black" />}
+                  onPress={() => {
+                    Alert.alert('Encerrar Incentivo',
+                      'Ao encerrar o incentivo, você não poderá editá-lo ou ver as vendas relacionadas a ele.',
+                      [
+                        {
+                          text: 'Cancelar'
+                        },
+                        {
+                          text: 'Confirmar',
+                          onPress: async () => {
+                            try {
+                              await incentivoFirestore.atualizar(incentivo_ativo.id, {
+                                status: false
+                              });
+                              await refetch()
+                              await recarregarAtivo()
+                            } catch (error) {
+                              console.error(error)
+                            }
                           }
                         }
-                      }
-                    ]
-                  )
+                      ]
+                    )
+                  }}
+                >Encerrar</Button>
+                <Button appearance='outline' size='small' onPress={() => navigator.navigate('RegistroVendaIncentivo', { incentObj: incentivo_ativo })}
+                  accessoryLeft={<MaterialIcons name="shopping-cart" size={16} color={customTheme['color-primary-500']} />}
+                >Ver vendas</Button>
+              </View>
+
+              <TouchableOpacity style={styles.btnEditar}
+                onPress={() => {
+                  setEditingIncentivo(incentivo_ativo);
+                  setForm({
+                    descricao: incentivo_ativo?.descricao || '',
+                    meta: incentivo_ativo?.meta.toString() || '',
+                    valor_incentivo: incentivo_ativo?.valor_incentivo.toString() || ''
+                  })
+                  setDataExpiracao(converterTimestamp(incentivo_ativo.data_expiracao))
+                  setVisible(true)
                 }}
-              >Encerrar</Button>
-              <Button appearance='outline' size='small' onPress={() => navigator.navigate('RegistroVendaIncentivo', { incentObj: incentivo_ativo })}
-                accessoryLeft={<MaterialIcons name="shopping-cart" size={16} color={customTheme['color-primary-500']} />}
-              >Ver vendas</Button>
+              >
+                <MaterialCommunityIcons name="clipboard-edit-outline" size={15} color={customTheme['color-warning-500']} />
+              </TouchableOpacity>
             </View>
           </CardGradientPrimary>
         )}
@@ -183,7 +227,7 @@ export const Incentivos = () => {
           )}
           ListEmptyComponent={
             <Card style={styles.emptyCard}>
-              <Text style={{textAlign: 'center'}} appearance="hint">Nenhum incentivo no histórico</Text>
+              <Text style={{ textAlign: 'center' }} appearance="hint">Nenhum incentivo no histórico</Text>
             </Card>
           }
           removeClippedSubviews
@@ -196,10 +240,13 @@ export const Incentivos = () => {
       <Modal
         visible={visible}
         backdropStyle={styles.backdrop}
-        onBackdropPress={() => setVisible(false)}
+        onBackdropPress={() => {
+          setVisible(false)
+          setEditingIncentivo(null);
+        }}
       >
         <Card style={styles.cardModal}>
-          <Text category="h6">Novo Incentivo</Text>
+          <Text category="h6">{(editingIncentivo) ? 'Editar incentivo do momento' : 'Novo Incentivo'}</Text>
 
           <Input
             label="Descrição *"
@@ -212,16 +259,20 @@ export const Incentivos = () => {
             label="Valor do prêmio *"
             keyboardType="numeric"
             value={form.valor_incentivo}
+            disabled={(!!editingIncentivo?.ganhador_nome)}
             onChangeText={v => setForm({ ...form, valor_incentivo: v })}
             style={styles.input}
+            caption={(editingIncentivo?.ganhador_nome) ? 'Para alterar o valor do prêmio, remova o ganhador atual.' : ''}
           />
 
           <Input
             label="Meta *"
             keyboardType="numeric"
             value={form.meta}
+            disabled={(!!editingIncentivo?.ganhador_nome)}
             onChangeText={v => setForm({ ...form, meta: v })}
             style={styles.input}
+            caption={(editingIncentivo?.ganhador_nome) ? 'Para alterar a meta, remova o ganhador atual.' : ''}
           />
 
           <View style={[styles.input, { gap: 5 }]}>
@@ -229,8 +280,14 @@ export const Incentivos = () => {
             <DatePicker dataPreEstabelecida={dataExpiracao} setarData={settingExpiracao} tamanBtn='small' tipo='date' />
           </View>
 
-          <Button onPress={handleAdicionarIncentivo} disabled={isLoading}
-          >{(isLoading) ? 'Adicionando...' : 'Criar Incentivo'}</Button>
+          <Button onPress={() => {
+            if (editingIncentivo) {
+              handleEditarIncentivo()
+            } else {
+              handleAdicionarIncentivo()
+            }
+          }} disabled={isLoading}
+          >{(isLoading) ? 'Adicionando...' : (editingIncentivo) ? 'Salvar alterações' : 'Criar Incentivo'}</Button>
         </Card>
       </Modal>
     </Layout>
@@ -277,5 +334,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: customTheme['border-color-primary'],
     backgroundColor: '#2eb8731a'
+  },
+  btnEditar: {
+    backgroundColor: '#d488062c',
+    alignItems: 'center',
+    padding: 8,
+    justifyContent: 'center',
+    borderRadius: 100
   }
 });

@@ -41,6 +41,14 @@ export class FuncionarioIncentivosFirestore extends PatternFirestore {
     })
   }
 
+  public async atualizar_EmTransacao(transaction: Transaction, idFuncIncent: string,
+    body: Partial<FuncionarioIncentivoFirestorePostRequestBody>
+  ) {
+    transaction.update(this.getRef(idFuncIncent), {
+      ...body
+    })
+  }
+
   public async enviarIncentivo(
     transaction: Transaction,
     idFuncIncent: string,

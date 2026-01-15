@@ -13,7 +13,7 @@ import { useFuncionariosIncentivoContext } from '../context/FuncionariosIncentiv
 import { funcinoarioIncentivosFirestore } from '../firestore/funcionario.incentivo.firestore';
 import { incentivoFirestore } from '../firestore/incentivo.firestore';
 import { useIncentivoAtivo, useListarFuncionariosDoIncentivo } from '../hooks/useIncentivo';
-import { useRestauranteConectado } from '../hooks/useRestaurante';
+import { useRestauranteConectado, useRestauranteId } from '../hooks/useRestaurante';
 import { Funcionario } from '../schema/funcionario.schema';
 import { Incentivo } from '../schema/incentivo.schema';
 import { customTheme } from '../theme/custom.theme';
@@ -25,12 +25,28 @@ export default function RegistroVendaIncentivo() {
 
   const [incentivo, setIncentivo] = useState<Incentivo>(incentObj)
 
-  const { data: res, isLoading: carregandoRes } = useRestauranteConectado()
+  const { data: res, isLoading: carregandoRes } = useRestauranteId()
   const { data: funcionarios, isLoading: carregandoFunc, refetch } = useListarFuncionariosDoIncentivo(incentivo.id);
 
-  const { refetch: recarregarIncentivo } = useIncentivoAtivo(res?.id || '');
+  const { refetch: recarregarIncentivo } = useIncentivoAtivo(res?.uid || '');
 
   const { funcionariosIncentivo, incrementar } = useFuncionariosIncentivoContext()
+
+  const confirmarGanhador = async (funcionario: Funcionario, idFuncInce: string) => {
+    try {
+      await incentivoFirestore.declararGanhador(incentivo, funcionario, idFuncInce);
+
+      setIncentivo(prev => ({
+        ...prev,
+        ganhador_nome: funcionario.nome,
+        ganhador_ref: idFuncInce
+      }))
+
+      recarregarIncentivo()
+    } catch (error: any) {
+      alert('Não foi possível declarar ganhador', error)
+    }
+  }
 
   const exibirGanhador = (funcionario: Funcionario, idFuncInce: string) => {
     Alert.alert('🎉 Temos um ganhador!',
@@ -43,19 +59,7 @@ export default function RegistroVendaIncentivo() {
         {
           text: 'Confirmar ganhador',
           onPress: async () => {
-            try {
-              await incentivoFirestore.declararGanhador(incentivo, funcionario, idFuncInce);
-
-              setIncentivo(prev => ({
-                ...prev,
-                ganhador_nome: funcionario.nome,
-                ganhador_ref: idFuncInce
-              }))
-
-              recarregarIncentivo()
-            } catch (error) {
-              console.error(error)
-            }
+            await confirmarGanhador(funcionario, idFuncInce);
           }
         }
       ]
@@ -74,7 +78,7 @@ export default function RegistroVendaIncentivo() {
   }
 
   useEffect(() => {
-    if (!incentivo.ganhador_nome) verificarGanhador();
+    if (incentivo.ganhador_nome === null) verificarGanhador();
   }, [])
 
   const [incrementando, setIncrementando] = useState(false)
@@ -142,7 +146,6 @@ export default function RegistroVendaIncentivo() {
             contentContainerStyle={styles.list}
             renderItem={({ item }) => {
               const counter = funcionariosIncentivo.get(item.id)?.valueOf() || 0;
-              console.info(incentivo.ganhador_ref, item.id)
               const isWinner = incentivo.ganhador_ref === item.id;
               const progress = Math.min(
                 (counter / incentivo?.meta) * 100,
@@ -192,12 +195,20 @@ export default function RegistroVendaIncentivo() {
                     <Text appearance="hint" style={styles.progressText}>
                       {item.contador} / {incentivo.meta} vendas
                     </Text>
+
+                    {
+                      (counter === incentObj.meta) && (!isWinner) &&
+                      <Button style={{ marginTop: 8 }} appearance='outline' status='warning' size='tiny'
+                        onPress={() => confirmarGanhador(item.funcionario_obj!, item.id)}
+                        accessoryRight={<MaterialCommunityIcons name="trophy-variant" size={12} color={customTheme['color-warning-500']} />}
+                      >Confirmar ganhador</Button>
+                    }
                   </View>
 
                   <View style={styles.counterBox}>
                     <Button
                       size="tiny"
-                      disabled={(incentivo.ganhador_nome !== undefined) || incrementando}
+                      disabled={incrementando || (!!incentivo.ganhador_nome)}
                       onPress={() => handleIncrementar(item.id, 1, counter)}
                     >
                       <Feather name="plus" size={14} />
@@ -210,7 +221,7 @@ export default function RegistroVendaIncentivo() {
                     <Button
                       size="tiny"
                       appearance="outline"
-                      disabled={counter === 0 || (incentivo.ganhador_nome !== undefined) || incrementando}
+                      disabled={counter === 0 || incrementando || (!!incentivo.ganhador_nome)}
                       onPress={() => handleIncrementar(item.id, -1, counter)}
                     >
                       <Feather name="minus" size={14} />
@@ -224,7 +235,23 @@ export default function RegistroVendaIncentivo() {
 
       {incentivo.ganhador_nome &&
         <View>
-          <Button appearance='outline' status='danger' size='tiny'>Cancelar ganhador</Button>
+          <Button appearance='outline' status='danger' size='tiny'
+            onPress={async () => {
+              try {
+                await incentivoFirestore.cancelarGanhador(incentivo, incentivo.ganhador_ref || '');
+
+                setIncentivo(prev => ({
+                  ...prev,
+                  ganhador_nome: undefined,
+                  ganhador_ref: undefined
+                }))
+
+                recarregarIncentivo()
+              } catch (error: any) {
+                alert('Não foi possível cancelar o ganhador', error)
+              }
+            }}
+          >Cancelar ganhador</Button>
         </View>
       }
     </Layout>

@@ -4,6 +4,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import {
   Button,
   Card,
+  Divider,
   Layout,
   Modal,
   Text
@@ -48,6 +49,15 @@ export const ResumoPagamento = () => {
 
   const totalParaPagar = (salarioBase() - calcularTotalVales(funcObj.vales));
 
+  const incentivos = () => {
+    if (funcObj.incentivo.length === 0) return 0;
+    return funcObj.incentivo?.reduce((acc, inc) => {
+      return acc + inc.valor
+    }, 0)
+  }
+
+  const totalParaPagarIncentivo = (totalParaPagar + incentivos());
+
   const { data: res_ } = useRestauranteId()
 
   const { isLoading, pagarFuncionario } = usePagamentos()
@@ -56,7 +66,7 @@ export const ResumoPagamento = () => {
 
   const handleConfirmPayment = async () => {
     const res = await pagarFuncionario(funcObj.id, {
-      incentivo: [],
+      incentivo: funcObj.incentivo,
       vales: formatarDataVales(funcObj.vales),
       valor_pago: totalParaPagar,
       restaurante_ref: res_?.uid || '',
@@ -163,11 +173,59 @@ export const ResumoPagamento = () => {
               </Text>
             </View>
 
-            <DinheiroDisplay
-              value={totalParaPagar}
-              size="xl"
-              variant={(totalParaPagar >= 0) ? "positive" : "negative"}
-            />
+            {
+              (funcObj.incentivo.length > 0) ?
+                <View>
+                  <View style={styles.linhaPagamento}>
+                    <Text category='s2' style={{ fontStyle: 'italic', fontFamily: 'JetBrains-Italic' }}>Subtotal</Text>
+                    <DinheiroDisplay
+                      value={totalParaPagar}
+                      size="lg"
+                      variant={(totalParaPagar >= 0) ? "positive" : "negative"}
+                    />
+                  </View>
+
+                  <Divider style={{ backgroundColor: '#23965c6e' }} />
+
+                  <View style={styles.linhaPagamento}>
+                    <Text category='s2' style={{ fontStyle: 'italic', fontFamily: 'JetBrains-Italic' }}>Incentivos</Text>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      {
+                        funcObj.incentivo.map((inc) => (
+                          <DinheiroDisplay
+                            key={inc.incentivo_ref}
+                            value={inc.valor}
+                            size="sm"
+                          />
+                        ))
+                      }
+                      <View style={{ flexDirection: 'row', gap: 15, marginTop: 8 }}>
+                        <Text category='s1' style={{ fontStyle: 'italic', fontFamily: 'JetBrains-Italic' }}>Total: </Text>
+                        <DinheiroDisplay value={incentivos()} variant='positive' />
+                      </View>
+                    </View>
+                  </View>
+
+                  <Divider style={{ backgroundColor: '#23965c6e' }} />
+
+                  <View style={styles.linhaPagamento}>
+                    <Text category='s2' style={{ fontStyle: 'italic', fontFamily: 'JetBrains-Italic' }}>Total</Text>
+                    <DinheiroDisplay
+                      value={totalParaPagarIncentivo}
+                      size="xl"
+                      variant={(totalParaPagarIncentivo >= 0) ? "positive" : "negative"}
+                    />
+                  </View>
+
+                </View>
+                :
+                <DinheiroDisplay
+                  value={totalParaPagar}
+                  size="xl"
+                  variant={(totalParaPagar >= 0) ? "positive" : "negative"}
+                />
+            }
+
           </Card>
 
           {/* Confirmar */}
@@ -247,6 +305,7 @@ export const ResumoPagamento = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: 16
   },
   content: {
     padding: 16,
@@ -335,4 +394,11 @@ const styles = StyleSheet.create({
   emptyText: {
     marginTop: 8,
   },
+
+  linhaPagamento: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBlock: 8
+  }
 });

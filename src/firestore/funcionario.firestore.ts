@@ -93,14 +93,16 @@ export class FuncionarioFirestore extends PatternFirestore {
 
   }
 
+  public removerGanhoIncentivo(transaction: Transaction, idFuncionario: string, incentivo: GanhosIncentivo) {
+    transaction.update(this.getRef(idFuncionario), {
+      incentivo: arrayRemove(incentivo)
+    })
+
+  }
+
   public async atualizar(id: string, payload: Partial<Funcionario>) {
     await updateDoc(doc(this.setup(), id), {
-      ...payload,
-      incentivo: {
-        contador: 0,
-        ganhador: false,
-        incentivo_ref: null
-      }
+      ...payload
     })
   }
 

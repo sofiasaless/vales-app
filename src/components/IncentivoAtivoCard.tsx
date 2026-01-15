@@ -31,7 +31,7 @@ export const IncentivoAtivoCard: React.FC<{ incentivo: Incentivo }> = ({ incenti
         <View style={{ flexDirection: 'row', gap: 5 }}>
           <MaterialCommunityIcons name="star-shooting" size={18} color={customTheme['color-primary-500']} />
           <Text category="s2" status='primary'>
-            Incentivo
+            Incentivo do momento
           </Text>
         </View>
 

@@ -2,14 +2,14 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useFocusEffect } from '@react-navigation/native';
-import { Layout, Text, useTheme } from '@ui-kitten/components';
+import { Button, Layout, Text, useTheme } from '@ui-kitten/components';
 import React, { useCallback, useMemo } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useFuncionarios, useFuncionariosRestaurante } from '../hooks/useFuncionarios';
 import { CardGradient } from './CardGradient';
 import { FuncionarioCard } from './FuncionarioCard';
 import { DinheiroDisplay } from './DinheiroDisplay';
-import { useRestauranteConectado } from '../hooks/useRestaurante';
+import { useRestauranteConectado, useRestauranteId } from '../hooks/useRestaurante';
 import { calcularTotalVales } from '../util/calculos.util';
 import { customTheme } from '../theme/custom.theme';
 import { IncentivoAtivoCard } from './IncentivoAtivoCard';
@@ -30,11 +30,11 @@ export const ListaFuncionarios = () => {
     </View>
   );
 
-  const { data: res, isLoading: carregandoRes } = useRestauranteConectado()
+  const { data: res, isLoading: carregandoRes } = useRestauranteId()
 
-  const { data: funcionarios, isLoading, refetch } = useFuncionariosRestaurante(res?.id || '')
+  const { data: funcionarios, isLoading, refetch } = useFuncionariosRestaurante(res?.uid || '')
 
-  const { data: incentivo_ativo, isLoading: carregandoIncentivoAtivo, refetch: recarregarIncentivo } = useIncentivoAtivo(res?.id || '');
+  const { data: incentivo_ativo, isLoading: carregandoIncentivoAtivo, refetch: recarregarIncentivo } = useIncentivoAtivo(res?.uid || '');
 
   const valesAbertos = useMemo(() => {
     return funcionarios?.reduce((acc, func) => {
@@ -53,6 +53,7 @@ export const ListaFuncionarios = () => {
 
   useFocusEffect(
     useCallback(() => {
+      if (carregandoRes) return;
       refetch()
       recarregarIncentivo()
     }, [carregandoRes])
