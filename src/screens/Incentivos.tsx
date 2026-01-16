@@ -17,6 +17,7 @@ import { converterParaDate } from '../util/datas.util';
 import { converterTimestamp } from '../util/formatadores.util';
 import { useFuncionariosRestaurante } from '../hooks/useFuncionarios';
 import { Incentivo } from '../schema/incentivo.schema';
+import { AppModal } from '../components/AppModal';
 
 export const Incentivos = () => {
   const navigator = useNavigation<NavigationProp<RootStackParamList>>();
@@ -231,59 +232,59 @@ export const Incentivos = () => {
         initialNumToRender={10}
       />
 
-      <Modal
-        visible={visible}
-        backdropStyle={styles.backdrop}
-        onBackdropPress={() => {
+
+      <AppModal visible={visible} onClose={() => {
+        setVisible(false)
+        setEditingIncentivo(null);
+      }}>
+        <Text category="h6">{(editingIncentivo) ? 'Editar incentivo do momento' : 'Novo Incentivo'}</Text>
+
+        <Input
+          label="Descrição *"
+          value={form.descricao}
+          onChangeText={v => setForm({ ...form, descricao: v })}
+          style={styles.input}
+        />
+
+        <Input
+          label="Valor do prêmio *"
+          keyboardType="numeric"
+          value={form.valor_incentivo}
+          disabled={(!!editingIncentivo?.ganhador_nome)}
+          onChangeText={v => setForm({ ...form, valor_incentivo: v })}
+          style={styles.input}
+          caption={(editingIncentivo?.ganhador_nome) ? 'Para alterar o valor do prêmio, remova o ganhador atual.' : ''}
+        />
+
+        <Input
+          label="Meta *"
+          keyboardType="numeric"
+          value={form.meta}
+          disabled={(!!editingIncentivo?.ganhador_nome)}
+          onChangeText={v => setForm({ ...form, meta: v })}
+          style={styles.input}
+          caption={(editingIncentivo?.ganhador_nome) ? 'Para alterar a meta, remova o ganhador atual.' : ''}
+        />
+
+        <View style={[styles.input, { gap: 5 }]}>
+          <Text category='c1' appearance='hint'>Data de expiração *</Text>
+          <DatePicker dataPreEstabelecida={dataExpiracao} setarData={settingExpiracao} tamanBtn='small' tipo='date' />
+        </View>
+
+        <Button onPress={() => {
+          if (editingIncentivo) {
+            handleEditarIncentivo()
+          } else {
+            handleAdicionarIncentivo()
+          }
+        }} disabled={isLoading}
+        >{(isLoading) ? 'Adicionando...' : (editingIncentivo) ? 'Salvar alterações' : 'Criar Incentivo'}</Button>
+
+        <Button status='danger' appearance='ghost' onPress={() => {
           setVisible(false)
           setEditingIncentivo(null);
-        }}
-      >
-        <Card style={styles.cardModal}>
-          <Text category="h6">{(editingIncentivo) ? 'Editar incentivo do momento' : 'Novo Incentivo'}</Text>
-
-          <Input
-            label="Descrição *"
-            value={form.descricao}
-            onChangeText={v => setForm({ ...form, descricao: v })}
-            style={styles.input}
-          />
-
-          <Input
-            label="Valor do prêmio *"
-            keyboardType="numeric"
-            value={form.valor_incentivo}
-            disabled={(!!editingIncentivo?.ganhador_nome)}
-            onChangeText={v => setForm({ ...form, valor_incentivo: v })}
-            style={styles.input}
-            caption={(editingIncentivo?.ganhador_nome) ? 'Para alterar o valor do prêmio, remova o ganhador atual.' : ''}
-          />
-
-          <Input
-            label="Meta *"
-            keyboardType="numeric"
-            value={form.meta}
-            disabled={(!!editingIncentivo?.ganhador_nome)}
-            onChangeText={v => setForm({ ...form, meta: v })}
-            style={styles.input}
-            caption={(editingIncentivo?.ganhador_nome) ? 'Para alterar a meta, remova o ganhador atual.' : ''}
-          />
-
-          <View style={[styles.input, { gap: 5 }]}>
-            <Text category='c1' appearance='hint'>Data de expiração *</Text>
-            <DatePicker dataPreEstabelecida={dataExpiracao} setarData={settingExpiracao} tamanBtn='small' tipo='date' />
-          </View>
-
-          <Button onPress={() => {
-            if (editingIncentivo) {
-              handleEditarIncentivo()
-            } else {
-              handleAdicionarIncentivo()
-            }
-          }} disabled={isLoading}
-          >{(isLoading) ? 'Adicionando...' : (editingIncentivo) ? 'Salvar alterações' : 'Criar Incentivo'}</Button>
-        </Card>
-      </Modal>
+        }}>Cancelar</Button>
+      </AppModal>
     </Layout>
   );
 };

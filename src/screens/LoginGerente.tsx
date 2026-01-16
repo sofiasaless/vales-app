@@ -9,7 +9,7 @@ import {
   Text
 } from '@ui-kitten/components';
 import React, { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
 import { useLoginGerente } from '../hooks/useLoginGerente';
 import { useRestauranteConectado, useRestauranteId } from '../hooks/useRestaurante';
@@ -52,7 +52,13 @@ export const LoginGerente: React.FC = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    const restauranteId = await AsyncStorage.getItem('uid')
+    let restauranteId
+    if (Platform.OS === 'web') {
+      restauranteId = localStorage.getItem('uid')
+    } else {
+      restauranteId = await AsyncStorage.getItem('uid')
+    }
+
     if (restauranteId && gerentes) {
       const res = await entrarComGerente(restauranteId, gerentes.at(selectedIndex)?.id || '', password)
       if (!res.ok) {

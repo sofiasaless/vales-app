@@ -5,6 +5,7 @@ import { GerenteService } from "../auth/gerente.service";
 import { GerenteFirestore } from "../firestore/gerente.firestore";
 import { Gerente } from "../schema/gerente.schema";
 import { usePushNotifications } from "./usePushNotifications";
+import { Platform } from "react-native";
 
 export function useLoginGerente() {
 
@@ -18,7 +19,11 @@ export function useLoginGerente() {
     setIsLoading(true)
     try {
       const res = await gerenteSerivce.logar(idRestaurante, id, senha);
-      await AsyncStorage.setItem('gerente', JSON.stringify(res));
+      if (Platform.OS === 'web') {
+        localStorage.setItem('gerente', JSON.stringify(res));
+      } else {
+        await AsyncStorage.setItem('gerente', JSON.stringify(res));
+      }
       return successHookResponse()
     } catch (error: any) {
       return errorHookResponse(error);
