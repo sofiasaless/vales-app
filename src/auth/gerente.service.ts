@@ -28,6 +28,8 @@ export class GerenteService extends PatternFirestore {
 
     if (!gerenteDoc.exists()) throw new Error(`Gerente não encontrado`);
 
+    if (!gerenteDoc.data().ativo) throw new Error(`Usuário desativado!`);
+
     // verificando se a senha bate
     if (gerenteDoc.data().senha !== senha) {
       throw new Error(`Senha incorreta`)

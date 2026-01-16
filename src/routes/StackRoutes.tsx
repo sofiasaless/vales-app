@@ -51,28 +51,11 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 enableScreens();
 
-type Props = {
-  isAuthenticated: boolean;
-  hasGerente: boolean;
-};
-
-export default function StackRoutes({ isAuthenticated, hasGerente }: Props) {
+export default function StackRoutes() {
   return (
     <Stack.Navigator>
 
-      {/* {!isAuthenticated ? (
-        <Stack.Screen name="LoginRestaurante" component={LoginRestaurante} options={{ headerShown: false }} />
-      ) : !hasGerente ? (
-        <Stack.Screen name="LoginGerente" component={LoginGerente} options={{ headerShown: false }} />
-      ) : (
-        <Stack.Screen name="Tabs" component={BottomTabsRoutes} options={{ headerShown: false }} />
-      )} */}
-
-      {!isAuthenticated ? (
-        <Stack.Screen name="LoginRestaurante" component={LoginRestaurante} options={{ headerShown: false }} />
-      ) : (
-        <Stack.Screen name="LoginGerente" component={LoginGerente} options={{ headerShown: false }} />
-      )}
+      <Stack.Screen name="LoginGerente" component={LoginGerente} options={{ headerShown: false }} />
 
       <Stack.Screen name="Tabs" component={BottomTabsRoutes} options={{ headerShown: false }} />
 

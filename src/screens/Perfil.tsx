@@ -16,6 +16,8 @@ import { useRestauranteConectado } from '../hooks/useRestaurante';
 export const Perfil = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
+  const {} = useRestauranteConectado()
+
   const iconColor = "#8f9bb3";
 
   const MenuItem = ({

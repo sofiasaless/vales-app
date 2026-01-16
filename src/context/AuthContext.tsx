@@ -1,41 +1,55 @@
+// contexts/AuthContext.tsx
 import {
   onAuthStateChanged,
-  User
-} from "firebase/auth";
-import React, { createContext, useContext, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { auth } from "../config/firebase.config";
+  getAuth,
+  User,
+  signOut
+} from 'firebase/auth';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type AuthContextType = {
+interface AuthContextData {
   user: User | null;
   loading: boolean;
-};
+  logout: () => Promise<void>;
+}
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-});
+const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const auth = getAuth();
+
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        await AsyncStorage.multiRemove(["uid", "gerente"]);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      try {
+        if (firebaseUser) {
+          await firebaseUser.getIdToken(true);
+          setUser(firebaseUser);
+        } else {
+          setUser(null);
+        }
+      } catch (error: any) {
+        console.warn('Usuário inválido ou desativado:', error.code);
+        await signOut(auth);
         setUser(null);
-      } else {
-        setUser(firebaseUser);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return unsub;
+    return unsubscribe;
   }, []);
 
+
+  const logout = async () => {
+    await signOut(auth);
+    setUser(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );

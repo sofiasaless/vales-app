@@ -147,7 +147,6 @@ export default function GerenciarGerentes() {
     form.tipo = tipoSelecionado;
 
     if (editing) {
-      console.info(form, editing.id)
       atualizarGerenteMutation.mutate({
         props: {
           body: form,
