@@ -59,13 +59,12 @@ export function BottomTab({ state, descriptors, navigation }: Props) {
 
           const title =
             options.tabBarLabel ??
-            options.title ??
-            route.name;
+            options.title;
 
           return (
             <BottomNavigationTab
               key={route.key}
-              title={title}
+              // title={route.name}
               icon={<IconTab nome={route.name} ativo={state.index === index}/>}
             />
           );

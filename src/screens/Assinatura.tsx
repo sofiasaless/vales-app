@@ -13,12 +13,10 @@ import { useRestauranteId } from '../hooks/useRestaurante';
 import { useVales } from '../hooks/useVales';
 import { RootStackParamList } from '../routes/StackRoutes';
 import { Funcionario } from '../schema/funcionario.schema';
-import { PagamentoPostRequestBody } from '../schema/pagamento.schema';
 import { uploadAssinaturaCloudinary } from '../services/cloudnary.serivce';
 import { alert } from '../util/alertfeedback.util';
-import { calcularTotalVales } from '../util/calculos.util';
+import { calcularTotalParaPagar, calcularTotalVales } from '../util/calculos.util';
 import { formatarDataVales } from '../util/datas.util';
-import { gerarRelatorioVales } from '../util/relatorios.util';
 
 export const Assinatura = () => {
   const route = useRoute();
@@ -28,10 +26,6 @@ export const Assinatura = () => {
   const signatureRef = useRef<SignaturePadRef>(null);
   const [assinaturaBase64, setAssinaturaBase64] = useState<string | null>(null);
 
-  const salarioBase = () => {
-    return (funcObj.tipo === 'FIXO') ? (funcObj.salario / 2) : (funcObj.salario * (funcObj.dias_trabalhados_semanal || 1))
-  }
-  const totalParaPagar = (salarioBase() - calcularTotalVales(funcObj.vales));
   const { data: res_ } = useRestauranteId()
   const { pagarFuncionario } = usePagamentos()
   const { adicionarVale } = useVales()
@@ -52,9 +46,9 @@ export const Assinatura = () => {
 
       const cloudnary_url = await uploadAssinaturaCloudinary(assinaturaBase64);
       const res = await pagarFuncionario(funcObj.id, {
-        incentivo: [],
+        incentivo: funcObj.incentivo,
         vales: formatarDataVales(funcObj.vales),
-        valor_pago: totalParaPagar,
+        valor_pago: calcularTotalParaPagar(funcObj),
         restaurante_ref: res_?.uid || '',
         salario_atual: funcObj.salario,
         assinatura: cloudnary_url.secure_url
@@ -62,12 +56,12 @@ export const Assinatura = () => {
 
       if (res.ok) {
         // verificar se o pagamento foi negativo e se for adicionar como novo vale
-        if (totalParaPagar < 0) {
+        if (calcularTotalParaPagar(funcObj) < 0) {
           await adicionarVale(funcObj.id, {
             id: Math.random().toString(),
             descricao: 'Negativo última quinzena',
             data_adicao: new Date(),
-            preco_unit: totalParaPagar * -1,
+            preco_unit: calcularTotalParaPagar(funcObj) * -1,
             quantidade: 1
           })
         }

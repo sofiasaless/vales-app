@@ -84,7 +84,7 @@ export const DetalhesFuncionario = () => {
           :
           <>
             <Card style={styles.cardCenter}>
-              <AvatarIniciais name={funcionarioFoco?.nome || ''} size='md' />
+              <AvatarIniciais img_url={funcionarioFoco?.foto_url} name={funcionarioFoco?.nome || ''} size='md' />
               <Text category="h5" style={styles.name}>
                 {funcionarioFoco?.nome}
               </Text>

@@ -25,6 +25,8 @@ import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
 import { calcularTotalVales } from '../util/calculos.util';
 import { useEventoAlteracoesContext } from '../context/EventoAlteracaoContext';
+import { Gerente } from '../schema/gerente.schema';
+import { useGerenteConectado } from '../hooks/useGerente';
 
 type RouteParams = {
   idFunc: string;
@@ -36,6 +38,9 @@ const emptyVale: ValeDinheiroPostRequestBody = {
 }
 
 export const GerenciaVales = () => {
+  const { data: gerente } = useGerenteConectado()
+  const styles = style(gerente);
+
   const route = useRoute();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { idFunc } = route.params as RouteParams;
@@ -104,8 +109,7 @@ export const GerenciaVales = () => {
         <ScrollView nestedScrollEnabled contentContainerStyle={styles.content}>
           <Layout level='1' style={styles.card}>
             <View style={styles.employeeHeader}>
-              {/* <Avatar size='giant' source={{ uri: 'https://static.vecteezy.com/ti/vetor-gratis/p1/7319933-black-avatar-person-icons-user-profile-icon-vetor.jpg' }} /> */}
-              <AvatarIniciais name={funcionarioFoco?.nome || ''} />
+              <AvatarIniciais img_url={funcionarioFoco?.foto_url} name={funcionarioFoco?.nome || ''} />
               <View style={styles.employeeInfo}>
                 <Text category="h6">{funcionarioFoco?.nome}</Text>
                 <Text appearance="hint">{funcionarioFoco?.cargo}</Text>
@@ -120,7 +124,6 @@ export const GerenciaVales = () => {
 
           <Button onPress={() => setModalVisible(true)} size='small' appearance='outline'>Adicionar vale em dinheiro</Button>
 
-          {/* Vale Atual Header */}
           <View style={styles.sectionHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
               <Feather name="shopping-bag" size={18} color={customTheme['color-primary-400']} />
@@ -171,8 +174,8 @@ export const GerenciaVales = () => {
           </Layout>
 
           <Button
+            style={styles.controleUsuario}
             size="medium"
-            // disabled={voucherTotal === 0}
             onPress={() =>
               navigation.navigate('ResumoPagamento', {
                 funcObj: {
@@ -186,7 +189,7 @@ export const GerenciaVales = () => {
             Pagar Funcionário
           </Button>
 
-          <View style={styles.actionRow}>
+          <View style={[styles.actionRow, styles.controleUsuario]}>
             <Button
               appearance="outline"
               status='basic'
@@ -274,109 +277,114 @@ export const GerenciaVales = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 32,
-    gap: 18
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  notFoundText: {
-    marginTop: 12,
-    marginBottom: 16,
-  },
-  backButton: {
-    marginTop: 8,
-  },
-  card: {
-    padding: 18,
-    // marginTop: 10,
-    // marginBottom: 12,
-    borderRadius: 16,
-    borderWidth: 0.5,
-    borderColor: customTheme['text-disabled-color'],
-    backgroundColor: customTheme['color-basic-700']
-  },
-  employeeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  employeeInfo: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  emptyCard: {
-    padding: 24,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  emptyText: {
-    marginTop: 8,
-  },
-  sectionTitle: {
-    marginBottom: 12,
-  },
-  input: {
-    marginTop: 8,
-  },
-  errorText: {
-    marginTop: 4,
-  },
-  addButton: {
-    marginTop: 12,
-  },
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  actionRow: {
-    flexDirection: 'row',
-  },
-  actionButton: {
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  containerList: {
-    maxHeight: 320,
-  },
-  contentContainer: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  backdrop: {
-    backgroundColor: 'rgba(0,0,0,0.5)'
-  },
-  modalTitle: {
-    marginBottom: 12,
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8,
-    marginTop: 16,
-  },
+const style = (gerente: Gerente | null | undefined) => {
+  return StyleSheet.create({
+    controleUsuario: {
+      display: (gerente) ? ((gerente.tipo === 'AUXILIAR') ? 'none' : 'flex') : 'flex'
+    },
+    container: {
+      flex: 1,
+    },
+    content: {
+      padding: 16,
+      paddingBottom: 32,
+      gap: 18
+    },
+    centered: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 16,
+    },
+    notFoundText: {
+      marginTop: 12,
+      marginBottom: 16,
+    },
+    backButton: {
+      marginTop: 8,
+    },
+    card: {
+      padding: 18,
+      // marginTop: 10,
+      // marginBottom: 12,
+      borderRadius: 16,
+      borderWidth: 0.5,
+      borderColor: customTheme['text-disabled-color'],
+      backgroundColor: customTheme['color-basic-700']
+    },
+    employeeHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    employeeInfo: {
+      marginLeft: 12,
+      flex: 1,
+    },
+    sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    emptyCard: {
+      padding: 24,
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    emptyText: {
+      marginTop: 8,
+    },
+    sectionTitle: {
+      marginBottom: 12,
+    },
+    input: {
+      marginTop: 8,
+    },
+    errorText: {
+      marginTop: 4,
+    },
+    addButton: {
+      marginTop: 12,
+    },
+    totalRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    actionRow: {
+      flexDirection: 'row',
+    },
+    actionButton: {
+      flex: 1,
+      marginHorizontal: 4,
+    },
+    containerList: {
+      maxHeight: 320,
+    },
+    contentContainer: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+    },
+    backdrop: {
+      backgroundColor: 'rgba(0,0,0,0.5)'
+    },
+    modalTitle: {
+      marginBottom: 12,
+    },
+    toggleRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginVertical: 8,
+    },
+    modalActions: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 8,
+      marginTop: 16,
+    },
 
-  deleteText: {
-    marginVertical: 12,
-  },
-});
+    deleteText: {
+      marginVertical: 12,
+    },
+  });
+}

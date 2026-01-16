@@ -16,6 +16,8 @@ import { customMapping, customTheme } from "./src/theme/custom.theme";
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider } from './src/context/AuthContext';
 import { TotalDespesasProvider } from './src/context/TotalDespesasContext';
+import { IncentiveProvider } from './src/context/InvenctiveContext';
+import { FuncionariosIncentivoProvider } from './src/context/FuncionariosIncentivoContext';
 
 SplashScreen.hideAsync()
 enableScreens();
@@ -33,8 +35,6 @@ Notifications.setNotificationHandler({
 });
 
 export default function App() {
-
-  usePushNotifications()
 
   const [checking, setChecking] = useState(true);
 
@@ -83,12 +83,16 @@ export default function App() {
       <ItenValesProvider>
         <EventoAlteracoesProvider>
           <TotalDespesasProvider>
-            <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
-              <AuthProvider>
-                <Routes />
-              </AuthProvider>
-              <StatusBar style="light" />
-            </ApplicationProvider>
+            <IncentiveProvider>
+              <FuncionariosIncentivoProvider>
+                <ApplicationProvider {...eva} theme={{ ...eva.dark, ...customTheme }} customMapping={customMapping}>
+                  <AuthProvider>
+                    <Routes />
+                  </AuthProvider>
+                  <StatusBar style="light" />
+                </ApplicationProvider>
+              </FuncionariosIncentivoProvider>
+            </IncentiveProvider>
           </TotalDespesasProvider>
         </EventoAlteracoesProvider>
       </ItenValesProvider>

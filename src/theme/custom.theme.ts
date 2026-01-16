@@ -138,7 +138,10 @@ export const customTheme = {
   'color-info-600': '#006FD6',
   'color-info-700': '#0057C2',
   'color-info-800': '#0041A8',
-  'color-info-900': '#002885'
+  'color-info-900': '#002885',
+
+
+  'border-color-primary':'#1a746779'
 };
 
 export const customMapping = {

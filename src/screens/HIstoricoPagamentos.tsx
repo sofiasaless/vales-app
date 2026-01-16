@@ -13,11 +13,12 @@ import { ItemVale } from '../components/ItemVale';
 import { useHistoricoPagamentos } from '../hooks/usePagamentos';
 import { Pagamento } from '../schema/pagamento.schema';
 import { customTheme } from '../theme/custom.theme';
-import { calcularTotalVales } from '../util/calculos.util';
+import { calcularSalarioQuinzena, calcularTotalIncentivos, calcularTotalVales } from '../util/calculos.util';
 import { converterParaDate } from '../util/datas.util';
 import { converterParaIsoDate, converterTimestamp } from '../util/formatadores.util';
 import { gerarRelatorioVales } from '../util/relatorios.util';
 import { Funcionario } from '../schema/funcionario.schema';
+import { CardGradient } from '../components/CardGradient';
 
 export const HistoricoPagamentos = () => {
   const route = useRoute<any>();
@@ -43,6 +44,8 @@ export const HistoricoPagamentos = () => {
       setDataFim(converterParaDate(dado))
     }
   }
+
+  const { data: historico, isLoading } = useHistoricoPagamentos(funcObj.id, { dataFim, dataInicio })
 
   const ItemHistorico = ({ historicoPagamento }: { historicoPagamento: Pagamento }) => {
     const isExpanded = expandedPayment === historicoPagamento.id;
@@ -100,7 +103,7 @@ export const HistoricoPagamentos = () => {
                   Salário Base
                 </Text>
                 <DinheiroDisplay
-                  value={historicoPagamento.salario_atual}
+                  value={calcularSalarioQuinzena(funcObj)}
                   size="sm"
                 />
               </View>
@@ -115,6 +118,20 @@ export const HistoricoPagamentos = () => {
                   variant="negative"
                 />
               </View>
+
+              {
+                historicoPagamento.incentivo.length > 0 &&
+                <View style={[styles.summaryCard, styles.sucessCard]}>
+                  <Text appearance="hint" category="c1">
+                    Valores Incentivos
+                  </Text>
+                  <DinheiroDisplay
+                    value={(calcularTotalIncentivos(historicoPagamento.incentivo))}
+                    size="sm"
+                    variant="positive"
+                  />
+                </View>
+              }
             </View>
 
             <View style={styles.voucherSection}>
@@ -137,15 +154,18 @@ export const HistoricoPagamentos = () => {
               </View>
             </View>
 
-            <View style={{gap: 8}}>
-              <Button style={{ display: (historicoPagamento.assinatura)?'flex':'none' }}
+            <View style={{ gap: 8 }}>
+              <Button style={{ display: (historicoPagamento.assinatura) ? 'flex' : 'none' }}
                 status='info'
                 onPress={async () => gerarRelatorioVales(funcObj, historicoPagamento, converterTimestamp(historicoPagamento.data_pagamento))}
                 accessoryRight={<Entypo name="share" size={20} color={'black'} />}
               >Ver relatório com assinatura</Button>
 
               <Button appearance='outline' status='info'
-                onPress={async () => gerarRelatorioVales(funcObj, historicoPagamento, converterTimestamp(historicoPagamento.data_pagamento))}
+                onPress={async () => gerarRelatorioVales(funcObj, {
+                  ...historicoPagamento,
+                  assinatura: undefined
+                }, converterTimestamp(historicoPagamento.data_pagamento))}
                 accessoryRight={<Entypo name="share" size={20} color={customTheme['color-info-500']} />}
               >Relatório para assinar</Button>
             </View>
@@ -155,32 +175,40 @@ export const HistoricoPagamentos = () => {
     )
   }
 
-  const { data: historico, isLoading } = useHistoricoPagamentos(funcObj.id, { dataFim, dataInicio })
-
   return (
     <Layout style={styles.container}>
 
       <View style={styles.content}>
-        <View style={styles.grupoBotoes}>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            <DatePicker status='warning' setarData={settingInicio} tamanBtn='small' tipo='date' dataPreEstabelecida={dataInicio} />
-            <Text style={{ textAlign: 'center', alignSelf: 'center', fontSize: 12 }} category='s1'>até</Text>
-            <DatePicker status='warning' setarData={settingFim} tamanBtn='small' tipo='date' dataPreEstabelecida={dataFim} />
+        <CardGradient styles={styles.filterCard}>
+          <View style={styles.filterHeader}>
+            <AntDesign name="calendar" size={18} color={customTheme['color-warning-500']} />
+            <Text category="s1" style={styles.filterTitle}>
+              Período
+            </Text>
           </View>
 
-          <Button
-            size='small'
-            status='warning'
-            appearance='outline'
-            accessoryRight={<AntDesign name="reload" size={16} color={customTheme['color-warning-500']} />}
-            onPress={() => {
-              setDataFim(new Date())
-              setDataInicio(new Date(new Date().setDate(1)))
-            }}
-          >
-            Resetar datas
-          </Button>
-        </View>
+          <View style={styles.dateRow}>
+            <DatePicker status='warning' setarData={settingInicio} tamanBtn='small' tipo='date' dataPreEstabelecida={dataInicio} />
+
+            <Text appearance="hint" style={styles.dateSeparator}>
+              até
+            </Text>
+
+            <DatePicker status='warning' setarData={settingFim} tamanBtn='small' tipo='date' dataPreEstabelecida={dataFim} />
+
+            <Button
+              size='small'
+              status='warning'
+              appearance='outline'
+              accessoryRight={<AntDesign name="reload" size={16} color={customTheme['color-warning-500']} />}
+              onPress={() => {
+                setDataFim(new Date())
+                setDataInicio(new Date(new Date().setDate(1)))
+              }}
+            >
+            </Button>
+          </View>
+        </CardGradient>
         {
           (isLoading) ?
             <Spinner />
@@ -298,6 +326,10 @@ export const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 61, 113, 0.09)',
   },
 
+  sucessCard: {
+    backgroundColor: 'rgba(46, 184, 114, 0.12)',
+  },
+
   voucherSection: {
     marginTop: 8,
   },
@@ -323,5 +355,36 @@ export const styles = StyleSheet.create({
     paddingBlock: 10,
     alignItems: 'center',
     gap: 15
-  }
+  },
+
+
+  filterCard: {
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: '#0F172A',
+    borderWidth: 1,
+    borderColor: 'rgba(245,158,11,0.25)',
+    gap: 14,
+  },
+
+  filterHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  filterTitle: {
+    fontWeight: '600',
+  },
+
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+
+  dateSeparator: {
+    fontSize: 12,
+  },
 });

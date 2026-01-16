@@ -1,6 +1,6 @@
-import { addDoc, collection, doc, getDocs } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, DocumentData, DocumentReference, getDocs, updateDoc } from "firebase/firestore";
 import { COLLECTIONS } from "../enums/firebase.enum";
-import { Gerente, GerentePostRequestBody } from "../schema/gerente.schema";
+import { Gerente, GerenteFirestorePostRequestBody, GerentePostRequestBody, GerenteUpdateRequestBody } from "../schema/gerente.schema";
 import { PatternFirestore } from "./pattern.firestore";
 
 export class GerenteFirestore extends PatternFirestore {
@@ -23,7 +23,7 @@ export class GerenteFirestore extends PatternFirestore {
   }
 
   public async criar(idRestaurante: string, body: GerentePostRequestBody) {
-    const gerenteToSave = {
+    const gerenteToSave: GerenteFirestorePostRequestBody = {
       ...body,
       data_criacao: new Date(),
       ativo: true,
@@ -48,5 +48,26 @@ export class GerenteFirestore extends PatternFirestore {
     return gerentes;
   }
 
+  public async excluir(idRestaurante: string, idGerente: string) {
+    await deleteDoc(this.getGerenteRef(idRestaurante, idGerente));
+  }
+
+  public async atualizar(idRestaurante: string, idGerente: string, body: Partial<GerenteUpdateRequestBody>) {
+    await updateDoc(this.getGerenteRef(idRestaurante, idGerente), {
+      ...body
+    })
+  }
+
+  public getGerenteRef(idRestaurante: string, idGerente: string) {
+    return doc(
+      this.firestore(),
+      COLLECTIONS.RESTAURENTES,
+      idRestaurante,
+      this.COLLECTION_NAME,
+      idGerente
+    );
+  }
 
 }
+
+export const gerenteFirestore = new GerenteFirestore()

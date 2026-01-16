@@ -82,6 +82,7 @@ export const validateCPF = (cpf: string): boolean => {
 };
 
 export const converterTimestamp = (data: Timestamp | any) => {
+  if (!data) return new Date();
   const formatada = data.toDate() as Date
   return formatada
 }

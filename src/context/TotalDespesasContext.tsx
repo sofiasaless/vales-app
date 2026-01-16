@@ -8,7 +8,8 @@ interface TotalDespesasContextType {
   totalDespesas: Despesa[] | undefined,
   adicionarNovaDespesa: (body: DespesaPostRequestBody) => void,
   filtrarPorDatas: (datas: DateFilterProps) => Promise<void>,
-  resetarDatas: () => void
+  resetarDatas: () => void;
+  filtrando: boolean
 }
 
 const TotalDespesasContext = createContext<TotalDespesasContextType | undefined>(undefined)
@@ -40,10 +41,13 @@ export const TotalDespesasProvider = ({ children }: { children: ReactNode }) => 
     setDataFim(new Date())
   }
 
+  const [filtrando, setFiltrando] = useState(false)
   const filtrarPorDatas = async (datas: DateFilterProps) => {
+    setFiltrando(true)
     setDataFim(datas.dataFim)
     setDataInicio(datas.dataInicio)
     await refetch()
+    setFiltrando(false)
   }
 
   useEffect(() => {
@@ -55,7 +59,8 @@ export const TotalDespesasProvider = ({ children }: { children: ReactNode }) => 
       totalDespesas,
       adicionarNovaDespesa,
       filtrarPorDatas,
-      resetarDatas
+      resetarDatas,
+      filtrando
     }}>
       {children}
     </TotalDespesasContext.Provider>

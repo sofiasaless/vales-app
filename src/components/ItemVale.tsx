@@ -40,7 +40,7 @@ export const ItemVale: React.FC<VoucherItemCardProps> = ({
 
           <Text appearance="hint" category="c2">
             {item.quantidade}x{' '}
-            <Text category='s2'>{item.preco_unit}</Text>
+            <Text category='s2'>{item.preco_unit.toFixed(2)}</Text>
           </Text>
 
           <Text category="c2" style={{color: customTheme['text-hint-color']}} numberOfLines={1}>

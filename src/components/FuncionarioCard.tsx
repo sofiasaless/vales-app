@@ -26,21 +26,6 @@ export const FuncionarioCard: React.FC<FuncionarioCardProps> = ({ employee }) =>
     );
   }
 
-  const today = new Date();
-  // const paidToday = employee.paymentHistory.some((payment) => {
-  //   const paymentDate = new Date(payment.date);
-  //   return (
-  //     paymentDate.getDate() === today.getDate() &&
-  //     paymentDate.getMonth() === today.getMonth() &&
-  //     paymentDate.getFullYear() === today.getFullYear()
-  //   );
-  // });
-
-  // const status = paidToday
-  //   ? 'today'
-  //   : voucherTotal > 0
-  //     ? 'pending'
-  //     : 'paid';
 
   return (
     <Pressable
@@ -54,12 +39,7 @@ export const FuncionarioCard: React.FC<FuncionarioCardProps> = ({ employee }) =>
     >
       <CardGradient styles={styles.card}>
         <View style={styles.content}>
-          {/* <Avatar
-            size="large"
-            style={styles.avatar}
-            source={{ uri: 'https://static.vecteezy.com/ti/vetor-gratis/p1/7319933-black-avatar-person-icons-user-profile-icon-vetor.jpg' }}
-          /> */}
-          <AvatarIniciais name={employee.nome} />
+          <AvatarIniciais img_url={employee.foto_url} name={employee.nome} />
 
           <Text
             category="s1"

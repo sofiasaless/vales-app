@@ -10,6 +10,8 @@ import { customTheme } from "../theme/custom.theme";
 import { converterParaDate } from "../util/datas.util";
 import { converterTimestamp, validateCPF } from "../util/formatadores.util";
 import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
+import { AvatarUpload } from "../components/AvatarUpload";
+import { uploadImage } from "../services/cloudnary.serivce";
 
 interface RouteParams {
   funcObj: Funcionario
@@ -121,6 +123,12 @@ export const EditarFuncionario = () => {
       return;
     }
 
+    if (formData.foto_url) {
+      if (!formData.foto_url.startsWith('https://') && formData.foto_url !== '') {
+        formData.foto_url = await uploadImage(formData.foto_url);
+      }
+    }
+
     const dataToUpdate: FuncionarioUpdateRequestBody = {
       nome: formData.nome,
       cargo: formData.cargo,
@@ -130,8 +138,11 @@ export const EditarFuncionario = () => {
       tipo: formData.tipo,
       cpf: formData.cpf,
       data_admissao: dataAdmissao,
-      data_nascimento: dataNascimento,
+      foto_url: formData.foto_url || '',
+      dias_trabalhados_semanal: formData.dias_trabalhados_semanal || 0
     }
+
+    if (dataNascimento.toLocaleDateString() !== new Date().toLocaleDateString()) dataToUpdate.data_nascimento = dataNascimento;
 
     try {
       const funcSer = new FuncionarioFirestore()
@@ -153,6 +164,10 @@ export const EditarFuncionario = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.card}>
+            <AvatarUpload value={formData.foto_url}
+              onChange={(url) => handleChange('foto_url', url)}
+            />
+
             <Input
               size="small"
               label="Nome Completo *"
@@ -192,23 +207,38 @@ export const EditarFuncionario = () => {
             </View>
 
             {/* Salário */}
-            <Input
-              size="small"
-              label={
-                formData.tipo === 'DIARISTA'
-                  ? 'Valor da Diária *'
-                  : 'Salário Base *'
-              }
-              placeholder="0,00"
-              keyboardType="numeric"
-              value={formData.salario.toString()}
-              onChangeText={handleSalaryChange}
-              status={errors.salario ? 'danger' : 'basic'}
-              caption={errors.salario}
-              accessoryLeft={() => (
-                <Text style={{ marginHorizontal: 8 }}>R$</Text>
-              )}
-            />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+              <Input
+                style={{ flex: 1 }}
+                size="small"
+                label={
+                  formData.tipo === 'DIARISTA'
+                    ? 'Valor da Diária *'
+                    : 'Salário Base *'
+                }
+                placeholder="0,00"
+                keyboardType="numeric"
+                value={formData.salario.toString()}
+                onChangeText={handleSalaryChange}
+                status={errors.salario ? 'danger' : 'basic'}
+                caption={errors.salario}
+                accessoryLeft={() => (
+                  <Text style={{ marginHorizontal: 8 }}>R$</Text>
+                )}
+              />
+
+              <Input
+                style={{ display: (formData.tipo === 'DIARISTA') ? 'flex' : 'none' }}
+                size="small"
+                label={"Dias de trabalho p/ semana *"}
+                placeholder="0"
+                keyboardType="numeric"
+                value={formData.dias_trabalhados_semanal?.toString() || ''}
+                onChangeText={(v) => handleChange('dias_trabalhados_semanal', Number(v))}
+                status={errors.dias_trabalhados_semanal ? 'danger' : 'basic'}
+                caption={errors.dias_trabalhados_semanal}
+              />
+            </View>
 
             {/* CPF */}
             <Input
@@ -243,18 +273,24 @@ export const EditarFuncionario = () => {
                 style={{ flex: 1 }}
                 size="small"
                 label="1° Dia do Pagamento"
-                placeholder="Todo dia 4"
+                placeholder="4"
                 value={(formData.primeiro_dia_pagamento === 0) ? '' : formData.primeiro_dia_pagamento.toString()}
                 onChangeText={(v) => handleChange('primeiro_dia_pagamento', v)}
+                accessoryLeft={() => (
+                  <Text category="s2" style={{ marginHorizontal: 4 }}>Todo dia </Text>
+                )}
               />
 
               <Input
                 style={{ flex: 1 }}
                 size="small"
                 label="2° Dia do Pagamento"
-                placeholder="Todo dia 19"
+                placeholder="19"
                 value={(formData.segundo_dia_pagamento === 0) ? '' : formData.segundo_dia_pagamento.toString()}
                 onChangeText={(v) => handleChange('segundo_dia_pagamento', v)}
+                accessoryLeft={() => (
+                  <Text category="s2" style={{ marginHorizontal: 4 }}>Todo dia </Text>
+                )}
               />
             </View>
 

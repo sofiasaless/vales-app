@@ -12,9 +12,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
 import { useLoginGerente } from '../hooks/useLoginGerente';
-import { useRestauranteConectado } from '../hooks/useRestaurante';
+import { useRestauranteConectado, useRestauranteId } from '../hooks/useRestaurante';
 import { RootStackParamList } from '../routes/StackRoutes';
-import { useGerenteConectado } from '../hooks/useGerente';
+import { useGerenteConectado, useListarGerentes } from '../hooks/useGerente';
+import { restauranteFirestore } from '../firestore/restaurante.firestore';
 
 export const LoginGerente: React.FC = () => {
 
@@ -24,12 +25,16 @@ export const LoginGerente: React.FC = () => {
 
   const navigator = useNavigation<NavigationProp<RootStackParamList>>()
 
-  const { entrarComGerente, gerentes, isLoading, isLoadingGerentes, listarGerentes } = useLoginGerente()
+  const { entrarComGerente, isLoading } = useLoginGerente()
 
   const {
     data: restaurante_conectado,
     isLoading: loadingRes
   } = useRestauranteConectado()
+
+  const {data: res_id} = useRestauranteId()
+
+  const { data: gerentes, isLoading: isLoadingGerentes, refetch: recarregarGerentes } = useListarGerentes(res_id?.uid || '')
 
   const validateForm = (): boolean => {
     const newErrors: { manager?: string; password?: string } = {};
@@ -55,24 +60,21 @@ export const LoginGerente: React.FC = () => {
         newErrors.password = res.message
         setErrors(newErrors);
       } else {
-        refetch()
+        const tokenNotificao = await AsyncStorage.getItem('pushToken')
+        if (tokenNotificao) {
+          restauranteFirestore.atualizarPushToken(res_id?.uid || '', tokenNotificao)
+        }
+        await refetch()
+        navigator.navigate('Tabs')
       }
     }
 
   };
 
-  const handleBack = () => {
-    navigator.navigate('LoginRestaurante')
-  };
-
-  const carregarInformacoes = async () => {
-    await listarGerentes(restaurante_conectado?.id || '')
-  }
-
   useFocusEffect(
     useCallback(() => {
-      carregarInformacoes()
-    }, [loadingRes])
+      if (res_id) recarregarGerentes();
+    }, [res_id])
   )
 
   return (
@@ -122,6 +124,7 @@ export const LoginGerente: React.FC = () => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          keyboardType='number-pad'
           status={errors.password ? 'danger' : 'primary'}
           caption={errors.password}
           style={styles.input}
@@ -135,15 +138,6 @@ export const LoginGerente: React.FC = () => {
             style={styles.primaryButton}
           >
             {isLoading ? 'Entrando...' : 'Acessar Sistema'}
-          </Button>
-
-          <Button
-            appearance="ghost"
-            status="basic"
-            onPress={handleBack}
-            style={styles.backButton}
-          >
-            ← Voltar para login do restaurante
           </Button>
         </View>
       </View>

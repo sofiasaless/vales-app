@@ -7,7 +7,7 @@ import { useLoginRestaurante } from '../hooks/useLoginRestaurante';
 import { RootStackParamList } from '../routes/StackRoutes';
 
 import * as SplashScreen from 'expo-splash-screen';
-import { useGerenteConectado } from '../hooks/useGerente';
+import { useGerenteConectado, useListarGerentes } from '../hooks/useGerente';
 
 SplashScreen.hideAsync()
 

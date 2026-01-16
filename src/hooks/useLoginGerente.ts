@@ -4,8 +4,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GerenteService } from "../auth/gerente.service";
 import { GerenteFirestore } from "../firestore/gerente.firestore";
 import { Gerente } from "../schema/gerente.schema";
+import { usePushNotifications } from "./usePushNotifications";
 
 export function useLoginGerente() {
+
+  usePushNotifications()
 
   const gerenteSerivce = new GerenteService()
   const gerenteFirestore = new GerenteFirestore()

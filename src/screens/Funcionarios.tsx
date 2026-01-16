@@ -5,7 +5,6 @@ import { useCallback } from 'react';
 import { Container } from "../components/Container";
 import { Header } from "../components/Header";
 import { ListaFuncionarios } from "../components/ListaFuncionarios";
-import { Text } from '@ui-kitten/components';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,6 +15,7 @@ export const Funcionarios = () => {
     'JetBrains-Bold': require('../../assets/fonts/JetBrainsMono-Bold.ttf'),
     'JetBrains-Medium': require('../../assets/fonts/JetBrainsMono-Medium.ttf'),
     'JetBrains-SemiBold': require('../../assets/fonts/JetBrainsMono-SemiBold.ttf'),
+    'JetBrains-Italic': require('../../assets/fonts/JetBrainsMono-Italic.ttf')
   });
 
   useFocusEffect(
@@ -32,7 +32,7 @@ export const Funcionarios = () => {
 
   return (
     <Container>
-      <Header title="Funcionários" subtitle="Visão geral" />
+      <Header title="Funcionários" />
       <ListaFuncionarios />
     </Container>
   )

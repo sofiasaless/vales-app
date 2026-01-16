@@ -9,7 +9,7 @@ export const Config = () => {
       <Button
         onPress={() => {
           const restSer = new RestauranteSerivce()
-          restSer.registrar('cafeilhasjava', '123456')
+          restSer.registrar('padariapaodemel', '123456')
         }}
       >Registrar restaurante</Button>
 
@@ -17,8 +17,8 @@ export const Config = () => {
         onPress={() => {
           console.info('clicando')
           const gerSer = new GerenteFirestore()
-          gerSer.criar('Az7xUZaL0IQDPp85bu9JDYB6DPE3', {
-            nome: 'Java',
+          gerSer.criar('q8E49B6oeiPEKFzXpXH0lL5yYPX2', {
+            nome: 'Miau',
             senha: '1234',
             tipo: 'GERENTE'
           })
