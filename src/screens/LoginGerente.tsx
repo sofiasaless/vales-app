@@ -12,9 +12,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
 import { useLoginGerente } from '../hooks/useLoginGerente';
-import { useRestauranteConectado } from '../hooks/useRestaurante';
+import { useRestauranteConectado, useRestauranteId } from '../hooks/useRestaurante';
 import { RootStackParamList } from '../routes/StackRoutes';
-import { useGerenteConectado } from '../hooks/useGerente';
+import { useGerenteConectado, useListarGerentes } from '../hooks/useGerente';
+import { restauranteFirestore } from '../firestore/restaurante.firestore';
 
 export const LoginGerente: React.FC = () => {
 
@@ -24,12 +25,16 @@ export const LoginGerente: React.FC = () => {
 
   const navigator = useNavigation<NavigationProp<RootStackParamList>>()
 
-  const { entrarComGerente, gerentes, isLoading, isLoadingGerentes, listarGerentes } = useLoginGerente()
+  const { entrarComGerente, isLoading } = useLoginGerente()
 
   const {
     data: restaurante_conectado,
     isLoading: loadingRes
   } = useRestauranteConectado()
+
+  const {data: res_id} = useRestauranteId()
+
+  const { data: gerentes, isLoading: isLoadingGerentes, refetch: recarregarGerentes } = useListarGerentes(res_id?.uid || '')
 
   const validateForm = (): boolean => {
     const newErrors: { manager?: string; password?: string } = {};
@@ -55,6 +60,10 @@ export const LoginGerente: React.FC = () => {
         newErrors.password = res.message
         setErrors(newErrors);
       } else {
+        const tokenNotificao = await AsyncStorage.getItem('pushToken')
+        if (tokenNotificao) {
+          restauranteFirestore.atualizarPushToken(res_id?.uid || '', tokenNotificao)
+        }
         await refetch()
         navigator.navigate('Tabs')
       }
@@ -62,14 +71,10 @@ export const LoginGerente: React.FC = () => {
 
   };
 
-  const carregarInformacoes = async () => {
-    await listarGerentes(restaurante_conectado?.id || '')
-  }
-
   useFocusEffect(
     useCallback(() => {
-      carregarInformacoes()
-    }, [loadingRes])
+      if (res_id) recarregarGerentes();
+    }, [res_id])
   )
 
   return (

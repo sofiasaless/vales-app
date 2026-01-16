@@ -22,6 +22,7 @@ import RegistroVendaIncentivo from '../screens/RegistroVendaIncentivo';
 import { Incentivo } from '../schema/incentivo.schema';
 import RelatorioFinancas from '../screens/RelatorioFinancas';
 import GerenciarGerentes from '../screens/GerenciarGerentes';
+import { Config } from '../screens/Config';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -147,6 +148,12 @@ export default function StackRoutes() {
         name="GerenciaGerentes"
         component={GerenciarGerentes}
         options={optionsHeader('Gerentes e auxiliares')}
+      />
+
+      <Stack.Screen
+        name="Config"
+        component={Config}
+        options={optionsHeader('aas')}
       />
     </Stack.Navigator>
   );

@@ -30,7 +30,7 @@ export class RestauranteSerivce extends PatternFirestore {
         ativo: true,
         data_criacao: new Date(),
         email,
-        nome_fantasia: 'Café Ilhas Java'
+        nome_fantasia: 'Padaria Pão de Mel'
       }
 
       await setDoc(doc(this.setup(), authResult.uid), restauranteToSave);
