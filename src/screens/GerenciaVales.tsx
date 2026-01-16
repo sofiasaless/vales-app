@@ -27,6 +27,7 @@ import { calcularTotalVales } from '../util/calculos.util';
 import { useEventoAlteracoesContext } from '../context/EventoAlteracaoContext';
 import { Gerente } from '../schema/gerente.schema';
 import { useGerenteConectado } from '../hooks/useGerente';
+import { AppModal } from '../components/AppModal';
 
 type RouteParams = {
   idFunc: string;
@@ -218,61 +219,55 @@ export const GerenciaVales = () => {
           </View>
         </ScrollView>
 
-        <Modal
-          visible={modalVisible}
-          backdropStyle={styles.backdrop}
-          onBackdropPress={() => setModalVisible(false)}
-        >
-          <Card disabled style={{ padding: 10, width: '130%', alignSelf: 'center' }}>
-            <Text category="h6" style={styles.modalTitle}>
-              Preencha abaixo
-            </Text>
+        <AppModal onClose={() => setModalVisible(false)} visible={modalVisible}>
+          <Text category="h6" style={styles.modalTitle}>
+            Preencha abaixo
+          </Text>
 
-            <Input
-              label="Valor (R$)"
+          <Input
+            label="Valor (R$)"
+            size='small'
+            placeholder="0,00"
+            value={formVale.preco_unit.toString()}
+            keyboardType="decimal-pad"
+            onChangeText={(text) => {
+              const valor = text.replace(/[^\d,]/g, '');
+              setFormVale((prev) => (({
+                ...prev,
+                preco_unit: Number(valor)
+              })))
+            }}
+            status={cashError ? 'danger' : 'basic'}
+            style={styles.input}
+          />
+
+          <Input
+            label="Descrição"
+            size='small'
+            placeholder="Ex: Adiantamento"
+            value={formVale.descricao}
+            onChangeText={(text) => {
+              setFormVale((prev) => (({
+                ...prev,
+                descricao: text
+              })))
+            }}
+            style={styles.input}
+          />
+
+          <View style={styles.modalActions}>
+            <Button
               size='small'
-              placeholder="0,00"
-              value={formVale.preco_unit.toString()}
-              keyboardType="decimal-pad"
-              onChangeText={(text) => {
-                const valor = text.replace(/[^\d,]/g, '');
-                setFormVale((prev) => (({
-                  ...prev,
-                  preco_unit: Number(valor)
-                })))
-              }}
-              status={cashError ? 'danger' : 'basic'}
-              style={styles.input}
-            />
-
-            <Input
-              label="Descrição"
-              size='small'
-              placeholder="Ex: Adiantamento"
-              value={formVale.descricao}
-              onChangeText={(text) => {
-                setFormVale((prev) => (({
-                  ...prev,
-                  descricao: text
-                })))
-              }}
-              style={styles.input}
-            />
-
-            <View style={styles.modalActions}>
-              <Button
-                size='small'
-                appearance="outline"
-                onPress={() => setModalVisible(false)}
-              >
-                Cancelar
-              </Button>
-              <Button onPress={handleAddCashVoucher} size='small'>
-                Confirmar
-              </Button>
-            </View>
-          </Card>
-        </Modal>
+              appearance="outline"
+              onPress={() => setModalVisible(false)}
+            >
+              Cancelar
+            </Button>
+            <Button onPress={handleAddCashVoucher} size='small'>
+              Confirmar
+            </Button>
+          </View>
+        </AppModal>
       </Layout>
   );
 };
@@ -363,9 +358,6 @@ const style = (gerente: Gerente | null | undefined) => {
     contentContainer: {
       paddingHorizontal: 8,
       paddingVertical: 4,
-    },
-    backdrop: {
-      backgroundColor: 'rgba(0,0,0,0.5)'
     },
     modalTitle: {
       marginBottom: 12,

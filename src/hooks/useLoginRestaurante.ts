@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState } from "react";
 import { RestauranteSerivce } from "../auth/restaurante.service";
 import { errorHookResponse, successHookResponse } from "../types/hookResponse.type";
+import { Platform } from "react-native";
 
 export function useLoginRestaurante() {
   const restServ = new RestauranteSerivce()
@@ -12,7 +13,11 @@ export function useLoginRestaurante() {
     setIsLoading(true)
     try {
       const res = await restServ.logar(email, senha);
-      await AsyncStorage.setItem('uid', res.uid);
+      if (Platform.OS === 'web') {
+        localStorage.setItem('uid', res.uid)
+      } else {
+        await AsyncStorage.setItem('uid', res.uid);
+      }
       return successHookResponse({data: res})
     } catch (error: any) {
       return errorHookResponse(error);
