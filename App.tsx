@@ -36,8 +36,6 @@ Notifications.setNotificationHandler({
 
 export default function App() {
 
-  usePushNotifications()
-
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
