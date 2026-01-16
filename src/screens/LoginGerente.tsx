@@ -124,6 +124,7 @@ export const LoginGerente: React.FC = () => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          keyboardType='number-pad'
           status={errors.password ? 'danger' : 'primary'}
           caption={errors.password}
           style={styles.input}

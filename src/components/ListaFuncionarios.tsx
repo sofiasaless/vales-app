@@ -104,7 +104,7 @@ export const ListaFuncionarios = () => {
           <DinheiroDisplay value={valesAbertos || 0} variant='positive' size='md' />
 
           <Text category="c1" appearance="hint" style={styles.mt4}>
-            {funcComVales} funcionário(s)
+            {funcComVales} funcionário(s) com vales
           </Text>
         </CardGradient>
       </View>

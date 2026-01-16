@@ -124,7 +124,6 @@ export const GerenciaVales = () => {
 
           <Button onPress={() => setModalVisible(true)} size='small' appearance='outline'>Adicionar vale em dinheiro</Button>
 
-          {/* Vale Atual Header */}
           <View style={styles.sectionHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
               <Feather name="shopping-bag" size={18} color={customTheme['color-primary-400']} />
