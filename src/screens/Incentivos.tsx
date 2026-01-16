@@ -95,143 +95,141 @@ export const Incentivos = () => {
 
   return (
     <Layout style={styles.container}>
-      <View style={styles.content}>
-        {incentivo_ativo && (
-          <TouchableOpacity onPress={() => navigator.navigate('RegistroVendaIncentivo', { incentObj: incentivo_ativo })}>
-            <CardGradientPrimary styles={styles.activeCard}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
-                  <MaterialCommunityIcons name="star-shooting" size={20} color={customTheme['color-primary-500']} />
-                  <Text category="s1" status='primary'>Incentivo do momento</Text>
-                </View>
-                <DinheiroDisplay value={incentivo_ativo.valor_incentivo} />
+      {incentivo_ativo && (
+        <TouchableOpacity onPress={() => navigator.navigate('RegistroVendaIncentivo', { incentObj: incentivo_ativo })}>
+          <CardGradientPrimary styles={styles.activeCard}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+                <MaterialCommunityIcons name="star-shooting" size={20} color={customTheme['color-primary-500']} />
+                <Text category="s1" status='primary'>Incentivo do momento</Text>
               </View>
+              <DinheiroDisplay value={incentivo_ativo.valor_incentivo} />
+            </View>
 
-              <Text category='s2'>{incentivo_ativo.descricao}</Text>
+            <Text category='s2'>{incentivo_ativo.descricao}</Text>
 
-              <View style={{ flexDirection: 'row', gap: 15 }}>
-                <View style={styles.subTxt}>
-                  <MaterialIcons name="star-purple500" size={13} color={customTheme['text-hint-color']} />
-                  <Text category='c1' appearance="hint">Meta: {incentivo_ativo.meta}</Text>
-                </View>
-                <View style={styles.subTxt}>
-                  <MaterialIcons name="calendar-month" size={13} color={customTheme['text-hint-color']} />
-                  <Text category='c1' appearance="hint">Expira em {converterTimestamp(incentivo_ativo.data_expiracao).toLocaleDateString()}</Text>
-                </View>
+            <View style={{ flexDirection: 'row', gap: 15 }}>
+              <View style={styles.subTxt}>
+                <MaterialIcons name="star-purple500" size={13} color={customTheme['text-hint-color']} />
+                <Text category='c1' appearance="hint">Meta: {incentivo_ativo.meta}</Text>
               </View>
+              <View style={styles.subTxt}>
+                <MaterialIcons name="calendar-month" size={13} color={customTheme['text-hint-color']} />
+                <Text category='c1' appearance="hint">Expira em {converterTimestamp(incentivo_ativo.data_expiracao).toLocaleDateString()}</Text>
+              </View>
+            </View>
 
-              {incentivo_ativo.ganhador_nome &&
-                <View style={styles.badgeGanhador}>
-                  <MaterialCommunityIcons name="crown" size={20} color={customTheme['color-success-600']} />
-                  <Text category='s2' status='success'>{incentivo_ativo.ganhador_nome}</Text>
-                </View>
-              }
+            {incentivo_ativo.ganhador_nome &&
+              <View style={styles.badgeGanhador}>
+                <MaterialCommunityIcons name="crown" size={20} color={customTheme['color-success-600']} />
+                <Text category='s2' status='success'>{incentivo_ativo.ganhador_nome}</Text>
+              </View>
+            }
 
-              <Divider style={{ backgroundColor: customTheme['border-color-primary'], marginBlock: 5 }} />
+            <Divider style={{ backgroundColor: customTheme['border-color-primary'], marginBlock: 5 }} />
 
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Button size='small' status='warning'
-                  accessoryLeft={<MaterialCommunityIcons name="check-decagram" size={16} color="black" />}
-                  onPress={() => {
-                    Alert.alert('Encerrar Incentivo',
-                      'Ao encerrar o incentivo, você não poderá editá-lo ou ver as vendas relacionadas a ele.',
-                      [
-                        {
-                          text: 'Cancelar'
-                        },
-                        {
-                          text: 'Confirmar',
-                          onPress: async () => {
-                            try {
-                              await incentivoFirestore.atualizar(incentivo_ativo.id, {
-                                status: false
-                              });
-                              await refetch()
-                              await recarregarAtivo()
-                            } catch (error) {
-                              console.error(error)
-                            }
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Button size='small' status='warning'
+                accessoryLeft={<MaterialCommunityIcons name="check-decagram" size={16} color="black" />}
+                onPress={() => {
+                  Alert.alert('Encerrar Incentivo',
+                    'Ao encerrar o incentivo, você não poderá editá-lo ou ver as vendas relacionadas a ele.',
+                    [
+                      {
+                        text: 'Cancelar'
+                      },
+                      {
+                        text: 'Confirmar',
+                        onPress: async () => {
+                          try {
+                            await incentivoFirestore.atualizar(incentivo_ativo.id, {
+                              status: false
+                            });
+                            await refetch()
+                            await recarregarAtivo()
+                          } catch (error) {
+                            console.error(error)
                           }
                         }
-                      ]
-                    )
-                  }}
-                >Encerrar</Button>
+                      }
+                    ]
+                  )
+                }}
+              >Encerrar</Button>
 
-                <TouchableOpacity style={styles.btnEditar}
-                  onPress={() => {
-                    setEditingIncentivo(incentivo_ativo);
-                    setForm({
-                      descricao: incentivo_ativo?.descricao || '',
-                      meta: incentivo_ativo?.meta.toString() || '',
-                      valor_incentivo: incentivo_ativo?.valor_incentivo.toString() || ''
-                    })
-                    setDataExpiracao(converterTimestamp(incentivo_ativo.data_expiracao))
-                    setVisible(true)
-                  }}
-                >
-                  <MaterialCommunityIcons name="clipboard-edit-outline" size={15} color={customTheme['color-warning-500']} />
-                </TouchableOpacity>
-              </View>
-            </CardGradientPrimary>
-          </TouchableOpacity>
-        )}
+              <TouchableOpacity style={styles.btnEditar}
+                onPress={() => {
+                  setEditingIncentivo(incentivo_ativo);
+                  setForm({
+                    descricao: incentivo_ativo?.descricao || '',
+                    meta: incentivo_ativo?.meta.toString() || '',
+                    valor_incentivo: incentivo_ativo?.valor_incentivo.toString() || ''
+                  })
+                  setDataExpiracao(converterTimestamp(incentivo_ativo.data_expiracao))
+                  setVisible(true)
+                }}
+              >
+                <MaterialCommunityIcons name="clipboard-edit-outline" size={15} color={customTheme['color-warning-500']} />
+              </TouchableOpacity>
+            </View>
+          </CardGradientPrimary>
+        </TouchableOpacity>
+      )}
 
-        <Button
-          style={styles.button}
-          disabled={!!incentivo_ativo}
-          onPress={() => setVisible(true)}
-        >
-          Começar Novo Incentivo
-        </Button>
+      <Button
+        style={styles.button}
+        disabled={!!incentivo_ativo}
+        onPress={() => setVisible(true)}
+      >
+        Começar Novo Incentivo
+      </Button>
 
-        <View style={{ flexDirection: 'row', marginVertical: 17, alignItems: 'center', gap: 8 }}>
-          <MaterialIcons name="history" size={20} color={customTheme['text-basic-color']} />
-          <Text category="h6">Histórico de Incentivos</Text>
-        </View>
-
-        <FlatList
-          data={incentivos}
-          keyExtractor={(item) => item.descricao}
-          contentContainerStyle={{ gap: 10 }}
-          renderItem={(incentivo) => (
-            <CardGradient colors_one='4' colors_two='2' key={incentivo.item.id} styles={styles.historyCard}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ flex: 1 }} category="s1">{incentivo.item.descricao}</Text>
-                <DinheiroDisplay size='md' value={incentivo.item.valor_incentivo} variant='positive' />
-              </View>
-
-              <View style={{ flexDirection: 'row', gap: 15 }}>
-                <View style={styles.subTxt}>
-                  <MaterialIcons name="star-purple500" size={13} color={customTheme['text-hint-color']} />
-                  <Text category='s2' appearance="hint">Meta: {incentivo.item.meta}</Text>
-                </View>
-                <View style={styles.subTxt}>
-                  <MaterialIcons name="calendar-month" size={13} color={customTheme['text-hint-color']} />
-                  <Text category='s2' appearance="hint">Expira em: {converterTimestamp(incentivo.item.data_expiracao).toLocaleDateString()}</Text>
-                </View>
-              </View>
-
-              {incentivo.item.ganhador_nome ? (
-                <View style={styles.badgeGanhador}>
-                  <MaterialCommunityIcons name="crown" size={20} color={customTheme['color-success-600']} />
-                  <Text category='s2' status='success'>{incentivo.item.ganhador_nome}</Text>
-                </View>
-              ) : (
-                <Text category='c2' appearance="hint">Expirado sem ganhador</Text>
-              )}
-            </CardGradient>
-          )}
-          ListEmptyComponent={
-            <Card style={styles.emptyCard}>
-              <Text style={{ textAlign: 'center' }} appearance="hint">Nenhum incentivo no histórico</Text>
-            </Card>
-          }
-          windowSize={5}
-          maxToRenderPerBatch={10}
-          initialNumToRender={10}
-        />
+      <View style={{ flexDirection: 'row', marginVertical: 17, alignItems: 'center', gap: 8 }}>
+        <MaterialIcons name="history" size={20} color={customTheme['text-basic-color']} />
+        <Text category="h6">Histórico de Incentivos</Text>
       </View>
+
+      <FlatList
+        data={incentivos}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ gap: 10 }}
+        renderItem={(incentivo) => (
+          <CardGradient colors_one='4' colors_two='2' key={incentivo.item.id} styles={styles.historyCard}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ flex: 1 }} category="s1">{incentivo.item.descricao}</Text>
+              <DinheiroDisplay size='md' value={incentivo.item.valor_incentivo} variant='positive' />
+            </View>
+
+            <View style={{ flexDirection: 'row', gap: 15 }}>
+              <View style={styles.subTxt}>
+                <MaterialIcons name="star-purple500" size={13} color={customTheme['text-hint-color']} />
+                <Text category='s2' appearance="hint">Meta: {incentivo.item.meta}</Text>
+              </View>
+              <View style={styles.subTxt}>
+                <MaterialIcons name="calendar-month" size={13} color={customTheme['text-hint-color']} />
+                <Text category='s2' appearance="hint">Expira em: {converterTimestamp(incentivo.item.data_expiracao).toLocaleDateString()}</Text>
+              </View>
+            </View>
+
+            {incentivo.item.ganhador_nome ? (
+              <View style={styles.badgeGanhador}>
+                <MaterialCommunityIcons name="crown" size={20} color={customTheme['color-success-600']} />
+                <Text category='s2' status='success'>{incentivo.item.ganhador_nome}</Text>
+              </View>
+            ) : (
+              <Text category='c2' appearance="hint">Expirado sem ganhador</Text>
+            )}
+          </CardGradient>
+        )}
+        ListEmptyComponent={
+          <Card style={styles.emptyCard}>
+            <Text style={{ textAlign: 'center' }} appearance="hint">Nenhum incentivo no histórico</Text>
+          </Card>
+        }
+        windowSize={5}
+        maxToRenderPerBatch={10}
+        initialNumToRender={10}
+      />
 
       <Modal
         visible={visible}
@@ -291,8 +289,7 @@ export const Incentivos = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 16 },
+  container: { flex: 1, padding: 16 },
   button: { marginVertical: 12 },
   activeCard: {
     marginBottom: 16,

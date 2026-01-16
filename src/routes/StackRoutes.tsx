@@ -21,6 +21,7 @@ import { Incentivos } from '../screens/Incentivos';
 import RegistroVendaIncentivo from '../screens/RegistroVendaIncentivo';
 import { Incentivo } from '../schema/incentivo.schema';
 import RelatorioFinancas from '../screens/RelatorioFinancas';
+import GerenciarGerentes from '../screens/GerenciarGerentes';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -41,8 +42,9 @@ export type RootStackParamList = {
   Financas: { idRest: string };
   FinancasDetalhes: { categoriaObj: CategoriaFinancas };
   Incentivos: { idRest: string };
-  RegistroVendaIncentivo: {incentObj: Incentivo};
+  RegistroVendaIncentivo: { incentObj: Incentivo };
   FinancasRelatorio: { idRest: string };
+  GerenciaGerentes: { idRest: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -54,40 +56,25 @@ type Props = {
   hasGerente: boolean;
 };
 
-export default function StackRoutes({isAuthenticated, hasGerente}: Props) {
+export default function StackRoutes({ isAuthenticated, hasGerente }: Props) {
   return (
     <Stack.Navigator>
-      {/* <Stack.Screen
-        name="Config"
-        component={Config}
-        options={{ headerShown: false }}
-      /> */}
 
-      {/* <Stack.Screen
-        name="LoginRestaurante"
-        component={LoginRestaurante}
-        options={{ headerShown: false }}
-      />
-
-      <Stack.Screen
-        name="LoginGerente"
-        component={LoginGerente}
-        options={{ headerShown: false }}
-      />
-      
-      <Stack.Screen
-        name="Tabs"
-        component={BottomTabsRoutes}
-        options={{ headerShown: false }}
-      /> */}
-
-      {!isAuthenticated ? (
+      {/* {!isAuthenticated ? (
         <Stack.Screen name="LoginRestaurante" component={LoginRestaurante} options={{ headerShown: false }} />
       ) : !hasGerente ? (
         <Stack.Screen name="LoginGerente" component={LoginGerente} options={{ headerShown: false }} />
       ) : (
         <Stack.Screen name="Tabs" component={BottomTabsRoutes} options={{ headerShown: false }} />
+      )} */}
+
+      {!isAuthenticated ? (
+        <Stack.Screen name="LoginRestaurante" component={LoginRestaurante} options={{ headerShown: false }} />
+      ) : (
+        <Stack.Screen name="LoginGerente" component={LoginGerente} options={{ headerShown: false }} />
       )}
+
+      <Stack.Screen name="Tabs" component={BottomTabsRoutes} options={{ headerShown: false }} />
 
       <Stack.Screen
         name="Vale"
@@ -171,6 +158,12 @@ export default function StackRoutes({isAuthenticated, hasGerente}: Props) {
         name="RegistroVendaIncentivo"
         component={RegistroVendaIncentivo}
         options={optionsHeader('Registrar venda no incentivo')}
+      />
+
+      <Stack.Screen
+        name="GerenciaGerentes"
+        component={GerenciarGerentes}
+        options={optionsHeader('Gerentes e auxiliares')}
       />
     </Stack.Navigator>
   );

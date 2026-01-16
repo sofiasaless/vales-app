@@ -55,14 +55,11 @@ export const LoginGerente: React.FC = () => {
         newErrors.password = res.message
         setErrors(newErrors);
       } else {
-        refetch()
+        await refetch()
+        navigator.navigate('Tabs')
       }
     }
 
-  };
-
-  const handleBack = () => {
-    navigator.navigate('LoginRestaurante')
   };
 
   const carregarInformacoes = async () => {
@@ -135,15 +132,6 @@ export const LoginGerente: React.FC = () => {
             style={styles.primaryButton}
           >
             {isLoading ? 'Entrando...' : 'Acessar Sistema'}
-          </Button>
-
-          <Button
-            appearance="ghost"
-            status="basic"
-            onPress={handleBack}
-            style={styles.backButton}
-          >
-            ← Voltar para login do restaurante
           </Button>
         </View>
       </View>

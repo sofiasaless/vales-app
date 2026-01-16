@@ -3,7 +3,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Layout, Text } from '@ui-kitten/components';
 import React, { ReactNode } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { AvatarIniciais } from '../components/AvatarIniciais';
 import { CardGradient } from '../components/CardGradient';
 import { Header } from '../components/Header';
@@ -69,11 +69,10 @@ export const Perfil = () => {
   return (
     <Layout style={styles.container}>
       <Header
-        title="Configurações"
-        subtitle={"Administre seu aplicativo e restaurante"}
+        title="Perfil e configurações"
       />
 
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         {/* Profile */}
         <CardGradient styles={styles.card}>
           <View style={styles.profileRow}>
@@ -140,14 +139,14 @@ export const Perfil = () => {
             label="Incentivos"
             onPress={() => navigation.navigate('Incentivos', { idRest: rest_conectado?.id! })}
           />
-          {/* <MenuItem
-            icon={<MaterialCommunityIcons name="bell" size={20} color={iconColor} />}
-            label="Notificações"
-            onPress={() => { }}
-          /> */}
+          <View style={styles.divider} />
+          <MenuItem
+            icon={<MaterialIcons name="people" size={20} color={iconColor}/>}
+            label="Gerentes e Auxiliares"
+            onPress={() => navigation.navigate('GerenciaGerentes', { idRest: rest_conectado?.id! })}
+          />
         </CardGradient>
 
-        {/* Logout */}
         <CardGradient styles={styles.menuCard}>
           <MenuItem
             icon={<MaterialIcons name="logout" size={24} color={customTheme['color-danger-600']} />}
@@ -161,13 +160,12 @@ export const Perfil = () => {
           />
         </CardGradient>
 
-        {/* App Info */}
         <View style={styles.footer}>
           <Text appearance="hint" category="c1">
             Vale Restaurante v1.0.0
           </Text>
         </View>
-      </View>
+      </ScrollView>
     </Layout>
   );
 };

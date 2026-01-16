@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
+import { gerenteFirestore } from "../firestore/gerente.firestore";
 import { Gerente } from "../schema/gerente.schema";
 
 export function useGerenteConectado() {
@@ -15,5 +16,15 @@ export function useGerenteConectado() {
     },
     refetchOnReconnect: true,
     refetchInterval: 30 * 60 * 1000
+  })
+}
+
+export function useListarGerentes(idRestaurante: string) {
+  return useQuery({
+    queryKey: ["gerentes"],
+    queryFn: async () => {
+      const res = await gerenteFirestore.listar(idRestaurante);
+      return res
+    }
   })
 }
