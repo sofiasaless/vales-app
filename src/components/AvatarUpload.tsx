@@ -1,10 +1,9 @@
-import * as ImagePicker from 'expo-image-picker';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { Button, Text } from '@ui-kitten/components';
-import { Image, StyleSheet, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 import { alert } from '../util/alertfeedback.util';
-import { CLOUDINARY_NAME } from '@env';
-import axios from 'axios';
 
 interface AvatarUploadProps {
   value?: string;
@@ -41,7 +40,9 @@ export const AvatarUpload = ({ value, onChange }: AvatarUploadProps) => {
       {value ? (
         <Image source={{ uri: value }} style={styles.avatar} />
       ) : (
-        <View style={styles.placeholder} />
+        <View style={styles.placeholder}>
+          <AntDesign name="cloud-upload" size={30} color="gray" />
+        </View>
       )}
 
       <Button
@@ -74,5 +75,7 @@ const styles = StyleSheet.create({
     height: 96,
     borderRadius: 48,
     backgroundColor: '#E5E7EB',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
 });

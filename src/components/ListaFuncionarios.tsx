@@ -2,20 +2,25 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useFocusEffect } from '@react-navigation/native';
-import { Button, Layout, Text, useTheme } from '@ui-kitten/components';
+import { Layout, Text, useTheme } from '@ui-kitten/components';
 import React, { useCallback, useMemo } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
-import { useFuncionarios, useFuncionariosRestaurante } from '../hooks/useFuncionarios';
-import { CardGradient } from './CardGradient';
-import { FuncionarioCard } from './FuncionarioCard';
-import { DinheiroDisplay } from './DinheiroDisplay';
-import { useRestauranteConectado, useRestauranteId } from '../hooks/useRestaurante';
-import { calcularTotalVales } from '../util/calculos.util';
-import { customTheme } from '../theme/custom.theme';
-import { IncentivoAtivoCard } from './IncentivoAtivoCard';
+import { useFuncionariosRestaurante } from '../hooks/useFuncionarios';
+import { useGerenteConectado } from '../hooks/useGerente';
 import { useIncentivoAtivo } from '../hooks/useIncentivo';
+import { useRestauranteId } from '../hooks/useRestaurante';
+import { Gerente } from '../schema/gerente.schema';
+import { customTheme } from '../theme/custom.theme';
+import { calcularTotalVales } from '../util/calculos.util';
+import { CardGradient } from './CardGradient';
+import { DinheiroDisplay } from './DinheiroDisplay';
+import { FuncionarioCard } from './FuncionarioCard';
+import { IncentivoAtivoCard } from './IncentivoAtivoCard';
 
 export const ListaFuncionarios = () => {
+  const { data: gerente } = useGerenteConectado()
+  const styles = style(gerente);
+
   const theme = useTheme();
 
   const EmptyState = () => (
@@ -35,6 +40,7 @@ export const ListaFuncionarios = () => {
   const { data: funcionarios, isLoading, refetch } = useFuncionariosRestaurante(res?.uid || '')
 
   const { data: incentivo_ativo, isLoading: carregandoIncentivoAtivo, refetch: recarregarIncentivo } = useIncentivoAtivo(res?.uid || '');
+
 
   const valesAbertos = useMemo(() => {
     return funcionarios?.reduce((acc, func) => {
@@ -67,7 +73,7 @@ export const ListaFuncionarios = () => {
         </View>
       }
 
-      <View style={styles.summaryGrid}>
+      <View style={[styles.summaryGrid, styles.controleUsuario]}>
         {/* Total Employees */}
         <CardGradient styles={styles.summaryCard}>
           <View style={styles.row}>
@@ -126,61 +132,68 @@ export const ListaFuncionarios = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-  },
+const style = (gerente: Gerente | null | undefined) => {
+  return StyleSheet.create({
+    controleUsuario: {
+      display: (gerente) ? ((gerente.tipo === 'AUXILIAR') ? 'none' : 'flex') : 'flex'
+    },
+    screen: {
+      flex: 1,
+      paddingHorizontal: 16,
+      paddingTop: 16,
+    },
 
-  /* Summary cards */
-  summaryGrid: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
-  },
+    /* Summary cards */
+    summaryGrid: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 24,
+    },
 
-  summaryCard: {
-    flex: 1,
-    borderRadius: 14,
-    padding: 16,
-  },
+    summaryCard: {
+      flex: 1,
+      borderRadius: 14,
+      padding: 16,
+    },
 
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginBottom: 4,
+    },
 
-  value: {
-    marginVertical: 4,
-  },
+    value: {
+      marginVertical: 4,
+    },
 
-  mt4: {
-    marginTop: 4,
-  },
+    mt4: {
+      marginTop: 4,
+    },
 
-  /* Employee grid */
-  list: {
-    paddingBottom: 24,
-  },
+    /* Employee grid */
+    list: {
+      paddingBottom: 24,
+    },
 
-  column: {
-    gap: 12,
-  },
+    column: {
+      gap: 12,
+    },
 
-  employeeItem: {
-    flex: 1,
-    marginBottom: 12,
-  },
+    employeeItem: {
+      flex: 1,
+      marginBottom: 12,
+    },
 
-  empty: {
-    alignItems: 'center',
-    marginTop: 48,
-  },
-  emptyText: {
-    marginTop: 12,
-    marginBottom: 4,
-  },
-});
+    empty: {
+      alignItems: 'center',
+      marginTop: 48,
+    },
+    emptyText: {
+      marginTop: 12,
+      marginBottom: 4,
+    },
+  });
+
+}
+

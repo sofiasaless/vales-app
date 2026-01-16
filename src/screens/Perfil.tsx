@@ -12,8 +12,15 @@ import { customTheme } from '../theme/custom.theme';
 import { useGerenteConectado } from '../hooks/useGerente';
 import { useSair } from '../hooks/useSair';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
+import { Gerente } from '../schema/gerente.schema';
 
 export const Perfil = () => {
+  const {
+    data: gerente_conectado,
+    isLoading
+  } = useGerenteConectado()
+  const styles = style(gerente_conectado);
+
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const iconColor = "#8f9bb3";
@@ -56,11 +63,6 @@ export const Perfil = () => {
       <MaterialIcons name="chevron-right" size={20} color={iconColor} />
     </TouchableOpacity>
   );
-
-  const { 
-    data: gerente_conectado,
-    isLoading
-  } = useGerenteConectado()
 
   const { data: rest_conectado } = useRestauranteConectado()
 
@@ -115,7 +117,7 @@ export const Perfil = () => {
         </CardGradient>
 
         {/* Menu */}
-        <CardGradient styles={styles.menuCard}>
+        <CardGradient styles={[styles.menuCard, styles.controleUsuario]}>
           <MenuItem
             icon={<MaterialCommunityIcons name="finance" size={20} color={iconColor} />}
             label="Finanças"
@@ -141,7 +143,7 @@ export const Perfil = () => {
           />
           <View style={styles.divider} />
           <MenuItem
-            icon={<MaterialIcons name="people" size={20} color={iconColor}/>}
+            icon={<MaterialIcons name="people" size={20} color={iconColor} />}
             label="Gerentes e Auxiliares"
             onPress={() => navigation.navigate('GerenciaGerentes', { idRest: rest_conectado?.id! })}
           />
@@ -160,7 +162,7 @@ export const Perfil = () => {
           />
         </CardGradient>
 
-        <Button onPress={() => navigation.navigate('Config')}>confis</Button>
+        {/* <Button onPress={() => navigation.navigate('Config')}>confis</Button> */}
 
         <View style={styles.footer}>
           <Text appearance="hint" category="c1">
@@ -173,105 +175,111 @@ export const Perfil = () => {
 };
 
 
-export const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingBottom: 24,
-  },
+export const style = (gerente: Gerente | null | undefined) => {
+  return StyleSheet.create({
+    controleUsuario: {
+      display: (gerente) ? ((gerente.tipo === 'AUXILIAR') ? 'none' : 'flex') : 'flex'
+    },
 
-  content: {
-    padding: 16,
-    gap: 12,
-  },
+    container: {
+      flex: 1,
+      paddingBottom: 24,
+    },
 
-  card: {
-    padding: 16,
-    marginHorizontal: 10,
-    borderRadius: 16
-  },
+    content: {
+      padding: 16,
+      gap: 12,
+    },
 
-  profileRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
+    card: {
+      padding: 16,
+      marginHorizontal: 10,
+      borderRadius: 16
+    },
 
-  profileInfo: {
-    flex: 1,
-  },
+    profileRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+    },
 
-  roleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
+    profileInfo: {
+      flex: 1,
+    },
 
-  roleText: {
-    color: '#2EB8A2',
-    fontSize: 13,
-    fontWeight: '500',
-  },
+    roleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      marginTop: 4,
+    },
 
-  restaurantRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
+    roleText: {
+      color: '#2EB8A2',
+      fontSize: 13,
+      fontWeight: '500',
+    },
 
-  restaurantIcon: {
-    padding: 12,
-    borderRadius: 16,
-    backgroundColor: 'rgba(46,184,162,0.2)',
-  },
+    restaurantRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
 
-  menuCard: {
-    padding: 0,
-    overflow: 'hidden',
-    marginHorizontal: 10,
-    borderRadius: 16
-  },
+    restaurantIcon: {
+      padding: 12,
+      borderRadius: 16,
+      backgroundColor: 'rgba(46,184,162,0.2)',
+    },
 
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-  },
+    menuCard: {
+      padding: 0,
+      overflow: 'hidden',
+      marginHorizontal: 10,
+      borderRadius: 16
+    },
 
-  menuItemDanger: {},
+    menuItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+    },
 
-  menuIcon: {
-    padding: 8,
-    borderRadius: 10,
-    marginRight: 12,
-  },
+    menuItemDanger: {},
 
-  iconDefaultBg: {
-    backgroundColor: 'rgba(143,155,179,0.15)',
-  },
+    menuIcon: {
+      padding: 8,
+      borderRadius: 10,
+      marginRight: 12,
+    },
 
-  iconDangerBg: {
-    backgroundColor: 'rgba(255,61,113,0.15)',
-  },
+    iconDefaultBg: {
+      backgroundColor: 'rgba(143,155,179,0.15)',
+    },
 
-  menuLabel: {
-    flex: 1,
-    fontWeight: '500',
-  },
+    iconDangerBg: {
+      backgroundColor: 'rgba(255,61,113,0.15)',
+    },
 
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(143,155,179,0.2)',
-    marginLeft: 56,
-  },
+    menuLabel: {
+      flex: 1,
+      fontWeight: '500',
+    },
 
-  footer: {
-    alignItems: 'center',
-    paddingTop: 24,
-    gap: 4,
-  },
+    divider: {
+      height: 1,
+      backgroundColor: 'rgba(143,155,179,0.2)',
+      marginLeft: 56,
+    },
 
-  footerText: {
-    marginTop: 4,
-  },
-});
+    footer: {
+      alignItems: 'center',
+      paddingTop: 24,
+      gap: 4,
+    },
+
+    footerText: {
+      marginTop: 4,
+    },
+  });
+}

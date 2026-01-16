@@ -64,7 +64,7 @@ export function BottomTab({ state, descriptors, navigation }: Props) {
           return (
             <BottomNavigationTab
               key={route.key}
-              title={route.name}
+              // title={route.name}
               icon={<IconTab nome={route.name} ativo={state.index === index}/>}
             />
           );
