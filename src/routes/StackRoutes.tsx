@@ -23,6 +23,8 @@ import { Incentivo } from '../schema/incentivo.schema';
 import RelatorioFinancas from '../screens/RelatorioFinancas';
 import GerenciarGerentes from '../screens/GerenciarGerentes';
 import { Config } from '../screens/Config';
+import { ItemMenu } from '../schema/menu.schema';
+import { ProdutoCardapio } from '../screens/ProdutoCardapio';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -46,6 +48,7 @@ export type RootStackParamList = {
   RegistroVendaIncentivo: { incentObj: Incentivo };
   FinancasRelatorio: { idRest: string };
   GerenciaGerentes: { idRest: string };
+  ProdutoCardapio: { idRest: string, produtoEditavel: ItemMenu | null };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -148,6 +151,12 @@ export default function StackRoutes() {
         name="GerenciaGerentes"
         component={GerenciarGerentes}
         options={optionsHeader('Gerentes e auxiliares')}
+      />
+
+      <Stack.Screen
+        name="ProdutoCardapio"
+        component={ProdutoCardapio}
+        options={optionsHeader('Adicionar/editar cardápio')}
       />
 
       <Stack.Screen

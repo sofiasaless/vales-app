@@ -169,7 +169,7 @@ export const Cadastro = () => {
       <Container>
         <Header title="Novo funcionário" />
 
-        <ScrollView contentContainerStyle={{padding: 16}}>
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
 
           <KeyboardAvoidingView style={styles.card} keyboardVerticalOffset={40}>
             <AvatarUpload value={formData.foto_url}
@@ -242,20 +242,40 @@ export const Cadastro = () => {
               caption={errors.cpf}
             />
 
-            {/* Datas */}
-            <View>
-              <Text category="label" style={styles.label}>
-                Data de nascimento
-              </Text>
-              <DatePicker dataPreEstabelecida={dataNascimento} tamanBtn="small" tipo="date" setarData={settingNascimento} />
-            </View>
+            {
+              (Platform.OS === 'web') ?
+                <>
+                  <View>
+                    <Text category="label" style={styles.label}>
+                      Data de nascimento
+                    </Text>
+                    <input type='date' onChange={(e) => setDataNascimento(new Date(e.target.value))} />
+                  </View>
 
-            <View>
-              <Text category="label" style={styles.label}>
-                Data de admissão
-              </Text>
-              <DatePicker dataPreEstabelecida={dataAdmissao} tamanBtn="small" tipo="date" setarData={settingAdmissao} />
-            </View>
+                  <View>
+                    <Text category="label" style={styles.label}>
+                      Data de admissão
+                    </Text>
+                    <input type='date' onChange={(e) => setDataAdmissao(new Date(e.target.value))} />
+                  </View>
+                </>
+                :
+                <>
+                  <View>
+                    <Text category="label" style={styles.label}>
+                      Data de nascimento
+                    </Text>
+                    <DatePicker dataPreEstabelecida={dataNascimento} tamanBtn="small" tipo="date" setarData={settingNascimento} />
+                  </View>
+
+                  <View>
+                    <Text category="label" style={styles.label}>
+                      Data de admissão
+                    </Text>
+                    <DatePicker dataPreEstabelecida={dataAdmissao} tamanBtn="small" tipo="date" setarData={settingAdmissao} />
+                  </View>
+                </>
+            }
 
             {/* Payday */}
             <View style={styles.paymentDays}>

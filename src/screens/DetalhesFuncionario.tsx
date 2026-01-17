@@ -7,7 +7,7 @@ import {
   Text
 } from '@ui-kitten/components';
 import React, { ReactNode, useCallback } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { AvatarIniciais } from '../components/AvatarIniciais';
@@ -193,6 +193,7 @@ export const DetalhesFuncionario = () => {
                 Demitir
               </Button>
             </View>
+            
           </>
         }
       </ScrollView>
@@ -202,8 +203,7 @@ export const DetalhesFuncionario = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingBottom: 24,
+    height: (Platform.OS === 'web')?'85%':'auto'
   },
 
   content: {
