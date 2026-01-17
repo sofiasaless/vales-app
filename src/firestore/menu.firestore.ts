@@ -52,11 +52,11 @@ export class MenuFirestore extends PatternFirestore {
     console.info('itens cadastrados com sucesso')
   }
 
-  public async adicionar(body: ItemMenuPostRequestBody) {
+  public async adicionar(idRestaurante: string, body: ItemMenuPostRequestBody) {
     const itemToSave: ItemMenuFirestorePostRequestBody = {
       ...body,
       data_criacao: new Date(),
-      restaurante_ref: this.restauranteService.getRef(body.restaurante_ref),
+      restaurante_ref: this.restauranteService.getRef(idRestaurante),
     }
 
     await addDoc(this.setup(), itemToSave)

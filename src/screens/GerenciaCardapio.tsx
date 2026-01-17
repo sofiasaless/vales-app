@@ -9,24 +9,28 @@ import {
   Spinner,
   Text
 } from '@ui-kitten/components';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   FlatList,
+  Platform,
   StyleSheet,
   View
 } from 'react-native';
 
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { menuFirestore, MenuFirestore } from '../firestore/menu.firestore';
-import { useCardapio } from '../hooks/useCardapio';
+import { useAcoesCardapio, useCardapio } from '../hooks/useCardapio';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
 import { ItemMenu, ItemMenuPostRequestBody } from '../schema/menu.schema';
 import { customTheme } from '../theme/custom.theme';
 import { AppModal } from '../components/AppModal';
+import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../routes/StackRoutes';
 
 export const GerenciaCardapio = () => {
   const styles = createStyles();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ItemMenu | null>(null);
@@ -42,11 +46,10 @@ export const GerenciaCardapio = () => {
   const [formData, setFormData] = useState<ItemMenuPostRequestBody>({
     descricao: '',
     preco: 0,
-    restaurante_ref: '',
   });
 
   const resetForm = () => {
-    setFormData({ descricao: '', preco: 0, restaurante_ref: '' });
+    setFormData({ descricao: '', preco: 0});
     setEditingProduct(null);
   };
 
@@ -59,7 +62,6 @@ export const GerenciaCardapio = () => {
     setFormData({
       descricao: product.descricao,
       preco: product.preco,
-      restaurante_ref: ''
     });
     setEditingProduct(product);
     setModalVisible(true);
@@ -89,21 +91,29 @@ export const GerenciaCardapio = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const { atualizarProdutoMutation, cadastrarProdutoMutation } = useAcoesCardapio()
 
   const handleSave = async () => {
 
     if (editingProduct) {
       if (!validateAtualizacaoProduto()) return;
-      await menuFirestore.atualizar(editingProduct.id, editingProduct);
-      refetch()
+      atualizarProdutoMutation.mutate({
+        props: {
+          body: editingProduct,
+          idProduto: editingProduct.id
+        }
+      })
       setModalVisible(false);
       resetForm();
     } else {
       if (!validateNovoProduto()) return;
       if (res?.id) {
-        formData.restaurante_ref = res?.id
-        await menuFirestore.adicionar(formData)
-        refetch()
+        cadastrarProdutoMutation.mutate({
+          props: {
+            body: formData,
+            idRestaurante: res.id
+          }
+        })
         setModalVisible(false);
         resetForm();
       }
@@ -126,7 +136,16 @@ export const GerenciaCardapio = () => {
           <Button
             size="small"
             appearance="ghost"
-            onPress={() => openEdit(item)}
+            onPress={() => {
+              if (Platform.OS === 'web') {
+                navigation.navigate('ProdutoCardapio', {
+                  idRest: res?.id!,
+                  produtoEditavel: item
+                })
+              } else {
+                openEdit(item)
+              }
+            }}
           >
             <MaterialCommunityIcons name="pencil" />
           </Button>
@@ -164,14 +183,22 @@ export const GerenciaCardapio = () => {
       <Layout style={styles.header}>
         <Button
           onPress={() => {
-            resetForm()
-            setModalVisible(true)
+            if (Platform.OS === 'web') {
+              navigation.navigate('ProdutoCardapio', {
+                idRest: res?.id!,
+                produtoEditavel: editingProduct
+              })
+            } else {
+              resetForm()
+              setModalVisible(true)
+            }
           }}
           accessoryLeft={<Entypo name="plus" size={20} color="black" />}
         >
           Novo produto
         </Button>
       </Layout>
+
 
       {isLoading ? (
         <View style={styles.centerContainer}>
@@ -186,8 +213,9 @@ export const GerenciaCardapio = () => {
           renderItem={renderItem}
           removeClippedSubviews
           windowSize={5}
-          maxToRenderPerBatch={10}
-          initialNumToRender={10}
+          maxToRenderPerBatch={5}
+          initialNumToRender={5}
+          nestedScrollEnabled
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text appearance="hint" style={styles.emptyText}>
@@ -262,13 +290,12 @@ export const GerenciaCardapio = () => {
 const createStyles = () =>
   StyleSheet.create({
     container: {
-      flex: 1,
-      width: '100%',
-      height: '100%',
+      height: (Platform.OS === 'web') ? '80%' : '100%'
     },
     header: {
       paddingHorizontal: 16,
       paddingVertical: 10,
+      justifyContent: 'center'
     },
     centerContainer: {
       flex: 1,
@@ -325,4 +352,4 @@ const createStyles = () =>
       marginTop: 16,
     },
   }
-);
+  );

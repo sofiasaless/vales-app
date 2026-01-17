@@ -3,6 +3,7 @@ import { Button, Input, Layout, Spinner, Text } from '@ui-kitten/components';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
+  Platform,
   StyleSheet,
   View
 } from 'react-native';
@@ -89,8 +90,19 @@ export default function Cardapio() {
           placeholder="Pesquisar por produto...."
           onChangeText={setSearch}
           accessoryLeft={<Feather name="search" size={22} color={customTheme['color-primary-500']} />}
-        />p
+        />
       </Layout>
+      <View style={{padding: 16, display: (Platform.OS === 'web')?'flex':'none'}}>
+        <Button
+          size="giant"
+          style={styles.actionButton}
+          onPress={handleAdicionarItems}
+          disabled={(tamanho === 0 || carregadnoAdicaoVales)}
+        >
+          {(carregadnoAdicaoVales) ? 'Adicionadno...' : `Adicionar (${tamanho})`}
+        </Button>
+      </View>
+
       {
         (isLoading) ?
           <Spinner />
@@ -136,7 +148,7 @@ export default function Cardapio() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    height: (Platform.OS === 'web')?'40%':'100%'
   },
   barraPesquisa: {
     paddingHorizontal: 16,
@@ -146,6 +158,7 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 120,
     gap: 10,
+    height: (Platform.OS === 'web')?'40%':'auto'
   },
   category: {
     gap: 8,

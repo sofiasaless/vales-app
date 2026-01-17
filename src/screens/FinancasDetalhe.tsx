@@ -15,6 +15,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import {
   FlatList,
+  Platform,
   StyleSheet,
   View
 } from 'react-native';
@@ -100,7 +101,7 @@ export default function FinancasDetalhe() {
   }
 
   return (
-    <Layout style={styles.container}>
+    <Layout style={[styles.container, (Platform.OS === 'web')?{height: '70%'}:{flex: 1}]}>
 
       <CardGradient styles={styles.summary}>
         <View
@@ -238,7 +239,6 @@ export default function FinancasDetalhe() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 16,
   },
 
