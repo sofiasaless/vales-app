@@ -10,7 +10,7 @@ import {
   Text
 } from '@ui-kitten/components';
 import React, { useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { CardGradient } from '../components/CardGradient';
@@ -224,7 +224,11 @@ export const ResumoPagamento = () => {
           <Button
             size="medium"
             onPress={() => {
-              navigator.navigate('Assinatura', { funcObj });
+              if (Platform.OS === 'web') {
+                navigator.navigate('AssinaturaWeb', { funcObj })
+              } else {
+                navigator.navigate('Assinatura', { funcObj });
+              }
             }}
             accessoryLeft={<AntDesign name="signature" size={18} color={'black'} />}
           >
@@ -289,7 +293,7 @@ export const ResumoPagamento = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    height: (Platform.OS === 'web') ? '95%' : 'auto',
     paddingBottom: 16
   },
   content: {

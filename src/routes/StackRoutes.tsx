@@ -25,6 +25,7 @@ import GerenciarGerentes from '../screens/GerenciarGerentes';
 import { Config } from '../screens/Config';
 import { ItemMenu } from '../schema/menu.schema';
 import { ProdutoCardapio } from '../screens/ProdutoCardapio';
+import { AssinaturaWeb } from '../screens/AssinaturaWeb';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -49,6 +50,7 @@ export type RootStackParamList = {
   FinancasRelatorio: { idRest: string };
   GerenciaGerentes: { idRest: string };
   ProdutoCardapio: { idRest: string, produtoEditavel: ItemMenu | null };
+  AssinaturaWeb: { funcObj: Funcionario };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -79,6 +81,12 @@ export default function StackRoutes() {
         name="Assinatura"
         component={Assinatura}
         options={optionsHeader('Assinatura do funcionário')}
+      />
+
+      <Stack.Screen
+        name="AssinaturaWeb"
+        component={AssinaturaWeb}
+        options={optionsHeader('Assinatura do funcionário WEB')}
       />
 
       <Stack.Screen
