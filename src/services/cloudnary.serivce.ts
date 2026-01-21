@@ -57,3 +57,19 @@ export const uploadImage = async (uri: string) => {
   return res.data.secure_url;
 
 };
+
+export const uploadImagemFromWeb = async (image: File | any) => {
+  const cloudName = CLOUDINARY_NAME;
+  const uploadPreset = 'ml_default';
+
+  const formData = new FormData();
+  formData.append("file", image);
+  formData.append("upload_preset", uploadPreset);
+
+  const res = await axios.post(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    formData
+  );
+
+  return res.data.secure_url
+}

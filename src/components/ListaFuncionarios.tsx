@@ -68,7 +68,7 @@ export const ListaFuncionarios = () => {
   return (
     <Layout level="1" style={styles.screen}>
       {incentivo_ativo &&
-        <View style={{ marginBottom: 10 }}>
+        <View style={[{ marginBottom: 10 }, styles.controleUsuario]}>
           <IncentivoAtivoCard incentivo={incentivo_ativo} />
         </View>
       }

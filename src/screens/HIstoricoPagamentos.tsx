@@ -4,7 +4,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
 import { Button, Card, Layout, Spinner, Text } from '@ui-kitten/components';
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { FlatList } from 'react-native-gesture-handler';
 import { DatePicker } from '../components/DatePicker';
@@ -19,6 +19,7 @@ import { converterParaIsoDate, converterTimestamp } from '../util/formatadores.u
 import { gerarRelatorioVales } from '../util/relatorios.util';
 import { Funcionario } from '../schema/funcionario.schema';
 import { CardGradient } from '../components/CardGradient';
+
 
 export const HistoricoPagamentos = () => {
   const route = useRoute<any>();

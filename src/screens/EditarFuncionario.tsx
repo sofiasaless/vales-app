@@ -11,7 +11,7 @@ import { converterParaDate } from "../util/datas.util";
 import { converterTimestamp, validateCPF } from "../util/formatadores.util";
 import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
 import { AvatarUpload } from "../components/AvatarUpload";
-import { uploadImage } from "../services/cloudnary.serivce";
+import { uploadImage, uploadImagemFromWeb } from "../services/cloudnary.serivce";
 
 interface RouteParams {
   funcObj: Funcionario
@@ -125,7 +125,13 @@ export const EditarFuncionario = () => {
 
     if (formData.foto_url) {
       if (!formData.foto_url.startsWith('https://') && formData.foto_url !== '') {
-        formData.foto_url = await uploadImage(formData.foto_url);
+        if (formData.foto_url) {
+          if (Platform.OS === 'web') {
+            formData.foto_url = await uploadImagemFromWeb(formData.foto_url);
+          } else {
+            formData.foto_url = await uploadImage(formData.foto_url);
+          }
+        }
       }
     }
 
