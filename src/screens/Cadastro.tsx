@@ -10,7 +10,7 @@ import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
 import { useGerenteConectado } from "../hooks/useGerente";
 import { useRestauranteId } from "../hooks/useRestaurante";
 import { FuncionarioPostRequestBody, TipoFuncionario } from "../schema/funcionario.schema";
-import { uploadImage } from "../services/cloudnary.serivce";
+import { uploadImage, uploadImagemFromWeb } from "../services/cloudnary.serivce";
 import { customTheme } from "../theme/custom.theme";
 import { converterParaDate } from "../util/datas.util";
 import { validateCPF } from "../util/formatadores.util";
@@ -135,19 +135,26 @@ export const Cadastro = () => {
 
   const [isLoading, setIsLoading] = useState(false)
   const handleSubmit = async () => {
-    setIsLoading(true)
-    if (!validate()) {
-      setIsLoading(false)
-      return;
-    }
-
-    if (id_res?.uid) {
-      formData.restaurante_ref = id_res.uid;
-    }
-
-    if (formData.foto_url) formData.foto_url = await uploadImage(formData.foto_url);
-
+    
     try {
+      setIsLoading(true)
+      if (!validate()) {
+        setIsLoading(false)
+        return;
+      }
+  
+      if (id_res?.uid) {
+        formData.restaurante_ref = id_res.uid;
+      }
+  
+      if (formData.foto_url) {
+        if (Platform.OS === 'web') {
+          formData.foto_url = await uploadImagemFromWeb(formData.foto_url);
+        } else {
+          formData.foto_url = await uploadImage(formData.foto_url);
+        }
+      }
+
       const funcSer = new FuncionarioFirestore()
       await funcSer.criar(formData);
       setFormData(emptyFuncionario);
@@ -329,7 +336,7 @@ export const Cadastro = () => {
             style={styles.submit}
             disabled={isLoading}
           >
-            {(isLoading) ? 'Contrantado...' : 'Cadastrar Funcionário'}
+            {(isLoading) ? 'Contratando...' : 'Cadastrar Funcionário'}
           </Button>
         </ScrollView>
       </Container>
