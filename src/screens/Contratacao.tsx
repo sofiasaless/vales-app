@@ -101,8 +101,8 @@ export const Contratacao = () => {
                   handleChange('regimeClt', index === 0)
                 }
               >
-                <Radio>Deseja regime CLT</Radio>
-                <Radio>NÃO deseja regime CLT</Radio>
+                <Radio>Regime CLT</Radio>
+                <Radio>Prestação de serviço (Sem CLT)</Radio>
               </RadioGroup>
             </View>
           </View>
@@ -115,17 +115,17 @@ export const Contratacao = () => {
               style={styles.submit}
               disabled={isLoading}
             >
-              {(isLoading) ? 'Gerando...' : 'Contrato sem assinatura'}
+              {(isLoading) ? 'Carregando...' : 'Gerar contrato e cadastrar'}
             </Button>
 
-            <Button
+            {/* <Button
               size="large"
               // onPress={() => contratoFuncionario('serviços de garcom', true)}
               style={styles.submit}
               disabled={isLoading}
             >
               Contrato com assinatura
-            </Button>
+            </Button> */}
           </View>
         </View>
       </Layout>

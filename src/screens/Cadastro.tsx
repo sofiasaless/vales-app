@@ -327,7 +327,7 @@ export const Cadastro = () => {
                   style={styles.submit}
                   disabled={isLoading}
                 >
-                  {(isLoading) ? 'Contrantado...' : 'Cadastrar Funcionário (sem contrato)'}
+                  {(isLoading) ? 'Cadastrando...' : 'Cadastrar Funcionário (sem contrato)'}
                 </Button>
 
                 <Button
@@ -335,6 +335,7 @@ export const Cadastro = () => {
                   onPress={async () => {
                     setIsLoadingContrato(true)
                     if (!validate()) {
+                      setIsLoadingContrato(false)
                       return
                     }
                     const toSend = await handlePrepararFuncionario()
