@@ -1,4 +1,4 @@
-import { addDoc, getDocs, orderBy, query, where } from "firebase/firestore";
+import { addDoc, getDocs, orderBy, query, Transaction, where } from "firebase/firestore";
 import { RestauranteSerivce } from "../auth/restaurante.service";
 import { COLLECTIONS } from "../enums/firebase.enum";
 import { Pagamento, PagamentoFirestorePostRequestBody, PagamentoPostRequestBody } from "../schema/pagamento.schema";
@@ -43,7 +43,7 @@ export class PagamentoFirestore extends PatternFirestore {
           orderBy('data_pagamento', 'desc')
         )
       );
-  
+
       const pagamentos: Pagamento[] = queryResult.docs.map((doc) => {
         return {
           id: doc.id,
@@ -51,7 +51,7 @@ export class PagamentoFirestore extends PatternFirestore {
           ...doc.data()
         } as Pagamento
       })
-  
+
       return pagamentos
     } catch (error) {
       console.error(error)

@@ -1,11 +1,11 @@
-import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, increment, orderBy, query, runTransaction, setDoc, Transaction, updateDoc, where, getCountFromServer } from "firebase/firestore";
-import { Funcionario, FuncionarioPostRequestBody } from "../schema/funcionario.schema";
-import { PatternFirestore } from "./pattern.firestore";
-import { COLLECTIONS } from "../enums/firebase.enum";
-import { Vale, ValeFirestorePostRequestBody } from "../schema/vale.shema";
+import { arrayRemove, arrayUnion, collection, doc, getDoc, getDocs, orderBy, query, runTransaction, setDoc, Transaction, updateDoc, where } from "firebase/firestore";
 import { RestauranteSerivce } from "../auth/restaurante.service";
-import { MenuFirestore } from "./menu.firestore";
+import { COLLECTIONS } from "../enums/firebase.enum";
+import { Funcionario, FuncionarioPostRequestBody } from "../schema/funcionario.schema";
 import { GanhosIncentivo } from "../schema/incentivo.schema";
+import { Vale, ValeFirestorePostRequestBody } from "../schema/vale.shema";
+import { MenuFirestore } from "./menu.firestore";
+import { PatternFirestore } from "./pattern.firestore";
 
 export class FuncionarioFirestore extends PatternFirestore {
 
@@ -106,8 +106,24 @@ export class FuncionarioFirestore extends PatternFirestore {
     })
   }
 
-  public async excluir(id: string) {
-    await deleteDoc(doc(this.setup(), id));
+  public async excluir(idFunc: string) {
+    await runTransaction(this.firestore(), async (transaction) => {
+      // apagar históricos do funcionário
+      const queryResult = await getDocs(
+        query(
+          collection(this.firestore(), COLLECTIONS.PAGAMENTOS),
+          where("funcionario_ref", "==", this.getRef(idFunc)),
+        )
+      );
+
+      queryResult.docs.map((docSnapshot) => {
+        const ref = doc(collection(this.firestore(), COLLECTIONS.PAGAMENTOS), docSnapshot.id);
+        transaction.delete(ref);
+      })
+
+      transaction.delete(this.getRef(idFunc))
+    })
+
   }
 
 }

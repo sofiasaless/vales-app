@@ -1,8 +1,7 @@
-import { doc, getDoc, getDocs, increment, query, Transaction, updateDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, increment, query, Transaction, updateDoc, where } from "firebase/firestore";
 import { COLLECTIONS } from "../enums/firebase.enum";
 import { FuncionarioIncentivo, FuncionarioIncentivoFirestorePostRequestBody } from "../schema/funcionario.incentivo.schema";
 import { PatternFirestore } from "./pattern.firestore";
-import { incentivoFirestore } from "./incentivo.firestore";
 import { funcionarioFirestore } from "./funcionario.firestore";
 
 export class FuncionarioIncentivosFirestore extends PatternFirestore {
@@ -17,7 +16,7 @@ export class FuncionarioIncentivosFirestore extends PatternFirestore {
         contador: 0,
         data_criacao: new Date(),
         ganhador: false,
-        incentivo_ref: incentivoFirestore.getRef(idIncentivo),
+        incentivo_ref: doc(collection(this.firestore(), COLLECTIONS.INCENTIVO)),
         funcinoario_ref: funcionarioFirestore.getRef(id)
       }
 
@@ -98,7 +97,7 @@ export class FuncionarioIncentivosFirestore extends PatternFirestore {
     const snap = await getDocs(
       query(
         this.setup(),
-        where("incentivo_ref", "==", incentivoFirestore.getRef(idIncentivo))
+        where("incentivo_ref", "==", doc(collection(this.firestore(), COLLECTIONS.INCENTIVO)))
       )
     )
 

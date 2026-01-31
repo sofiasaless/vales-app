@@ -7,7 +7,7 @@ import {
   Text
 } from '@ui-kitten/components';
 import React, { ReactNode, useCallback } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { AvatarIniciais } from '../components/AvatarIniciais';
@@ -28,7 +28,6 @@ export const DetalhesFuncionario = () => {
   const route = useRoute();
   const { idFunc } = route.params as RouteParams;
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const navBottom = useNavigation<NavigationProp<BottomTabParamList>>();
 
   const InfoRow = ({
     icon,
@@ -65,7 +64,7 @@ export const DetalhesFuncionario = () => {
     try {
       const funcFir = new FuncionarioFirestore()
       await funcFir.excluir(idFunc)
-      navBottom.navigate('Funcionarios')
+      navigation.navigate('Tabs')
     } catch (error) {
       console.error('erro ao excluir funcionário ', error)
     }
@@ -123,7 +122,7 @@ export const DetalhesFuncionario = () => {
               )}
 
               <Button disabled={funcionarioFoco?.contrato === undefined} size='small' status='warning'
-              onPress={() => contratoFuncionario(funcionarioFoco?.contrato?.descricao_servicos || '', funcionarioFoco?.contrato?.contratacao_regime_ctl || false)}
+                onPress={() => contratoFuncionario(funcionarioFoco?.contrato?.descricao_servicos || '', funcionarioFoco?.contrato?.contratacao_regime_ctl || false)}
               >Ver e compartilhar contrato</Button>
             </Card>
 
@@ -192,7 +191,17 @@ export const DetalhesFuncionario = () => {
               <Button
                 status="danger"
                 style={styles.actionButton}
-                onPress={handleExcluir}
+                onPress={() => {
+                  Alert.alert("Tem certeza de que deseja demitir o funcionário?", "Ao demiti-lo, as informações dele serão apagadas e não poderão ser recuperadas", [
+                    {
+                      text: "Cancelar"
+                    },
+                    {
+                      text: "Confirmar",
+                      onPress: () => handleExcluir()
+                    },
+                  ])
+                }}
               >
                 Demitir
               </Button>
