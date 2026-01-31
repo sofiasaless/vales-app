@@ -1,6 +1,6 @@
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import { enableScreens } from 'react-native-screens';
-import { Funcionario } from '../schema/funcionario.schema';
+import { Funcionario, FuncionarioPostRequestBody } from '../schema/funcionario.schema';
 import { Assinatura } from '../screens/Assinatura';
 import Cardapio from '../screens/Cardapio';
 import { DetalhesFuncionario } from '../screens/DetalhesFuncionario';
@@ -23,12 +23,14 @@ import { Incentivo } from '../schema/incentivo.schema';
 import RelatorioFinancas from '../screens/RelatorioFinancas';
 import GerenciarGerentes from '../screens/GerenciarGerentes';
 import { Config } from '../screens/Config';
+import { Contratacao } from '../screens/Contratacao';
 
 export type RootStackParamList = {
   Tabs: undefined;
   Vale: { idFunc: string };
   Funcionario: undefined;
   Cadastro: undefined;
+  Contratacao: { funcObj: FuncionarioPostRequestBody };
   ResumoPagamento: { funcObj: Funcionario };
   Assinatura: { funcObj: Funcionario };
   GerenciaCardapio: undefined;
@@ -148,6 +150,12 @@ export default function StackRoutes() {
         name="GerenciaGerentes"
         component={GerenciarGerentes}
         options={optionsHeader('Gerentes e auxiliares')}
+      />
+
+      <Stack.Screen
+        name="Contratacao"
+        component={Contratacao}
+        options={optionsHeader('Contrato do funcionário')}
       />
 
       <Stack.Screen

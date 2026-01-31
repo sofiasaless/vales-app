@@ -18,6 +18,7 @@ import { RootStackParamList } from '../routes/StackRoutes';
 import { customTheme } from '../theme/custom.theme';
 import { converterParaIsoDate, formatCPF } from '../util/formatadores.util';
 import { BottomTabParamList } from '../routes/BottomRoutes';
+import { contratoFuncionario } from '../util/contratos.util';
 
 interface RouteParams {
   idFunc: string
@@ -99,7 +100,6 @@ export const DetalhesFuncionario = () => {
               </View>
             </Card>
 
-            {/* Personal Info */}
             <Card style={styles.card}>
               <Text category="s1" style={styles.cardTitle}>
                 Informações Pessoais
@@ -121,6 +121,10 @@ export const DetalhesFuncionario = () => {
                   value={converterParaIsoDate(funcionarioFoco?.data_nascimento)}
                 />
               )}
+
+              <Button disabled={funcionarioFoco?.contrato === undefined} size='small' status='warning'
+              onPress={() => contratoFuncionario(funcionarioFoco?.contrato?.descricao_servicos || '', funcionarioFoco?.contrato?.contratacao_regime_ctl || false)}
+              >Ver e compartilhar contrato</Button>
             </Card>
 
             {/* Employment Info */}
@@ -149,7 +153,7 @@ export const DetalhesFuncionario = () => {
               {
                 funcionarioFoco?.tipo === 'DIARISTA' &&
                 <InfoRow
-                  
+
                   icon={<Entypo name="wallet" size={22} color={customTheme['text-hint-color']} />}
                   label={'Salário Base (Mensal)'}
                   value={<DinheiroDisplay value={(funcionarioFoco?.salario * 3 * 4)} />}

@@ -1,4 +1,5 @@
 import Feather from '@expo/vector-icons/Feather';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Button, Input, Layout, Radio, RadioGroup, Text } from "@ui-kitten/components";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
@@ -9,9 +10,11 @@ import { Header } from "../components/Header";
 import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
 import { useGerenteConectado } from "../hooks/useGerente";
 import { useRestauranteId } from "../hooks/useRestaurante";
+import { RootStackParamList } from '../routes/StackRoutes';
 import { FuncionarioPostRequestBody, TipoFuncionario } from "../schema/funcionario.schema";
 import { uploadImage } from "../services/cloudnary.serivce";
 import { customTheme } from "../theme/custom.theme";
+import { alert } from '../util/alertfeedback.util';
 import { converterParaDate } from "../util/datas.util";
 import { validateCPF } from "../util/formatadores.util";
 
@@ -28,11 +31,12 @@ const emptyFuncionario: FuncionarioPostRequestBody = {
   vales: [],
   incentivo: [],
   restaurante_ref: '',
-  foto_url: undefined
+  foto_url: ''
 }
 
 export const Cadastro = () => {
   const { data: gerente } = useGerenteConectado()
+  const navigator = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -133,6 +137,14 @@ export const Cadastro = () => {
 
   const { data: id_res } = useRestauranteId()
 
+  const handlePrepararFuncionario = async () => {
+    if (id_res?.uid) formData.restaurante_ref = id_res.uid;
+    if (formData.foto_url != '' && formData.foto_url != undefined) formData.foto_url = await uploadImage(formData.foto_url);
+
+    return formData
+  }
+
+  const [isLoadingContrato, setIsLoadingContrato] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const handleSubmit = async () => {
     setIsLoading(true)
@@ -141,17 +153,13 @@ export const Cadastro = () => {
       return;
     }
 
-    if (id_res?.uid) {
-      formData.restaurante_ref = id_res.uid;
-    }
-
-    if (formData.foto_url) formData.foto_url = await uploadImage(formData.foto_url);
+    await handlePrepararFuncionario();
 
     try {
       const funcSer = new FuncionarioFirestore()
       await funcSer.criar(formData);
       setFormData(emptyFuncionario);
-      console.info('sucesso ao cadastrar')
+      alert("Sucesso ao cadastrar!", "Vá para área de funcionários para acessar o novo funcionário.")
     } catch (error) {
       console.error(`erro ao cadastrar funcionario ${error}`)
     } finally {
@@ -207,7 +215,7 @@ export const Cadastro = () => {
                 {/* Tipo */}
                 <View>
                   <Text category="label" style={styles.label}>
-                    Tipo de Contrato
+                    Tipo de Funcionário
                   </Text>
 
                   <RadioGroup
@@ -311,14 +319,32 @@ export const Cadastro = () => {
                 <Button onPress={calcularDiasDePagamento} size="small" status="warning" appearance="ghost">Calcular dias de pagamento</Button>
               </View>
 
-              <Button
-                size="large"
-                onPress={handleSubmit}
-                style={styles.submit}
-                disabled={isLoading}
-              >
-                {(isLoading) ? 'Contrantado...' : 'Cadastrar Funcionário'}
-              </Button>
+              <View style={styles.btnsArea}>
+                <Button
+                  appearance='outline'
+                  size="large"
+                  onPress={handleSubmit}
+                  style={styles.submit}
+                  disabled={isLoading}
+                >
+                  {(isLoading) ? 'Contrantado...' : 'Cadastrar Funcionário (sem contrato)'}
+                </Button>
+
+                <Button
+                  size="large"
+                  onPress={async () => {
+                    setIsLoadingContrato(true)
+                    if (!validate()) {
+                      return
+                    }
+                    const toSend = await handlePrepararFuncionario()
+                    setIsLoadingContrato(false)
+                    navigator.navigate('Contratacao', { funcObj: toSend })
+                  }}
+                  style={styles.submit}
+                  disabled={isLoading || isLoadingContrato}
+                >Contratar Funcionário</Button>
+              </View>
             </ScrollView>
           </KeyboardAvoidingView>
         </Layout>
@@ -352,6 +378,9 @@ const styles = StyleSheet.create({
 
   paymentDays: {
     flexDirection: 'row',
+    gap: 10
+  },
+  btnsArea: {
     gap: 10
   }
 });

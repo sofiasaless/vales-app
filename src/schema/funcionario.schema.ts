@@ -3,6 +3,17 @@ import { Vale } from "./vale.shema";
 
 export type TipoFuncionario = 'DIARISTA' | 'FIXO'
 
+export interface AssinaturasContrato {
+  contratante: string,
+  contratado: string
+}
+
+export type ContratoFuncionario = {
+  contratacao_regime_ctl: boolean,
+  descricao_servicos: string,
+  assinaturas?: AssinaturasContrato
+}
+
 export type Funcionario = {
   id: string,
   nome: string,
@@ -20,6 +31,7 @@ export type Funcionario = {
   segundo_dia_pagamento: number,
   restaurante_ref: string,
   data_cadastro: Date,
+  contrato?: ContratoFuncionario
 }
 
 export type FuncionarioPostRequestBody = Omit<Funcionario, "id" | "data_cadastro">
