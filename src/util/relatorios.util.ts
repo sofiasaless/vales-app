@@ -6,19 +6,7 @@ import { Funcionario } from "../schema/funcionario.schema";
 import { Pagamento, PagamentoPostRequestBody } from "../schema/pagamento.schema";
 import { Restaurante } from "../schema/restaurante.schema";
 import { calcularTotalIncentivos, calcularTotalVales } from "./calculos.util";
-import { converterTimestamp } from "./formatadores.util";
-
-function formatDate(date?: Date) {
-  if (!date) return '-';
-  return new Date(date).toLocaleDateString('pt-BR');
-}
-
-function formatMoney(value: number) {
-  return value.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
-}
+import { converterTimestamp, formatDateRelatorio, formatMoney } from "./formatadores.util";
 
 export async function gerarRelatorioVales(
   funcionario: Funcionario,
@@ -189,14 +177,14 @@ export async function gerarRelatorioVales(
           <div><strong>CPF:</strong> ${funcionario.cpf ?? '-'}</div>
           <div><strong>Tipo:</strong> ${funcionario.tipo}</div>
           <div><strong>Salário Bruto:</strong> ${formatMoney(funcionario.salario)}</div>
-          <div><strong>Data de Admissão:</strong> ${formatDate(converterTimestamp(funcionario.data_admissao))}</div>
+          <div><strong>Data de Admissão:</strong> ${formatDateRelatorio(converterTimestamp(funcionario.data_admissao))}</div>
         </div>
       </div>
 
       <div class="section">
         <h2>Resumo do Pagamento</h2>
         <div class="info-grid">
-          <div><strong>Data do Pagamento:</strong> ${formatDate(data_pag)}</div>
+          <div><strong>Data do Pagamento:</strong> ${formatDateRelatorio(data_pag)}</div>
           <div><strong>Salário Base:</strong> ${formatMoney(salarioBase())}</div>
           <div><strong>Total em Vales:</strong> ${formatMoney(totalVales)}</div>
           <div><strong>Total em Incentivos:</strong> ${formatMoney(totalIncentivos)}</div>
@@ -221,7 +209,7 @@ export async function gerarRelatorioVales(
       ? `<tr><td colspan="5">Nenhum vale registrado</td></tr>`
       : vales.map(v => `
         <tr>
-          <td>${formatDate(converterTimestamp(v.data_adicao))}</td>
+          <td>${formatDateRelatorio(converterTimestamp(v.data_adicao))}</td>
           <td>${v.descricao}</td>
           <td>${v.quantidade}</td>
           <td>${formatMoney(v.preco_unit)}</td>
@@ -358,7 +346,7 @@ export async function gerarRelatorioDespesas(
       <h1>Relatório de Gastos</h1>
       <div class="subtitle">
         ${(nomeCategoria) ? `Categoria: <strong>${nomeCategoria}</strong><br/>` : ''}
-        Período: ${formatDate(datas.dataInicio)} até ${formatDate(datas.dataFim)}
+        Período: ${formatDateRelatorio(datas.dataInicio)} até ${formatDateRelatorio(datas.dataFim)}
       </div>
 
       <div class="section">
@@ -375,7 +363,7 @@ export async function gerarRelatorioDespesas(
           <div><strong>Nome Fantasia:</strong> ${estabelecimento.nome_fantasia}</div>
           <div><strong>Email:</strong> ${estabelecimento.email}</div>
           <div><strong>Status:</strong> ${estabelecimento.ativo ? 'Ativo' : 'Inativo'}</div>
-          <div><strong>Data de Criação:</strong> ${formatDate(converterTimestamp(estabelecimento.data_criacao))}</div>
+          <div><strong>Data de Criação:</strong> ${formatDateRelatorio(converterTimestamp(estabelecimento.data_criacao))}</div>
         </div>
       </div>
 
@@ -398,7 +386,7 @@ export async function gerarRelatorioDespesas(
         .map(
           d => `
                       <tr>
-                        <td>${formatDate(converterTimestamp(d.data_criacao))}</td>
+                        <td>${formatDateRelatorio(converterTimestamp(d.data_criacao))}</td>
                         <td>${d.descricao}</td>
                         ${(!nomeCategoria) ? '' : `<td>${nomeCategoria}</td>`}
                         <td class="right">${formatMoney(d.valor)}</td>

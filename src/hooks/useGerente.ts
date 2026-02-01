@@ -2,12 +2,19 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
 import { gerenteFirestore } from "../firestore/gerente.firestore";
 import { Gerente } from "../schema/gerente.schema";
+import { Platform } from "react-native";
 
 export function useGerenteConectado() {
   return useQuery({
     queryKey: ["gerente_conectado"],
     queryFn: async () => {
-      const string_res = await AsyncStorage.getItem('gerente')
+      let string_res
+      if (Platform.OS === 'web') {
+        string_res = localStorage.getItem('gerente')
+      } else {
+        string_res = await AsyncStorage.getItem('gerente')
+      }
+
       if (string_res) {
         const res = JSON.parse(string_res) as Gerente
         return res

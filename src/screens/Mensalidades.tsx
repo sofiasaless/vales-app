@@ -13,6 +13,7 @@ import * as Clipboard from 'expo-clipboard';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { CardGradient } from '../components/CardGradient';
 import { customTheme } from '../theme/custom.theme';
+import { AppModal } from '../components/AppModal';
 
 interface Subscription {
   id: string;
@@ -142,82 +143,75 @@ export default function Mensalidades() {
         })}
       </View>
 
-      {/* MODAL */}
-      <Modal
-        visible={!!selected}
-        backdropStyle={styles.backdrop}
-        onBackdropPress={() => setSelected(null)}
-      >
-        {selected && (
-          <Card style={styles.modal}>
-            <Text category="h6">{selected.name}</Text>
+      {selected && (
+        <AppModal visible={!!selected} onClose={() => setSelected(null)}>
+          <Text category="h6">{selected.name}</Text>
+          <Text appearance="hint" category="c1">
+            Detalhes do pagamento
+          </Text>
+
+          {/* VALOR */}
+          <View style={styles.block}>
             <Text appearance="hint" category="c1">
-              Detalhes do pagamento
+              Valor
+            </Text>
+            <DinheiroDisplay value={selected.amount} variant='positive' size="md" />
+          </View>
+
+          {/* VENCIMENTO */}
+          <View style={styles.block}>
+            <View style={styles.iconRow}>
+              <Ionicons
+                name="calendar-outline"
+                size={16}
+                color={customTheme['text-hint-color']}
+              />
+              <Text appearance="hint" category="c1">
+                Data de vencimento
+              </Text>
+            </View>
+            <Text category="s1">
+              12/02/2025
+            </Text>
+          </View>
+
+          {/* PIX */}
+          <View style={styles.block}>
+            <Text appearance="hint" category="c1">
+              Chave PIX
             </Text>
 
-            {/* VALOR */}
-            <View style={styles.block}>
-              <Text appearance="hint" category="c1">
-                Valor
+            <View style={styles.pixRow}>
+              <Text style={styles.pixKey}>
+                {selected.pixKey}
               </Text>
-              <DinheiroDisplay value={selected.amount} variant='positive' size="md" />
-            </View>
 
-            {/* VENCIMENTO */}
-            <View style={styles.block}>
-              <View style={styles.iconRow}>
+              <Button
+                appearance="outline"
+                size="small"
+                onPress={() => handleCopyPix(selected.pixKey)}
+              >
                 <Ionicons
-                  name="calendar-outline"
+                  name={copied ? 'checkmark' : 'copy-outline'}
                   size={16}
-                  color={customTheme['text-hint-color']}
+                  color={
+                    copied
+                      ? theme['color-success-600']
+                      : theme['color-primary-600']
+                  }
                 />
-                <Text appearance="hint" category="c1">
-                  Data de vencimento
-                </Text>
-              </View>
-              <Text category="s1">
-                12/02/2025
-              </Text>
+              </Button>
             </View>
+          </View>
 
-            {/* PIX */}
-            <View style={styles.block}>
-              <Text appearance="hint" category="c1">
-                Chave PIX
-              </Text>
-
-              <View style={styles.pixRow}>
-                <Text style={styles.pixKey}>
-                  {selected.pixKey}
-                </Text>
-
-                <Button
-                  appearance="outline"
-                  size="small"
-                  onPress={() => handleCopyPix(selected.pixKey)}
-                >
-                  <Ionicons
-                    name={copied ? 'checkmark' : 'copy-outline'}
-                    size={16}
-                    color={
-                      copied
-                        ? theme['color-success-600']
-                        : theme['color-primary-600']
-                    }
-                  />
-                </Button>
-              </View>
-            </View>
-
-            <Button
-              appearance="outline"
-              onPress={() => setSelected(null)}
-            >
-              Fechar
-            </Button>
-          </Card>
-        )}
-      </Modal>
+          <Button
+            appearance="outline"
+            onPress={() => setSelected(null)}
+          >
+            Fechar
+          </Button>
+        </AppModal>
+      )}
     </Layout>
   );
 }

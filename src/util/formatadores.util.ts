@@ -91,3 +91,15 @@ export const converterParaIsoDate = (data: Timestamp | any) => {
   if (data === undefined) return ''
   return converterTimestamp(data).toLocaleDateString()
 }
+
+export function formatDateRelatorio(date?: Date) {
+  if (!date) return '-';
+  return new Date(date).toLocaleDateString('pt-BR');
+}
+
+export function formatMoney(value: number) {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
+}

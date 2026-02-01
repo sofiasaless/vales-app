@@ -15,6 +15,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import {
   FlatList,
+  Platform,
   StyleSheet,
   View
 } from 'react-native';
@@ -32,6 +33,7 @@ import { DatePicker } from '../components/DatePicker';
 import { converterParaDate } from '../util/datas.util';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
 import { gerarRelatorioDespesas } from '../util/relatorios.util';
+import { AppModal } from '../components/AppModal';
 
 export default function FinancasDetalhe() {
   const route = useRoute<any>();
@@ -99,7 +101,7 @@ export default function FinancasDetalhe() {
   }
 
   return (
-    <Layout style={styles.container}>
+    <Layout style={[styles.container, (Platform.OS === 'web')?{height: '70%'}:{flex: 1}]}>
 
       <CardGradient styles={styles.summary}>
         <View
@@ -187,19 +189,15 @@ export default function FinancasDetalhe() {
 
           <Button size='small' appearance='outline' status='info'
             accessoryRight={<Entypo name="share" size={16} color={customTheme['color-info-500']} />}
-            onPress={async () => gerarRelatorioDespesas(despesas || [], restaurante!, {dataFim, dataInicio}, categoriaObj.descricao)}
+            onPress={async () => gerarRelatorioDespesas(despesas || [], restaurante!, { dataFim, dataInicio }, categoriaObj.descricao)}
           >Compartilhar relatório</Button>
         </View>
       </View>
 
-      <Modal
-        visible={modalOpen}
-        backdropStyle={styles.backdrop}
-        onBackdropPress={() => setModalOpen(false)}
-      >
-        <Card disabled style={{ padding: 10, alignSelf: 'center' }}>
-          <Text category="h6">Nova Despesa</Text>
+      <AppModal visible={modalOpen} onClose={() => setModalOpen(false)}>
 
+        <Text category="h6">Nova Despesa</Text>
+        <View style={{gap: 5, marginTop: 8}}>
           <Input
             status='primary'
             label="Descrição"
@@ -219,28 +217,28 @@ export default function FinancasDetalhe() {
             onChangeText={setValor}
           />
 
-          <View style={styles.modalActions}>
-            <Button
-              appearance="ghost"
-              status='danger'
-              onPress={() => setModalOpen(false)}
-            >
-              Cancelar
-            </Button>
+        </View>
 
-            <Button disabled={isAdicionando} onPress={adicionarDespesa}>
-              {(isAdicionando) ? 'Adicionando...' : 'Adicionar'}
-            </Button>
-          </View>
-        </Card>
-      </Modal>
+        <View style={styles.modalActions}>
+          <Button
+            appearance="ghost"
+            status='danger'
+            onPress={() => setModalOpen(false)}
+          >
+            Cancelar
+          </Button>
+
+          <Button disabled={isAdicionando} onPress={adicionarDespesa}>
+            {(isAdicionando) ? 'Adicionando...' : 'Adicionar'}
+          </Button>
+        </View>
+      </AppModal>
     </Layout >
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 16,
   },
 

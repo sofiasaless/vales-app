@@ -2,8 +2,9 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { Button, Text } from '@ui-kitten/components';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, Platform, StyleSheet, View } from 'react-native';
 import { alert } from '../util/alertfeedback.util';
+import { customTheme } from '../theme/custom.theme';
 
 interface AvatarUploadProps {
   value?: string;
@@ -29,8 +30,21 @@ export const AvatarUpload = ({ value, onChange }: AvatarUploadProps) => {
     });
 
     if (result.canceled) return;
-
     onChange(result.assets[0].uri);
+  };
+
+  const pickImagemWeb = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result;
+        if (typeof result === 'string') {
+          onChange(result); // Salva a URL da imagem
+        }
+      };
+      reader.readAsDataURL(file); // Lê o arquivo como base64
+    }
   };
 
   return (
@@ -45,15 +59,20 @@ export const AvatarUpload = ({ value, onChange }: AvatarUploadProps) => {
         </View>
       )}
 
-      <Button
-        size="small"
-        status='info'
-        appearance="outline"
-        onPress={pickImage}
-        disabled={loading}
-      >
-        {loading ? 'Enviando...' : 'Selecionar imagem de perfil'}
-      </Button>
+      {
+        (Platform.OS === 'web')?
+        <input type="file" id="userImage" onChange={(e) => pickImagemWeb(e)} placeholder='Selecionar imagem de perfil' style={styles.inputBtn}/>
+        :
+        <Button
+          size="small"
+          status='info'
+          appearance="outline"
+          onPress={pickImage}
+          disabled={loading}
+        >
+          {loading ? 'Enviando...' : 'Selecionar imagem de perfil'}
+        </Button>
+      }
     </View>
   );
 };
@@ -76,6 +95,19 @@ const styles = StyleSheet.create({
     borderRadius: 48,
     backgroundColor: '#E5E7EB',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    alignContent: 'center',
+    textAlign: 'center'
   },
+  inputBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    backgroundColor: customTheme['color-info-700'],
+    color: '#fff',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontWeight: 500,
+  }
 });

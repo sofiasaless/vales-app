@@ -48,6 +48,8 @@ export type RootStackParamList = {
   RegistroVendaIncentivo: { incentObj: Incentivo };
   FinancasRelatorio: { idRest: string };
   GerenciaGerentes: { idRest: string };
+  ProdutoCardapio: { idRest: string, produtoEditavel: ItemMenu | null };
+  AssinaturaWeb: { funcObj: Funcionario };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -78,6 +80,12 @@ export default function StackRoutes() {
         name="Assinatura"
         component={Assinatura}
         options={optionsHeader('Assinatura do funcionário')}
+      />
+
+      <Stack.Screen
+        name="AssinaturaWeb"
+        component={AssinaturaWeb}
+        options={optionsHeader('Assinatura do funcionário WEB')}
       />
 
       <Stack.Screen

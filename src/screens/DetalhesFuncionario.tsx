@@ -206,6 +206,7 @@ export const DetalhesFuncionario = () => {
                 Demitir
               </Button>
             </View>
+            
           </>
         }
       </ScrollView>
@@ -215,8 +216,7 @@ export const DetalhesFuncionario = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingBottom: 24,
+    height: (Platform.OS === 'web')?'85%':'auto'
   },
 
   content: {

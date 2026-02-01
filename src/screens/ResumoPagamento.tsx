@@ -10,7 +10,7 @@ import {
   Text
 } from '@ui-kitten/components';
 import React, { useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { CardGradient } from '../components/CardGradient';
@@ -25,6 +25,7 @@ import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
 import { calcularSalarioQuinzena, calcularTotalParaPagar, calcularTotalVales } from '../util/calculos.util';
 import { formatarDataVales } from '../util/datas.util';
+import { AppModal } from '../components/AppModal';
 
 interface RouteParams {
   funcObj: Funcionario
@@ -223,7 +224,11 @@ export const ResumoPagamento = () => {
           <Button
             size="medium"
             onPress={() => {
-              navigator.navigate('Assinatura', { funcObj });
+              if (Platform.OS === 'web') {
+                navigator.navigate('AssinaturaWeb', { funcObj })
+              } else {
+                navigator.navigate('Assinatura', { funcObj });
+              }
             }}
             accessoryLeft={<AntDesign name="signature" size={18} color={'black'} />}
           >
@@ -241,61 +246,54 @@ export const ResumoPagamento = () => {
         </Layout>
       </ScrollView>
 
-      {/* Modal de confirmação */}
-      <Modal
-        visible={showConfirmModal}
-        backdropStyle={styles.backdrop}
-        onBackdropPress={() => setShowConfirmModal(false)}
-      >
-        <Card disabled style={styles.modal}>
-          <Text category="h6" style={styles.modalTitle}>
-            Confirmar Pagamento
+      <AppModal visible={showConfirmModal} onClose={() => setShowConfirmModal(false)}>
+        <Text category="h6" style={styles.modalTitle}>
+          Confirmar Pagamento
+        </Text>
+
+        <Text category="s2" style={styles.modalText}>
+          Você está prestes a confirmar o pagamento SEM COLETAR A ASSINATURA. Apenas o relatório comum estará disponível para compartilhar.
+        </Text>
+
+        <View style={styles.modalAmount}>
+          <DinheiroDisplay
+            value={calcularTotalParaPagar(funcObj)}
+            size="xl"
+            variant="positive"
+          />
+        </View>
+
+        <View style={styles.warningBox}>
+          <Text status="warning" category="c1">
+            ⚠️ O vale será zerado após a confirmação
           </Text>
+        </View>
 
-          <Text category="s2" style={styles.modalText}>
-            Você está prestes a confirmar o pagamento SEM COLETAR A ASSINATURA. Apenas o relatório comum estará disponível para compartilhar.
-          </Text>
+        <View style={styles.modalActions}>
+          <Button
+            appearance="outline"
+            disabled={isLoading}
+            onPress={() => setShowConfirmModal(false)}
+          >
+            Cancelar
+          </Button>
 
-          <View style={styles.modalAmount}>
-            <DinheiroDisplay
-              value={calcularTotalParaPagar(funcObj)}
-              size="xl"
-              variant="positive"
-            />
-          </View>
-
-          <View style={styles.warningBox}>
-            <Text status="warning" category="c1">
-              ⚠️ O vale será zerado após a confirmação
-            </Text>
-          </View>
-
-          <View style={styles.modalActions}>
-            <Button
-              appearance="outline"
-              disabled={isLoading}
-              onPress={() => setShowConfirmModal(false)}
-            >
-              Cancelar
-            </Button>
-
-            <Button
-              status="success"
-              disabled={isLoading}
-              onPress={handleConfirmPayment}
-            >
-              {isLoading ? 'Processando...' : 'Confirmar'}
-            </Button>
-          </View>
-        </Card>
-      </Modal>
+          <Button
+            status="success"
+            disabled={isLoading}
+            onPress={handleConfirmPayment}
+          >
+            {isLoading ? 'Processando...' : 'Confirmar'}
+          </Button>
+        </View>
+      </AppModal>
     </Layout>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    height: (Platform.OS === 'web') ? '95%' : 'auto',
     paddingBottom: 16
   },
   content: {

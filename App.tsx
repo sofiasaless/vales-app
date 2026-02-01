@@ -18,6 +18,7 @@ import { AuthProvider } from './src/context/AuthContext';
 import { TotalDespesasProvider } from './src/context/TotalDespesasContext';
 import { IncentiveProvider } from './src/context/InvenctiveContext';
 import { FuncionariosIncentivoProvider } from './src/context/FuncionariosIncentivoContext';
+import * as tslib from 'tslib';
 
 SplashScreen.hideAsync()
 enableScreens();

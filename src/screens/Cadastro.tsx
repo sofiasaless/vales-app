@@ -12,7 +12,7 @@ import { useGerenteConectado } from "../hooks/useGerente";
 import { useRestauranteId } from "../hooks/useRestaurante";
 import { RootStackParamList } from '../routes/StackRoutes';
 import { FuncionarioPostRequestBody, TipoFuncionario } from "../schema/funcionario.schema";
-import { uploadImage } from "../services/cloudnary.serivce";
+import { uploadImage, uploadImagemFromWeb } from "../services/cloudnary.serivce";
 import { customTheme } from "../theme/custom.theme";
 import { alert } from '../util/alertfeedback.util';
 import { converterParaDate } from "../util/datas.util";
@@ -156,6 +156,24 @@ export const Cadastro = () => {
     await handlePrepararFuncionario();
 
     try {
+      setIsLoading(true)
+      if (!validate()) {
+        setIsLoading(false)
+        return;
+      }
+  
+      if (id_res?.uid) {
+        formData.restaurante_ref = id_res.uid;
+      }
+  
+      if (formData.foto_url) {
+        if (Platform.OS === 'web') {
+          formData.foto_url = await uploadImagemFromWeb(formData.foto_url);
+        } else {
+          formData.foto_url = await uploadImage(formData.foto_url);
+        }
+      }
+
       const funcSer = new FuncionarioFirestore()
       await funcSer.criar(formData);
       setFormData(emptyFuncionario);
@@ -176,7 +194,6 @@ export const Cadastro = () => {
       :
       <Container>
         <Header title="Novo funcionário" />
-        <Layout level="1" style={{ flex: 1 }}>
 
           <KeyboardAvoidingView
             behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
@@ -348,7 +365,16 @@ export const Cadastro = () => {
               </View>
             </ScrollView>
           </KeyboardAvoidingView>
-        </Layout>
+
+          <Button
+            size="large"
+            onPress={handleSubmit}
+            style={styles.submit}
+            disabled={isLoading}
+          >
+            {(isLoading) ? 'Contratando...' : 'Cadastrar Funcionário'}
+          </Button>
+        </ScrollView>
       </Container>
   )
 }

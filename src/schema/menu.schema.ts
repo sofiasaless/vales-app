@@ -8,7 +8,7 @@ export type ItemMenu = {
   data_criacao: Date
 }
 
-export type ItemMenuPostRequestBody = Omit<ItemMenu, "id" | "data_criacao">
+export type ItemMenuPostRequestBody = Omit<ItemMenu, "id" | "data_criacao" | "restaurante_ref">
 
 export type ItemMenuFirestorePostRequestBody = Omit<ItemMenu, "id" | "restaurante_ref"> & {
   restaurante_ref: DocumentReference

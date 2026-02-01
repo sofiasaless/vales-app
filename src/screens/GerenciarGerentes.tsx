@@ -6,6 +6,8 @@ import {
   Input,
   Layout,
   Modal,
+  Radio,
+  RadioGroup,
   Select,
   SelectItem,
   Spinner,
@@ -25,6 +27,7 @@ import { Gerente, GerentePostRequestBody, GerenteUpdateRequestBody, TiposGerente
 import { gerenteFirestore } from '../firestore/gerente.firestore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { converterTimestamp } from '../util/formatadores.util';
+import { AppModal } from '../components/AppModal';
 
 type CriarGerenteInput = {
   idRestaurante: string;
@@ -41,6 +44,8 @@ export default function GerenciarGerentes() {
   const route = useRoute();
   const { idRest } = route.params as { idRest: string };
 
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+
   const queryClient = useQueryClient();
 
   const { data: gerentes, isLoading } = useListarGerentes(idRest);
@@ -51,14 +56,12 @@ export default function GerenciarGerentes() {
 
   const [form, setForm] = useState<GerentePostRequestBody>(bodyVazio)
 
-  const [tipoIndex, setTipoIndex] = useState<IndexPath>(new IndexPath(1));
-
   const tipoSelecionado: TiposGerente =
-    tipoIndex.row === 0 ? 'GERENTE' : 'AUXILIAR';
+    selectedIndex === 0 ? 'GERENTE' : 'AUXILIAR';
 
   function resetForm() {
     setForm(bodyVazio)
-    setTipoIndex(new IndexPath(1));
+    setSelectedIndex(0);
     setEditing(null);
   }
 
@@ -74,9 +77,7 @@ export default function GerenciarGerentes() {
       senha: gerente.senha,
       tipo: gerente.tipo
     })
-    setTipoIndex(
-      gerente.tipo === 'GERENTE' ? new IndexPath(0) : new IndexPath(1)
-    );
+    setSelectedIndex((gerente.tipo === 'GERENTE') ? 0 : 1);
     setModalVisible(true);
   }
 
@@ -243,12 +244,9 @@ export default function GerenciarGerentes() {
           />
       }
 
-      <Modal
-        visible={modalVisible}
-        backdropStyle={styles.backdrop}
-        onBackdropPress={() => setModalVisible(false)}
-      >
+      <AppModal visible={modalVisible} onClose={() => setModalVisible(false)}>
         <Layout style={styles.modal}>
+
           <Text category="h6" style={styles.modalTitle}>
             {editing ? 'Editar Usuário' : 'Novo Usuário'}
           </Text>
@@ -263,16 +261,15 @@ export default function GerenciarGerentes() {
             style={styles.input}
           />
 
-          <Select
-            label="Tipo"
-            selectedIndex={tipoIndex}
-            onSelect={index => setTipoIndex(index as IndexPath)}
-            value={tipoSelecionado}
-            style={styles.input}
+          <RadioGroup
+            selectedIndex={selectedIndex}
+            onChange={(index) =>
+              setSelectedIndex(index)
+            }
           >
-            <SelectItem title="Gerente" />
-            <SelectItem title="Auxiliar" />
-          </Select>
+            <Radio>Gerente</Radio>
+            <Radio>Auxiliar</Radio>
+          </RadioGroup>
 
           <Input
             label="Senha"
@@ -294,8 +291,8 @@ export default function GerenciarGerentes() {
             </Button>
           </View>
         </Layout>
-      </Modal>
-    </Layout>
+      </AppModal >
+    </Layout >
   );
 }
 
