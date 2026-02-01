@@ -9,13 +9,14 @@ import {
   Text
 } from '@ui-kitten/components';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import { CardGradient } from '../components/CardGradient';
 import { useLoginGerente } from '../hooks/useLoginGerente';
 import { useRestauranteConectado, useRestauranteId } from '../hooks/useRestaurante';
 import { RootStackParamList } from '../routes/StackRoutes';
 import { useGerenteConectado, useListarGerentes } from '../hooks/useGerente';
 import { restauranteFirestore } from '../firestore/restaurante.firestore';
+import * as Updates from 'expo-updates';
 
 export const LoginGerente: React.FC = () => {
 
@@ -32,7 +33,7 @@ export const LoginGerente: React.FC = () => {
     isLoading: loadingRes
   } = useRestauranteConectado()
 
-  const {data: res_id} = useRestauranteId()
+  const { data: res_id } = useRestauranteId()
 
   const { data: gerentes, isLoading: isLoadingGerentes, refetch: recarregarGerentes } = useListarGerentes(res_id?.uid || '')
 
@@ -52,12 +53,7 @@ export const LoginGerente: React.FC = () => {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
-    let restauranteId
-    if (Platform.OS === 'web') {
-      restauranteId = localStorage.getItem('uid')
-    } else {
-      restauranteId = await AsyncStorage.getItem('uid')
-    }
+    let restauranteId = await AsyncStorage.getItem('uid')
 
     if (restauranteId && gerentes) {
       const res = await entrarComGerente(restauranteId, gerentes.at(selectedIndex)?.id || '', password)
@@ -83,6 +79,48 @@ export const LoginGerente: React.FC = () => {
     }, [res_id])
   )
 
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    async function checkForUpdates() {
+      try {
+        // Verifica se há atualização disponível
+        const update = await Updates.checkForUpdateAsync();
+        if (update.isAvailable) {
+          // Se existir, pergunta ao usuário se quer atualizar
+          Alert.alert(
+            'Atualização disponível',
+            'Uma nova versão do aplicativo está disponível. Deseja atualizar agora?',
+            [
+              { text: 'Depois', style: 'cancel' },
+              {
+                text: 'Atualizar',
+                onPress: async () => {
+                  await Updates.fetchUpdateAsync();
+                  await Updates.reloadAsync(); // Reinicia o app com a nova versão
+                },
+              },
+            ]
+          );
+        }
+      } catch (error) {
+        console.log('Erro ao verificar atualizações:', error);
+      } finally {
+        setChecking(false);
+      }
+    }
+
+    checkForUpdates();
+  }, []);
+
+  if (checking) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
     <CardGradient colors_one='4' colors_two='1' styles={styles.container}>
       <View style={styles.header}>
@@ -93,7 +131,7 @@ export const LoginGerente: React.FC = () => {
         </View>
 
         <Text category="h3" style={styles.title}>
-          Olá, Gerente!
+          Olá, seja bem-vindo!
         </Text>
         <Text appearance="hint" style={styles.subtitle}>
           Selecione seu perfil para continuar
