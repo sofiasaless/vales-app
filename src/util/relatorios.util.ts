@@ -120,14 +120,54 @@ export async function gerarRelatorioVales(
           border-top: 1px solid #000;
           margin-top: 48px;
         }
+
+        .page-break {
+          page-break-before: always;
+          break-before: page;
+        }
       </style>
     </head>
 
     <body>
-      <hDinheiroDisplay1>Relatório de Pagamento</h1>
-      <div class="subtitle">
-        Período: ${formatDateRelatorio(dataInicio)} até ${formatDateRelatorio(data_pag)}
+      <h1>Declaração de Recebimento de Remuneração Quinzenal</h1>
+
+      <div class="termo">
+        <p>
+        Declaro, para os devidos fins, que eu, <strong>${funcionario.nome}</strong>, recebi da empresa o valor <strong>${formatMoney(salarioFinal)}</strong> referente à minha remuneração quinzenal, correspondente ao período de apuração informado em meu contracheque.
+        </p>
+        <p>
+        Declaro ainda que o pagamento foi realizado de forma correta, estando de acordo com os valores discriminados no respectivo contracheque, incluindo a remuneração pactuada e eventuais adicionais ou benefícios concedidos.
+        </p>
+        <p>
+        Afirmo que o valor recebido corresponde integralmente ao que me era devido no período mencionado, não havendo, até a presente data, qualquer reclamação, divergência ou pendência financeira relacionada ao pagamento efetuado, dando plena, geral e irrevogável quitação quanto aos valores recebidos.
+        </p>
       </div>
+
+      ${pagamento.assinatura
+        ?
+        `<div class="section-assinatura">
+          <h5>Assinatura do Funcionário</h5>
+          <img src="${pagamento.assinatura}" style="width: 120px;" />
+        </div>
+        `
+        :
+        `<div class="signature">
+          <div>
+            <div class="signature-line"></div>
+            Funcionário
+          </div>
+          <div>
+            <div class="signature-line"></div>
+            Responsável
+          </div>
+        </div>
+        `
+      }
+
+      <div class="page-break"></div>
+
+      <h2>Relatório de Pagamento</h2>
+      <p>Período: ${formatDate(dataInicio)} até ${formatDate(data_pag)}</p>
 
       <div class="section">
         <h2>Funcionário</h2>
@@ -209,33 +249,6 @@ export async function gerarRelatorioVales(
         </div>
         `
       : ''
-    }
-
-      <div class="termo">
-        Eu, <strong>${funcionario.nome}</strong>, declaro que recebi meu salário no valor de
-        <strong>${formatMoney(salarioFinal)}</strong>, referente ao período informado, já considerando os descontos de vales no valor total de <strong>${formatMoney(calcularTotalVales(pagamento.vales))},</strong>
-        ${incentivos.length > 0 ? ` e os incentivos recebidos no valor total de <strong>${formatMoney(calcularTotalIncentivos(pagamento.incentivo))}</strong>.` : '.'}
-      </div>
-
-      ${pagamento.assinatura
-      ?
-      `<div class="section-assinatura">
-        <h5>Assinatura do Funcionário</h5>
-        <img src="${pagamento.assinatura}" style="width: 120px;" />
-      </div>
-      `
-      :
-      `<div class="signature">
-        <div>
-          <div class="signature-line"></div>
-          Funcionário
-        </div>
-        <div>
-          <div class="signature-line"></div>
-          Responsável
-        </div>
-      </div>
-      `
     }
     </body>
   </html>

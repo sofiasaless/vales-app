@@ -1,6 +1,6 @@
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import { enableScreens } from 'react-native-screens';
-import { Funcionario } from '../schema/funcionario.schema';
+import { Funcionario, FuncionarioPostRequestBody } from '../schema/funcionario.schema';
 import { Assinatura } from '../screens/Assinatura';
 import Cardapio from '../screens/Cardapio';
 import { DetalhesFuncionario } from '../screens/DetalhesFuncionario';
@@ -23,15 +23,14 @@ import { Incentivo } from '../schema/incentivo.schema';
 import RelatorioFinancas from '../screens/RelatorioFinancas';
 import GerenciarGerentes from '../screens/GerenciarGerentes';
 import { Config } from '../screens/Config';
-import { ItemMenu } from '../schema/menu.schema';
-import { ProdutoCardapio } from '../screens/ProdutoCardapio';
-import { AssinaturaWeb } from '../screens/AssinaturaWeb';
+import { Contratacao } from '../screens/Contratacao';
 
 export type RootStackParamList = {
   Tabs: undefined;
   Vale: { idFunc: string };
   Funcionario: undefined;
   Cadastro: undefined;
+  Contratacao: { funcObj: FuncionarioPostRequestBody };
   ResumoPagamento: { funcObj: Funcionario };
   Assinatura: { funcObj: Funcionario };
   GerenciaCardapio: undefined;
@@ -162,9 +161,9 @@ export default function StackRoutes() {
       />
 
       <Stack.Screen
-        name="ProdutoCardapio"
-        component={ProdutoCardapio}
-        options={optionsHeader('Adicionar/editar cardápio')}
+        name="Contratacao"
+        component={Contratacao}
+        options={optionsHeader('Contrato do funcionário')}
       />
 
       <Stack.Screen

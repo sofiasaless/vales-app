@@ -1,4 +1,5 @@
 import Feather from '@expo/vector-icons/Feather';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Button, Input, Layout, Radio, RadioGroup, Text } from "@ui-kitten/components";
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
@@ -9,9 +10,11 @@ import { Header } from "../components/Header";
 import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
 import { useGerenteConectado } from "../hooks/useGerente";
 import { useRestauranteId } from "../hooks/useRestaurante";
+import { RootStackParamList } from '../routes/StackRoutes';
 import { FuncionarioPostRequestBody, TipoFuncionario } from "../schema/funcionario.schema";
 import { uploadImage, uploadImagemFromWeb } from "../services/cloudnary.serivce";
 import { customTheme } from "../theme/custom.theme";
+import { alert } from '../util/alertfeedback.util';
 import { converterParaDate } from "../util/datas.util";
 import { validateCPF } from "../util/formatadores.util";
 
@@ -28,11 +31,12 @@ const emptyFuncionario: FuncionarioPostRequestBody = {
   vales: [],
   incentivo: [],
   restaurante_ref: '',
-  foto_url: undefined
+  foto_url: ''
 }
 
 export const Cadastro = () => {
   const { data: gerente } = useGerenteConectado()
+  const navigator = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -133,9 +137,24 @@ export const Cadastro = () => {
 
   const { data: id_res } = useRestauranteId()
 
+  const handlePrepararFuncionario = async () => {
+    if (id_res?.uid) formData.restaurante_ref = id_res.uid;
+    if (formData.foto_url != '' && formData.foto_url != undefined) formData.foto_url = await uploadImage(formData.foto_url);
+
+    return formData
+  }
+
+  const [isLoadingContrato, setIsLoadingContrato] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const handleSubmit = async () => {
-    
+    setIsLoading(true)
+    if (!validate()) {
+      setIsLoading(false)
+      return;
+    }
+
+    await handlePrepararFuncionario();
+
     try {
       setIsLoading(true)
       if (!validate()) {
@@ -158,7 +177,7 @@ export const Cadastro = () => {
       const funcSer = new FuncionarioFirestore()
       await funcSer.criar(formData);
       setFormData(emptyFuncionario);
-      console.info('sucesso ao cadastrar')
+      alert("Sucesso ao cadastrar!", "Vá para área de funcionários para acessar o novo funcionário.")
     } catch (error) {
       console.error(`erro ao cadastrar funcionario ${error}`)
     } finally {
@@ -176,158 +195,175 @@ export const Cadastro = () => {
       <Container>
         <Header title="Novo funcionário" />
 
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={20}
+          >
+            <ScrollView
+              contentContainerStyle={styles.container}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={styles.card}>
+                <AvatarUpload value={formData.foto_url}
+                  onChange={(url) => handleChange('foto_url', url)}
+                />
 
-          <KeyboardAvoidingView style={styles.card} keyboardVerticalOffset={40}>
-            <AvatarUpload value={formData.foto_url}
-              onChange={(url) => handleChange('foto_url', url)}
-            />
+                <Input
+                  size="small"
+                  label="Nome Completo *"
+                  placeholder="Ex: Maria Silva"
+                  value={formData.nome}
+                  onChangeText={(v) => handleChange('nome', v)}
+                  status={errors.nome ? 'danger' : 'basic'}
+                  caption={errors.nome}
+                />
 
-            <Input
-              size="small"
-              label="Nome Completo *"
-              placeholder="Ex: Maria Silva"
-              value={formData.nome}
-              onChangeText={(v) => handleChange('nome', v)}
-              status={errors.nome ? 'danger' : 'basic'}
-              caption={errors.nome}
-            />
+                {/* Cargo */}
+                <Input
+                  size="small"
+                  label="Cargo *"
+                  placeholder="Ex: Cozinheira"
+                  value={formData.cargo}
+                  onChangeText={(v) => handleChange('cargo', v)}
+                  status={errors.cargo ? 'danger' : 'basic'}
+                  caption={errors.cargo}
+                />
 
-            {/* Cargo */}
-            <Input
-              size="small"
-              label="Cargo *"
-              placeholder="Ex: Cozinheira"
-              value={formData.cargo}
-              onChangeText={(v) => handleChange('cargo', v)}
-              status={errors.cargo ? 'danger' : 'basic'}
-              caption={errors.cargo}
-            />
+                {/* Tipo */}
+                <View>
+                  <Text category="label" style={styles.label}>
+                    Tipo de Funcionário
+                  </Text>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-              <Input
-                style={{ flex: 1 }}
-                size="small"
-                label={
-                  formData.tipo === 'DIARISTA'
-                    ? 'Valor da Diária *'
-                    : 'Salário Base *'
-                }
-                placeholder="0,00"
-                keyboardType="numeric"
-                value={formData.salario.toString()}
-                onChangeText={handleSalaryChange}
-                status={errors.salario ? 'danger' : 'basic'}
-                caption={errors.salario}
-                accessoryLeft={() => (
-                  <Text style={{ marginHorizontal: 8 }}>R$</Text>
-                )}
-              />
+                  <RadioGroup
+                    selectedIndex={formData.tipo === 'FIXO' ? 0 : 1}
+                    onChange={(index) =>
+                      handleChange('tipo', index === 0 ? 'FIXO' : 'DIARISTA')
+                    }
+                  >
+                    <Radio>Fixo (Quinzenas)</Radio>
+                    <Radio>Diarista</Radio>
+                  </RadioGroup>
+                </View>
 
-              <Input
-                style={{ display: (formData.tipo === 'DIARISTA') ? 'flex' : 'none' }}
-                size="small"
-                label={"Dias de trabalho p/ semana *"}
-                placeholder="0"
-                keyboardType="numeric"
-                value={formData.dias_trabalhados_semanal?.toString() || ''}
-                onChangeText={(v) => handleChange('dias_trabalhados_semanal', Number(v))}
-                status={errors.dias_trabalhados_semanal ? 'danger' : 'basic'}
-                caption={errors.dias_trabalhados_semanal}
-              />
-            </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+                  <Input
+                    style={{ flex: 1 }}
+                    size="small"
+                    label={
+                      formData.tipo === 'DIARISTA'
+                        ? 'Valor da Diária *'
+                        : 'Salário Base *'
+                    }
+                    placeholder="0,00"
+                    keyboardType="numeric"
+                    value={formData.salario.toString()}
+                    onChangeText={handleSalaryChange}
+                    status={errors.salario ? 'danger' : 'basic'}
+                    caption={errors.salario}
+                    accessoryLeft={() => (
+                      <Text style={{ marginHorizontal: 8 }}>R$</Text>
+                    )}
+                  />
 
-            {/* CPF */}
-            <Input
-              size="small"
-              label="CPF"
-              placeholder="000.000.000-00"
-              keyboardType="numeric"
-              value={formData.cpf}
-              onChangeText={handleCPFChange}
-              status={errors.cpf ? 'danger' : 'basic'}
-              caption={errors.cpf}
-            />
+                  <Input
+                    style={{ display: (formData.tipo === 'DIARISTA') ? 'flex' : 'none' }}
+                    size="small"
+                    label={"Dias de trabalho p/ semana *"}
+                    placeholder="0"
+                    keyboardType="numeric"
+                    value={formData.dias_trabalhados_semanal?.toString() || ''}
+                    onChangeText={(v) => handleChange('dias_trabalhados_semanal', Number(v))}
+                    status={errors.dias_trabalhados_semanal ? 'danger' : 'basic'}
+                    caption={errors.dias_trabalhados_semanal}
+                  />
+                </View>
 
-            {
-              (Platform.OS === 'web') ?
-                <>
-                  <View>
-                    <Text category="label" style={styles.label}>
-                      Data de nascimento
-                    </Text>
-                    <input type='date' onChange={(e) => setDataNascimento(new Date(e.target.value))} />
-                  </View>
+                {/* CPF */}
+                <Input
+                  size="small"
+                  label="CPF"
+                  placeholder="000.000.000-00"
+                  keyboardType="numeric"
+                  value={formData.cpf}
+                  onChangeText={handleCPFChange}
+                  status={errors.cpf ? 'danger' : 'basic'}
+                  caption={errors.cpf}
+                />
 
-                  <View>
-                    <Text category="label" style={styles.label}>
-                      Data de admissão
-                    </Text>
-                    <input type='date' onChange={(e) => setDataAdmissao(new Date(e.target.value))} />
-                  </View>
-                </>
-                :
-                <>
-                  <View>
-                    <Text category="label" style={styles.label}>
-                      Data de nascimento
-                    </Text>
-                    <DatePicker dataPreEstabelecida={dataNascimento} tamanBtn="small" tipo="date" setarData={settingNascimento} />
-                  </View>
+                {/* Datas */}
+                <View>
+                  <Text category="label" style={styles.label}>
+                    Data de nascimento
+                  </Text>
+                  <DatePicker dataPreEstabelecida={dataNascimento} tamanBtn="small" tipo="date" setarData={settingNascimento} />
+                </View>
 
-                  <View>
-                    <Text category="label" style={styles.label}>
-                      Data de admissão
-                    </Text>
-                    <DatePicker dataPreEstabelecida={dataAdmissao} tamanBtn="small" tipo="date" setarData={settingAdmissao} />
-                  </View>
-                </>
-            }
+                <View>
+                  <Text category="label" style={styles.label}>
+                    Data de admissão
+                  </Text>
+                  <DatePicker dataPreEstabelecida={dataAdmissao} tamanBtn="small" tipo="date" setarData={settingAdmissao} />
+                </View>
 
-            {/* Payday */}
-            <View style={styles.paymentDays}>
-              <Input
-                style={{ flex: 1 }}
-                size="small"
-                label="1° Dia do Pagamento"
-                placeholder="4"
-                value={(formData.primeiro_dia_pagamento === 0) ? '' : formData.primeiro_dia_pagamento.toString()}
-                onChangeText={(v) => handleChange('primeiro_dia_pagamento', v)}
-                accessoryLeft={() => (
-                  <Text category="s2" style={{ marginHorizontal: 4 }}>Todo dia </Text>
-                )}
-              />
+                {/* Payday */}
+                <View style={styles.paymentDays}>
+                  <Input
+                    style={{ flex: 1 }}
+                    size="small"
+                    label="1° Dia do Pagamento"
+                    placeholder="4"
+                    value={(formData.primeiro_dia_pagamento === 0) ? '' : formData.primeiro_dia_pagamento.toString()}
+                    onChangeText={(v) => handleChange('primeiro_dia_pagamento', v)}
+                    accessoryLeft={() => (
+                      <Text category="s2" style={{ marginHorizontal: 4 }}>Todo dia </Text>
+                    )}
+                  />
 
-              <Input
-                style={{ flex: 1 }}
-                size="small"
-                label="2° Dia do Pagamento"
-                placeholder="19"
-                value={(formData.segundo_dia_pagamento === 0) ? '' : formData.segundo_dia_pagamento.toString()}
-                onChangeText={(v) => handleChange('segundo_dia_pagamento', v)}
-                accessoryLeft={() => (
-                  <Text category="s2" style={{ marginHorizontal: 4 }}>Todo dia </Text>
-                )}
-              />
-            </View>
+                  <Input
+                    style={{ flex: 1 }}
+                    size="small"
+                    label="2° Dia do Pagamento"
+                    placeholder="19"
+                    value={(formData.segundo_dia_pagamento === 0) ? '' : formData.segundo_dia_pagamento.toString()}
+                    onChangeText={(v) => handleChange('segundo_dia_pagamento', v)}
+                    accessoryLeft={() => (
+                      <Text category="s2" style={{ marginHorizontal: 4 }}>Todo dia </Text>
+                    )}
+                  />
+                </View>
 
-            <Button onPress={calcularDiasDePagamento} size="small" status="warning" appearance="ghost">Calcular dias de pagamento</Button>
+                <Button onPress={calcularDiasDePagamento} size="small" status="warning" appearance="ghost">Calcular dias de pagamento</Button>
+              </View>
 
-            <View>
-              <Text category="label" style={styles.label}>
-                Tipo de Contrato
-              </Text>
+              <View style={styles.btnsArea}>
+                <Button
+                  appearance='outline'
+                  size="large"
+                  onPress={handleSubmit}
+                  style={styles.submit}
+                  disabled={isLoading}
+                >
+                  {(isLoading) ? 'Cadastrando...' : 'Cadastrar Funcionário (sem contrato)'}
+                </Button>
 
-              <RadioGroup
-                selectedIndex={formData.tipo === 'FIXO' ? 0 : 1}
-                onChange={(index) =>
-                  handleChange('tipo', index === 0 ? 'FIXO' : 'DIARISTA')
-                }
-              >
-                <Radio>Fixo (Quinzenas)</Radio>
-                <Radio>Diarista</Radio>
-              </RadioGroup>
-            </View>
+                <Button
+                  size="large"
+                  onPress={async () => {
+                    setIsLoadingContrato(true)
+                    if (!validate()) {
+                      setIsLoadingContrato(false)
+                      return
+                    }
+                    const toSend = await handlePrepararFuncionario()
+                    setIsLoadingContrato(false)
+                    navigator.navigate('Contratacao', { funcObj: toSend })
+                  }}
+                  style={styles.submit}
+                  disabled={isLoading || isLoadingContrato}
+                >Contratar Funcionário</Button>
+              </View>
+            </ScrollView>
           </KeyboardAvoidingView>
 
           <Button
@@ -369,6 +405,9 @@ const styles = StyleSheet.create({
 
   paymentDays: {
     flexDirection: 'row',
+    gap: 10
+  },
+  btnsArea: {
     gap: 10
   }
 });
