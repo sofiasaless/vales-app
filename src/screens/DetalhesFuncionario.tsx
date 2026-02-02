@@ -216,7 +216,7 @@ export const DetalhesFuncionario = () => {
 
 const styles = StyleSheet.create({
   container: {
-    height: (Platform.OS === 'web')?'85%':'auto'
+    flex: 1
   },
 
   content: {

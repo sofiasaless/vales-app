@@ -224,11 +224,7 @@ export const ResumoPagamento = () => {
           <Button
             size="medium"
             onPress={() => {
-              if (Platform.OS === 'web') {
-                navigator.navigate('AssinaturaWeb', { funcObj })
-              } else {
-                navigator.navigate('Assinatura', { funcObj });
-              }
+              navigator.navigate('Assinatura', { funcObj });
             }}
             accessoryLeft={<AntDesign name="signature" size={18} color={'black'} />}
           >
