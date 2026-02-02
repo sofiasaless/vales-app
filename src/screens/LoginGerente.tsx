@@ -131,10 +131,10 @@ export const LoginGerente: React.FC = () => {
         </View>
 
         <Text category="h3" style={styles.title}>
-          Olá, seja 
+          Olá, seja bem-vindo!
         </Text>
         <Text appearance="hint" style={styles.subtitle}>
-          Selecione seu perfil para continuar
+          Selecione seu perfil para começar
         </Text>
       </View>
 

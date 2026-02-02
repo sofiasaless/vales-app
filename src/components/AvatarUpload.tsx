@@ -1,4 +1,3 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
 import { Button, Text } from '@ui-kitten/components';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
@@ -55,7 +54,7 @@ export const AvatarUpload = ({ value, onChange }: AvatarUploadProps) => {
         <Image source={{ uri: value }} style={styles.avatar} />
       ) : (
         <View style={styles.placeholder}>
-          <AntDesign name="cloud-upload" size={30} color="gray" />
+         +
         </View>
       )}
 

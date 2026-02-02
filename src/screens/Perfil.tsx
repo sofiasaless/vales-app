@@ -166,7 +166,7 @@ export const Perfil = () => {
 
         <View style={styles.footer}>
           <Text appearance="hint" category="c1">
-            Vale App v1.0.0
+            Vale App v1.0.1
           </Text>
         </View>
       </ScrollView>

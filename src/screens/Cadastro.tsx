@@ -362,18 +362,17 @@ export const Cadastro = () => {
                 style={styles.submit}
                 disabled={isLoading || isLoadingContrato}
               >Contratar Funcionário</Button>
+              <Button
+                size="large"
+                onPress={handleSubmit}
+                style={styles.submit}
+                disabled={isLoading}
+              >
+                {(isLoading) ? 'Contratando...' : 'Cadastrar Funcionário'}
+              </Button>
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
-
-        <Button
-          size="large"
-          onPress={handleSubmit}
-          style={styles.submit}
-          disabled={isLoading}
-        >
-          {(isLoading) ? 'Contratando...' : 'Cadastrar Funcionário'}
-        </Button>
       </Container>
   )
 }
