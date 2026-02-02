@@ -134,7 +134,7 @@ export const LoginGerente: React.FC = () => {
           Olá, seja bem-vindo!
         </Text>
         <Text appearance="hint" style={styles.subtitle}>
-          Selecione seu perfil para começar
+          Selecione o operador para começar
         </Text>
       </View>
 
