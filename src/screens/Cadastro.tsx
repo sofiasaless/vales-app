@@ -307,7 +307,7 @@ export const Cadastro = () => {
               </View>
 
               {/* Payday */}
-              <View style={styles.paymentDays}>
+              <View style={[styles.paymentDays, { display: (formData.tipo === 'DIARISTA')?'none':'flex' }]}>
                 <Input
                   style={{ flex: 1 }}
                   size="small"
@@ -333,7 +333,7 @@ export const Cadastro = () => {
                 />
               </View>
 
-              <Button onPress={calcularDiasDePagamento} size="small" status="warning" appearance="ghost">Calcular dias de pagamento</Button>
+              <Button disabled={formData.tipo === 'DIARISTA'} onPress={calcularDiasDePagamento} size="small" status="warning" appearance="ghost">Calcular dias de pagamento</Button>
             </View>
 
             <View style={styles.btnsArea}>
