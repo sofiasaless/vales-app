@@ -13,7 +13,7 @@ import { useFuncionariosIncentivoContext } from '../context/FuncionariosIncentiv
 import { funcinoarioIncentivosFirestore } from '../firestore/funcionario.incentivo.firestore';
 import { incentivoFirestore } from '../firestore/incentivo.firestore';
 import { useIncentivoAtivo, useListarFuncionariosDoIncentivo } from '../hooks/useIncentivo';
-import { useRestauranteConectado, useRestauranteId } from '../hooks/useRestaurante';
+import { useRestauranteId } from '../hooks/useRestaurante';
 import { Funcionario } from '../schema/funcionario.schema';
 import { Incentivo } from '../schema/incentivo.schema';
 import { customTheme } from '../theme/custom.theme';
@@ -200,7 +200,7 @@ export default function RegistroVendaIncentivo() {
                     </View>
 
                     <Text appearance="hint" style={styles.progressText}>
-                      {item.contador} / {incentivo.meta} vendas
+                      {counter} / {incentivo.meta} vendas
                     </Text>
 
                     {

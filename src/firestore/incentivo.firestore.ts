@@ -48,7 +48,7 @@ export class IncentivoFirestore extends PatternFirestore {
         id: doc.id,
         ...doc.data(),
         restaurante_ref: doc.data().restaurante_ref.id,
-        ganhador_ref: doc.data().ganhador_ref.id,
+        ganhador_ref: doc.data().ganhador_ref?.id || '',
       } as Incentivo
     })
 
