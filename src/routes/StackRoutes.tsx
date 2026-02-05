@@ -23,6 +23,7 @@ import RelatorioFinancas from '../screens/RelatorioFinancas';
 import { ResumoPagamento } from '../screens/ResumoPagamento';
 import { customTheme } from '../theme/custom.theme';
 import { BottomTabsRoutes } from './BottomRoutes';
+import { AssinaturaContrato } from '../screens/AssinaturaContrato';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -47,6 +48,7 @@ export type RootStackParamList = {
   RegistroVendaIncentivo: { incentObj: Incentivo };
   FinancasRelatorio: { idRest: string };
   GerenciaGerentes: { idRest: string };
+  AssinaturaContrato: { funcObj: FuncionarioPostRequestBody }
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -155,6 +157,12 @@ export default function StackRoutes() {
         name="Contratacao"
         component={Contratacao}
         options={optionsHeader('Contrato do funcionário')}
+      />
+
+      <Stack.Screen
+        name="AssinaturaContrato"
+        component={AssinaturaContrato}
+        options={optionsHeader('Assinatura do funcionário')}
       />
 
       <Stack.Screen

@@ -338,16 +338,6 @@ export const Cadastro = () => {
 
             <View style={styles.btnsArea}>
               <Button
-                appearance='outline'
-                size="large"
-                onPress={handleSubmit}
-                style={styles.submit}
-                disabled={isLoading}
-              >
-                {(isLoading) ? 'Cadastrando...' : 'Cadastrar Funcionário (sem contrato)'}
-              </Button>
-
-              <Button
                 size="large"
                 onPress={async () => {
                   setIsLoadingContrato(true)
@@ -362,13 +352,15 @@ export const Cadastro = () => {
                 style={styles.submit}
                 disabled={isLoading || isLoadingContrato}
               >Contratar Funcionário</Button>
+
               <Button
+                appearance='outline'
                 size="large"
                 onPress={handleSubmit}
                 style={styles.submit}
                 disabled={isLoading}
               >
-                {(isLoading) ? 'Contratando...' : 'Cadastrar Funcionário'}
+                {(isLoading) ? 'Cadastrando...' : 'Cadastrar Funcionário (sem contrato)'}
               </Button>
             </View>
           </ScrollView>

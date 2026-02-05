@@ -42,34 +42,6 @@ export const Contratacao = () => {
   };
 
   const [isLoading, setIsLoading] = useState(false)
-  const handleContratacaoSemAssinatura = async () => {
-    setIsLoading(true)
-    if (!validate()) {
-      setIsLoading(false)
-      return;
-    }
-
-    try {
-      // enviar dados do funcionário para o firebase
-      const toSave: FuncionarioPostRequestBody = {
-        ...funcObj,
-        contrato: {
-          contratacao_regime_ctl: formData.regimeClt,
-          descricao_servicos: formData.descricaoServicos
-        }
-      }
-      const funcSer = new FuncionarioFirestore()
-      await funcSer.criar(toSave);
-      Alert.alert("Sucesso ao contratar!", "Confira na área de funcionários, o contrato estará disponível no perfil.", [{
-        text: 'Confirmar',
-        onPress: () => navigator.navigate('Tabs')
-      }])
-    } catch (error: any) {
-      Alert.alert('Erro ao contratar', error);
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   useEffect(() => {
     console.info('funcionario ', funcObj)
@@ -111,21 +83,25 @@ export const Contratacao = () => {
             <Button
               appearance='outline'
               size="large"
-              onPress={handleContratacaoSemAssinatura}
+              onPress={() => {
+                if (!validate()) {
+                  setIsLoading(false)
+                  return;
+                }
+                const toSave: FuncionarioPostRequestBody = {
+                  ...funcObj,
+                  contrato: {
+                    contratacao_regime_ctl: formData.regimeClt,
+                    descricao_servicos: formData.descricaoServicos
+                  }
+                }
+                navigator.navigate('AssinaturaContrato', {funcObj: toSave})
+              }}
               style={styles.submit}
               disabled={isLoading}
             >
-              {(isLoading) ? 'Carregando...' : 'Gerar contrato e cadastrar'}
+              {(isLoading) ? 'Carregando...' : 'Coletar assinatura e cadastrar'}
             </Button>
-
-            {/* <Button
-              size="large"
-              // onPress={() => contratoFuncionario('serviços de garcom', true)}
-              style={styles.submit}
-              disabled={isLoading}
-            >
-              Contrato com assinatura
-            </Button> */}
           </View>
         </View>
       </Layout>

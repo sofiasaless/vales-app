@@ -1,9 +1,10 @@
-import { Button, Text } from '@ui-kitten/components';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { Text } from '@ui-kitten/components';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { Image, Platform, StyleSheet, View } from 'react-native';
-import { alert } from '../util/alertfeedback.util';
+import { Image, StyleSheet, View } from 'react-native';
 import { customTheme } from '../theme/custom.theme';
+import { alert } from '../util/alertfeedback.util';
 
 interface AvatarUploadProps {
   value?: string;
@@ -54,24 +55,9 @@ export const AvatarUpload = ({ value, onChange }: AvatarUploadProps) => {
         <Image source={{ uri: value }} style={styles.avatar} />
       ) : (
         <View style={styles.placeholder}>
-         +
+         <AntDesign name="cloud-upload" size={30} color="gray" />
         </View>
       )}
-
-      {
-        (Platform.OS === 'web')?
-        <input type="file" id="userImage" onChange={(e) => pickImagemWeb(e)} placeholder='Selecionar imagem de perfil' style={styles.inputBtn}/>
-        :
-        <Button
-          size="small"
-          status='info'
-          appearance="outline"
-          onPress={pickImage}
-          disabled={loading}
-        >
-          {loading ? 'Enviando...' : 'Selecionar imagem de perfil'}
-        </Button>
-      }
     </View>
   );
 };
