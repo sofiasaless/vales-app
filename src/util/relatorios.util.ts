@@ -167,7 +167,7 @@ export async function gerarRelatorioVales(
       <div class="page-break"></div>
 
       <h2>Relatório de Pagamento</h2>
-      <p>Período: ${formatDate(dataInicio)} até ${formatDate(data_pag)}</p>
+      <p>Período: ${(dataInicio).toLocaleDateString()} até ${(data_pag).toLocaleDateString()}</p>
 
       <div class="section">
         <h2>Funcionário</h2>
