@@ -147,7 +147,7 @@ export async function gerarRelatorioVales(
         ?
         `<div class="section-assinatura">
           <h5>Assinatura do Funcionário</h5>
-          <img src="${pagamento.assinatura}" style="width: 120px;" />
+          <img src="${pagamento.assinatura}" style="width: 120px; transform: rotate(90deg);" />
         </div>
         `
         :
