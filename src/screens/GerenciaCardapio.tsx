@@ -27,6 +27,7 @@ import { customTheme } from '../theme/custom.theme';
 import { AppModal } from '../components/AppModal';
 import { NavigationProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../routes/StackRoutes';
+import { parseMoedaBR } from '../util/formatadores.util';
 
 export const GerenciaCardapio = () => {
   const styles = createStyles();
@@ -36,6 +37,8 @@ export const GerenciaCardapio = () => {
   const [editingProduct, setEditingProduct] = useState<ItemMenu | null>(null);
 
   const { data: res, isLoading: carregandoRest } = useRestauranteConectado()
+
+  const [precoTexto, setPrecoTexto] = useState('');
 
   const {
     data: itensCardapio,
@@ -239,15 +242,20 @@ export const GerenciaCardapio = () => {
 
         <Input
           label="Preço"
-          value={formData.preco.toString()}
           keyboardType="decimal-pad"
           placeholder="0,00"
-          onChangeText={(price) =>
-            setFormData({
-              ...formData,
-              preco: Number(price),
-            })
-          }
+          value={precoTexto}
+          onChangeText={(price) => {
+            setPrecoTexto(price);
+            const numero = parseMoedaBR(price);
+
+            if (numero !== null) {
+              setFormData({
+                ...formData,
+                preco: numero,
+              })
+            }
+          }}
           status={errors.preco ? 'danger' : 'basic'}
           caption={errors.preco}
           style={styles.input}

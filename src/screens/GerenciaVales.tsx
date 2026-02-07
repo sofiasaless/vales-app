@@ -28,6 +28,7 @@ import { Vale, ValeDinheiroPostRequestBody } from '../schema/vale.shema';
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
 import { calcularTotalVales } from '../util/calculos.util';
+import { parseMoedaBR } from '../util/formatadores.util';
 
 type RouteParams = {
   idFunc: string;
@@ -55,6 +56,8 @@ export const GerenciaVales = () => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const { adicionarVale, isLoading: carregando, removerVale, isLoadingVales, listarVales, vales } = useVales()
+
+  const [precoTexto, setPrecoTexto] = useState('');
 
   const handleRemoveItem = async (valeToRemove: Vale) => {
     Alert.alert(`Confirmar remoção`, `Tem certeza que quer remover "${valeToRemove.descricao}"?`, [
@@ -99,6 +102,7 @@ export const GerenciaVales = () => {
     setModalVisible(false)
     setFormVale(emptyVale)
     setCashError('');
+    setPrecoTexto('')
   };
 
   const { novaAdicaoVale } = useEventoAlteracoesContext()
@@ -232,16 +236,21 @@ export const GerenciaVales = () => {
 
           <Input
             label="Valor (R$)"
-            size='small'
+            size="small"
             placeholder="0,00"
-            value={formVale.preco_unit.toString()}
+            value={precoTexto}
             keyboardType="decimal-pad"
             onChangeText={(text) => {
-              const valor = text.replace(/[^\d,]/g, '');
-              setFormVale((prev) => (({
-                ...prev,
-                preco_unit: Number(valor)
-              })))
+              setPrecoTexto(text);
+
+              const numero = parseMoedaBR(text);
+
+              if (numero !== null) {
+                setFormVale(prev => ({
+                  ...prev,
+                  preco_unit: numero
+                }));
+              }
             }}
             status={cashError ? 'danger' : 'basic'}
             style={styles.input}

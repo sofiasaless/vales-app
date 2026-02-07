@@ -28,7 +28,7 @@ import { colorMap, iconMap } from '../maps/financas.map';
 import { CategoriaFinancas, DespesaPostRequestBody } from '../schema/financa.schema';
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
-import { converterParaIsoDate, formatCurrency } from '../util/formatadores.util';
+import { converterParaIsoDate, formatCurrency, parseMoedaBR } from '../util/formatadores.util';
 import { DatePicker } from '../components/DatePicker';
 import { converterParaDate } from '../util/datas.util';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
@@ -44,7 +44,7 @@ export default function FinancasDetalhe() {
     descricao: '',
     valor: 0,
   });
-  const [valor, setValor] = useState('')
+  const [valor, setValor] = useState<number>(0)
 
   const [dataInicio, setDataInicio] = useState(new Date(new Date().setDate(1)))
   const settingInicio = (tipo: 'DATA' | 'HORA', dado?: string) => {
@@ -65,6 +65,8 @@ export default function FinancasDetalhe() {
 
   const { adicionarNovaDespesa } = useTotalDespesasContext()
 
+  const [precoTexto, setPrecoTexto] = useState('');
+
   const totalPeriodo = useMemo(() => {
     return despesas?.reduce((acumulador, atual) => {
       return acumulador + atual.valor;
@@ -75,7 +77,7 @@ export default function FinancasDetalhe() {
   const adicionarDespesa = async () => {
     try {
       setIsAdicionando(true)
-      if (!novaDespesa.descricao.trim() || valor === '') return;
+      if (!novaDespesa.descricao.trim() || valor <= 0) return;
 
       novaDespesa.valor = Number(valor);
       await despesaFirestore.criar(categoriaObj.id, novaDespesa);
@@ -83,7 +85,8 @@ export default function FinancasDetalhe() {
       await refetch()
       adicionarNovaDespesa(novaDespesa)
       setNovaDespesa({ descricao: '', valor: 0 });
-      setValor('')
+      setValor(0)
+      setPrecoTexto('')
       setModalOpen(false);
     } catch (error: any) {
       alert('Ocorreu um erro ao adicionar despesa', error)
@@ -101,7 +104,7 @@ export default function FinancasDetalhe() {
   }
 
   return (
-    <Layout style={[styles.container, (Platform.OS === 'web')?{height: '70%'}:{flex: 1}]}>
+    <Layout style={[styles.container, (Platform.OS === 'web') ? { height: '70%' } : { flex: 1 }]}>
 
       <CardGradient styles={styles.summary}>
         <View
@@ -197,7 +200,7 @@ export default function FinancasDetalhe() {
       <AppModal visible={modalOpen} onClose={() => setModalOpen(false)}>
 
         <Text category="h6">Nova Despesa</Text>
-        <View style={{gap: 5, marginTop: 8}}>
+        <View style={{ gap: 5, marginTop: 8 }}>
           <Input
             status='primary'
             label="Descrição"
@@ -213,8 +216,15 @@ export default function FinancasDetalhe() {
             label="Valor"
             placeholder="0,00"
             keyboardType="decimal-pad"
-            value={valor}
-            onChangeText={setValor}
+            value={precoTexto}
+            onChangeText={(price) => {
+              setPrecoTexto(price);
+              const numero = parseMoedaBR(price);
+
+              if (numero !== null) {
+                setValor(numero)
+              }
+            }}
           />
 
         </View>

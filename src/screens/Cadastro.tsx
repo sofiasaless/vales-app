@@ -16,7 +16,7 @@ import { uploadImage, uploadImagemFromWeb } from "../services/cloudnary.serivce"
 import { customTheme } from "../theme/custom.theme";
 import { alert } from '../util/alertfeedback.util';
 import { converterParaDate } from "../util/datas.util";
-import { validateCPF } from "../util/formatadores.util";
+import { parseMoedaBR, validateCPF } from "../util/formatadores.util";
 
 const emptyFuncionario: FuncionarioPostRequestBody = {
   nome: '',
@@ -41,6 +41,8 @@ export const Cadastro = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState<FuncionarioPostRequestBody>(emptyFuncionario);
+
+  const [salarioTexto, setsalarioTexto] = useState('');
 
   const [dataAdmissao, setDataAdmissao] = useState<Date>(new Date)
   const settingAdmissao = (tipo: 'DATA' | 'HORA', dado?: string) => {
@@ -257,8 +259,16 @@ export const Cadastro = () => {
                   }
                   placeholder="0,00"
                   keyboardType="numeric"
-                  value={formData.salario.toString()}
-                  onChangeText={handleSalaryChange}
+                  value={salarioTexto}
+                  onChangeText={(text) => {
+                    setsalarioTexto(text);
+
+                    const numero = parseMoedaBR(text);
+
+                    if (numero !== null) {
+                      handleChange('salario', numero)
+                    }
+                  }}
                   status={errors.salario ? 'danger' : 'basic'}
                   caption={errors.salario}
                   accessoryLeft={() => (
@@ -307,7 +317,7 @@ export const Cadastro = () => {
               </View>
 
               {/* Payday */}
-              <View style={[styles.paymentDays, { display: (formData.tipo === 'DIARISTA')?'none':'flex' }]}>
+              <View style={[styles.paymentDays, { display: (formData.tipo === 'DIARISTA') ? 'none' : 'flex' }]}>
                 <Input
                   style={{ flex: 1 }}
                   size="small"
