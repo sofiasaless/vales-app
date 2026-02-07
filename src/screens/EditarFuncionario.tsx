@@ -2,16 +2,15 @@ import { NavigationProp, useNavigation, useRoute } from "@react-navigation/nativ
 import { Button, Input, Layout, Radio, RadioGroup, Text } from "@ui-kitten/components";
 import { useState } from "react";
 import { Platform, ScrollView, StyleSheet, View } from "react-native";
-import { Container } from "../components/Container";
+import { AvatarUpload } from "../components/AvatarUpload";
 import { DatePicker } from "../components/DatePicker";
+import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
 import { RootStackParamList } from "../routes/StackRoutes";
 import { Funcionario, FuncionarioUpdateRequestBody } from "../schema/funcionario.schema";
+import { uploadImage, uploadImagemFromWeb } from "../services/cloudnary.serivce";
 import { customTheme } from "../theme/custom.theme";
 import { converterParaDate } from "../util/datas.util";
 import { converterTimestamp, validateCPF } from "../util/formatadores.util";
-import { FuncionarioFirestore } from "../firestore/funcionario.firestore";
-import { AvatarUpload } from "../components/AvatarUpload";
-import { uploadImage, uploadImagemFromWeb } from "../services/cloudnary.serivce";
 
 interface RouteParams {
   funcObj: Funcionario

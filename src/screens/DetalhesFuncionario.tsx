@@ -121,9 +121,15 @@ export const DetalhesFuncionario = () => {
                 />
               )}
 
-              <Button disabled={funcionarioFoco?.contrato === undefined} size='small' status='warning'
-                onPress={() => contratoFuncionario(funcionarioFoco?.contrato?.descricao_servicos || '', funcionarioFoco?.contrato?.contratacao_regime_ctl || false)}
-              >Ver e compartilhar contrato</Button>
+              <View style={{gap: 7}}>
+                <Button disabled={funcionarioFoco?.contrato === undefined} size='small' status='warning'
+                  onPress={() => contratoFuncionario(funcionarioFoco?.contrato?.descricao_servicos || '', funcionarioFoco?.contrato?.contratacao_regime_ctl || false)}
+                >Compartilhar contrato (sem assinatura)</Button>
+
+                <Button appearance='outline' disabled={funcionarioFoco?.contrato === undefined} size='small' status='warning'
+                  onPress={() => contratoFuncionario(funcionarioFoco?.contrato?.descricao_servicos || '', funcionarioFoco?.contrato?.contratacao_regime_ctl || false, funcionarioFoco?.contrato?.assinaturas)}
+                >Compartilhar contrato (já assinado)</Button>
+              </View>
             </Card>
 
             {/* Employment Info */}
@@ -216,7 +222,7 @@ export const DetalhesFuncionario = () => {
 
 const styles = StyleSheet.create({
   container: {
-    height: (Platform.OS === 'web')?'85%':'auto'
+    flex: 1
   },
 
   content: {

@@ -9,22 +9,21 @@ import { CardGradientPrimary } from '../components/CardGradientPrimary';
 import { DatePicker } from '../components/DatePicker';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { incentivoFirestore } from '../firestore/incentivo.firestore';
-import { useIncentivoAtivo, useListarIncentivos } from '../hooks/useIncentivo';
+import { useFuncionariosRestaurante } from '../hooks/useFuncionarios';
+import { useAcoesIncentivo, useIncentivoAtivo, useListarIncentivos } from '../hooks/useIncentivo';
 import { RootStackParamList } from '../routes/StackRoutes';
+import { Incentivo } from '../schema/incentivo.schema';
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
 import { converterParaDate } from '../util/datas.util';
 import { converterTimestamp } from '../util/formatadores.util';
-import { useFuncionariosRestaurante } from '../hooks/useFuncionarios';
-import { Incentivo } from '../schema/incentivo.schema';
-import { AppModal } from '../components/AppModal';
 
 export const Incentivos = () => {
   const navigator = useNavigation<NavigationProp<RootStackParamList>>();
   const route = useRoute();
   const { idRest } = route.params as { idRest: string };
 
-  const { data: incentivos, isLoading: carregandoIncentivo, refetch } = useListarIncentivos(idRest);
+  const { data: incentivos, isLoading: carregandoIncentivos, refetch } = useListarIncentivos(idRest);
   const { data: incentivo_ativo, isLoading: carregandoIncentivoAtivo, refetch: recarregarAtivo } = useIncentivoAtivo(idRest);
 
   const { data: funcionarios } = useFuncionariosRestaurante(idRest)
@@ -45,6 +44,8 @@ export const Incentivos = () => {
 
   const [editingIncentivo, setEditingIncentivo] = useState<Incentivo | null>(null)
 
+  const { criarIncentivo } = useAcoesIncentivo()
+
   const [isLoading, setIsLoading] = useState(false)
   const handleAdicionarIncentivo = async () => {
     try {
@@ -52,17 +53,22 @@ export const Incentivos = () => {
       if (!form.descricao || !form.valor_incentivo || !form.meta) return;
 
       if (funcionarios) {
-        await incentivoFirestore.criar(idRest, {
-          data_expiracao: dataExpiracao,
-          valor_incentivo: Number(form.valor_incentivo),
-          meta: Number(form.meta),
-          descricao: form.descricao
-        }, funcionarios);
+        criarIncentivo.mutate({
+          props: {
+            idRestaurante: idRest,
+            body: {
+              data_expiracao: dataExpiracao,
+              valor_incentivo: Number(form.valor_incentivo),
+              meta: Number(form.meta),
+              descricao: form.descricao
+            },
+            funcionarios: funcionarios
+          }
+        })
       } else {
         throw new Error("Necessário pelo menos 1 funcionário para começar incentivo")
       }
 
-      await recarregarAtivo()
       setForm({ descricao: '', valor_incentivo: '', meta: '' });
       setVisible(false);
     } catch (error: any) {
@@ -93,6 +99,10 @@ export const Incentivos = () => {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (criarIncentivo.isSuccess) recarregarAtivo()
+  }, [criarIncentivo.isPending])
 
   return (
     <Layout style={styles.container}>
@@ -233,58 +243,60 @@ export const Incentivos = () => {
       />
 
 
-      <AppModal visible={visible} onClose={() => {
+      <Modal backdropStyle={styles.backdrop} visible={visible} onBackdropPress={() => {
         setVisible(false)
         setEditingIncentivo(null);
       }}>
-        <Text category="h6">{(editingIncentivo) ? 'Editar incentivo do momento' : 'Novo Incentivo'}</Text>
+        <Card style={styles.cardModal}>
+          <Text category="h6">{(editingIncentivo) ? 'Editar incentivo do momento' : 'Novo Incentivo'}</Text>
 
-        <Input
-          label="Descrição *"
-          value={form.descricao}
-          onChangeText={v => setForm({ ...form, descricao: v })}
-          style={styles.input}
-        />
+          <Input
+            label="Descrição *"
+            value={form.descricao}
+            onChangeText={v => setForm({ ...form, descricao: v })}
+            style={styles.input}
+          />
 
-        <Input
-          label="Valor do prêmio *"
-          keyboardType="numeric"
-          value={form.valor_incentivo}
-          disabled={(!!editingIncentivo?.ganhador_nome)}
-          onChangeText={v => setForm({ ...form, valor_incentivo: v })}
-          style={styles.input}
-          caption={(editingIncentivo?.ganhador_nome) ? 'Para alterar o valor do prêmio, remova o ganhador atual.' : ''}
-        />
+          <Input
+            label="Valor do prêmio *"
+            keyboardType="numeric"
+            value={form.valor_incentivo}
+            disabled={(!!editingIncentivo?.ganhador_nome)}
+            onChangeText={v => setForm({ ...form, valor_incentivo: v })}
+            style={styles.input}
+            caption={(editingIncentivo?.ganhador_nome) ? 'Para alterar o valor do prêmio, remova o ganhador atual.' : ''}
+          />
 
-        <Input
-          label="Meta *"
-          keyboardType="numeric"
-          value={form.meta}
-          disabled={(!!editingIncentivo?.ganhador_nome)}
-          onChangeText={v => setForm({ ...form, meta: v })}
-          style={styles.input}
-          caption={(editingIncentivo?.ganhador_nome) ? 'Para alterar a meta, remova o ganhador atual.' : ''}
-        />
+          <Input
+            label="Meta *"
+            keyboardType="numeric"
+            value={form.meta}
+            disabled={(!!editingIncentivo?.ganhador_nome)}
+            onChangeText={v => setForm({ ...form, meta: v })}
+            style={styles.input}
+            caption={(editingIncentivo?.ganhador_nome) ? 'Para alterar a meta, remova o ganhador atual.' : ''}
+          />
 
-        <View style={[styles.input, { gap: 5 }]}>
-          <Text category='c1' appearance='hint'>Data de expiração *</Text>
-          <DatePicker dataPreEstabelecida={dataExpiracao} setarData={settingExpiracao} tamanBtn='small' tipo='date' />
-        </View>
+          <View style={[styles.input, { gap: 5 }]}>
+            <Text category='c1' appearance='hint'>Data de expiração *</Text>
+            <DatePicker dataPreEstabelecida={dataExpiracao} setarData={settingExpiracao} tamanBtn='small' tipo='date' />
+          </View>
 
-        <Button onPress={() => {
-          if (editingIncentivo) {
-            handleEditarIncentivo()
-          } else {
-            handleAdicionarIncentivo()
-          }
-        }} disabled={isLoading}
-        >{(isLoading) ? 'Adicionando...' : (editingIncentivo) ? 'Salvar alterações' : 'Criar Incentivo'}</Button>
+          <Button onPress={() => {
+            if (editingIncentivo) {
+              handleEditarIncentivo()
+            } else {
+              handleAdicionarIncentivo()
+            }
+          }} disabled={isLoading}
+          >{(isLoading) ? 'Adicionando...' : (editingIncentivo) ? 'Salvar alterações' : 'Criar Incentivo'}</Button>
 
-        <Button status='danger' appearance='ghost' onPress={() => {
-          setVisible(false)
-          setEditingIncentivo(null);
-        }}>Cancelar</Button>
-      </AppModal>
+          <Button status='danger' appearance='ghost' onPress={() => {
+            setVisible(false)
+            setEditingIncentivo(null);
+          }}>Cancelar</Button>
+        </Card>
+      </Modal>
     </Layout>
   );
 };

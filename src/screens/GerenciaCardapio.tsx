@@ -49,7 +49,7 @@ export const GerenciaCardapio = () => {
   });
 
   const resetForm = () => {
-    setFormData({ descricao: '', preco: 0});
+    setFormData({ descricao: '', preco: 0 });
     setEditingProduct(null);
   };
 
@@ -136,16 +136,7 @@ export const GerenciaCardapio = () => {
           <Button
             size="small"
             appearance="ghost"
-            onPress={() => {
-              if (Platform.OS === 'web') {
-                navigation.navigate('ProdutoCardapio', {
-                  idRest: res?.id!,
-                  produtoEditavel: item
-                })
-              } else {
-                openEdit(item)
-              }
-            }}
+            onPress={() => openEdit(item)}
           >
             <MaterialCommunityIcons name="pencil" />
           </Button>
@@ -183,15 +174,8 @@ export const GerenciaCardapio = () => {
       <Layout style={styles.header}>
         <Button
           onPress={() => {
-            if (Platform.OS === 'web') {
-              navigation.navigate('ProdutoCardapio', {
-                idRest: res?.id!,
-                produtoEditavel: editingProduct
-              })
-            } else {
-              resetForm()
-              setModalVisible(true)
-            }
+            resetForm()
+            setModalVisible(true)
           }}
           accessoryLeft={<Entypo name="plus" size={20} color="black" />}
         >

@@ -4,21 +4,21 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRoute } from '@react-navigation/native';
 import { Button, Card, Layout, Spinner, Text } from '@ui-kitten/components';
 import React, { useState } from 'react';
-import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import { FlatList } from 'react-native-gesture-handler';
+import { CardGradient } from '../components/CardGradient';
 import { DatePicker } from '../components/DatePicker';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { ItemVale } from '../components/ItemVale';
 import { useHistoricoPagamentos } from '../hooks/usePagamentos';
+import { Funcionario } from '../schema/funcionario.schema';
 import { Pagamento } from '../schema/pagamento.schema';
 import { customTheme } from '../theme/custom.theme';
 import { calcularSalarioQuinzena, calcularTotalIncentivos, calcularTotalVales } from '../util/calculos.util';
 import { converterParaDate } from '../util/datas.util';
 import { converterParaIsoDate, converterTimestamp } from '../util/formatadores.util';
 import { gerarRelatorioVales } from '../util/relatorios.util';
-import { Funcionario } from '../schema/funcionario.schema';
-import { CardGradient } from '../components/CardGradient';
 
 
 export const HistoricoPagamentos = () => {
@@ -225,7 +225,7 @@ export const HistoricoPagamentos = () => {
                 <View style={styles.empty}>
                   <MaterialIcons name="history" size={48} color="#8f9bb3" />
                   <Text appearance="hint" style={styles.mt}>
-                    Nenhum pagamento registrado
+                    Nenhum pagamento neste período
                   </Text>
                   <Text appearance="hint" category="c1" style={{ textAlign: 'center' }}>
                     O histórico aparecerá após o primeiro pagamento

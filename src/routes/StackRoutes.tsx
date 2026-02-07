@@ -1,29 +1,29 @@
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import { enableScreens } from 'react-native-screens';
+import { CategoriaFinancas } from '../schema/financa.schema';
 import { Funcionario, FuncionarioPostRequestBody } from '../schema/funcionario.schema';
+import { Incentivo } from '../schema/incentivo.schema';
 import { Assinatura } from '../screens/Assinatura';
 import Cardapio from '../screens/Cardapio';
+import { Config } from '../screens/Config';
+import { Contratacao } from '../screens/Contratacao';
 import { DetalhesFuncionario } from '../screens/DetalhesFuncionario';
 import { EditarFuncionario } from '../screens/EditarFuncionario';
+import Financas from '../screens/Financas';
+import FinancasDetalhe from '../screens/FinancasDetalhe';
 import { GerenciaCardapio } from '../screens/GerenciaCardapio';
+import GerenciarGerentes from '../screens/GerenciarGerentes';
 import { GerenciaVales } from '../screens/GerenciaVales';
 import { HistoricoPagamentos } from '../screens/HIstoricoPagamentos';
+import { Incentivos } from '../screens/Incentivos';
 import { LoginGerente } from '../screens/LoginGerente';
-import { LoginRestaurante } from '../screens/LoginRestaurante';
 import Mensalidades from '../screens/Mensalidades';
+import RegistroVendaIncentivo from '../screens/RegistroVendaIncentivo';
+import RelatorioFinancas from '../screens/RelatorioFinancas';
 import { ResumoPagamento } from '../screens/ResumoPagamento';
 import { customTheme } from '../theme/custom.theme';
 import { BottomTabsRoutes } from './BottomRoutes';
-import Financas from '../screens/Financas';
-import FinancasDetalhe from '../screens/FinancasDetalhe';
-import { CategoriaFinancas } from '../schema/financa.schema';
-import { Incentivos } from '../screens/Incentivos';
-import RegistroVendaIncentivo from '../screens/RegistroVendaIncentivo';
-import { Incentivo } from '../schema/incentivo.schema';
-import RelatorioFinancas from '../screens/RelatorioFinancas';
-import GerenciarGerentes from '../screens/GerenciarGerentes';
-import { Config } from '../screens/Config';
-import { Contratacao } from '../screens/Contratacao';
+import { AssinaturaContrato } from '../screens/AssinaturaContrato';
 
 export type RootStackParamList = {
   Tabs: undefined;
@@ -48,8 +48,7 @@ export type RootStackParamList = {
   RegistroVendaIncentivo: { incentObj: Incentivo };
   FinancasRelatorio: { idRest: string };
   GerenciaGerentes: { idRest: string };
-  ProdutoCardapio: { idRest: string, produtoEditavel: ItemMenu | null };
-  AssinaturaWeb: { funcObj: Funcionario };
+  AssinaturaContrato: { funcObj: FuncionarioPostRequestBody }
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -80,12 +79,6 @@ export default function StackRoutes() {
         name="Assinatura"
         component={Assinatura}
         options={optionsHeader('Assinatura do funcionário')}
-      />
-
-      <Stack.Screen
-        name="AssinaturaWeb"
-        component={AssinaturaWeb}
-        options={optionsHeader('Assinatura do funcionário WEB')}
       />
 
       <Stack.Screen
@@ -164,6 +157,12 @@ export default function StackRoutes() {
         name="Contratacao"
         component={Contratacao}
         options={optionsHeader('Contrato do funcionário')}
+      />
+
+      <Stack.Screen
+        name="AssinaturaContrato"
+        component={AssinaturaContrato}
+        options={optionsHeader('Assinatura do funcionário')}
       />
 
       <Stack.Screen

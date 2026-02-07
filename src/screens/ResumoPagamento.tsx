@@ -98,7 +98,7 @@ export const ResumoPagamento = () => {
               >
                 <AntDesign name="wallet" size={14} color={customTheme['color-primary-400']} />
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 30 }}>
+              <View style={{ alignItems: 'flex-start', gap: 5 }}>
                 <Text category="s1">{(funcObj.tipo === 'FIXO') ? 'Quinzena' : 'Diárias'}</Text>
                 <Text category='c2' appearance='hint'>{getBaseSalario()}</Text>
               </View>
@@ -224,11 +224,7 @@ export const ResumoPagamento = () => {
           <Button
             size="medium"
             onPress={() => {
-              if (Platform.OS === 'web') {
-                navigator.navigate('AssinaturaWeb', { funcObj })
-              } else {
-                navigator.navigate('Assinatura', { funcObj });
-              }
+              navigator.navigate('Assinatura', { funcObj });
             }}
             accessoryLeft={<AntDesign name="signature" size={18} color={'black'} />}
           >
