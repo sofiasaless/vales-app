@@ -107,6 +107,8 @@ export const customTheme = {
   'color-basic-800': '#1C2126',
   'color-basic-900': '#151A1E',
 
+  'background-transparent-primary': '#1a746777',
+
   /* Success */
   'color-success-500': '#2EB872',
   'color-success-600': '#23965C',

@@ -1,3 +1,4 @@
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { Button, Input, Text } from '@ui-kitten/components';
 import React, { useState } from 'react';
@@ -7,7 +8,8 @@ import { useLoginRestaurante } from '../hooks/useLoginRestaurante';
 import { RootStackParamList } from '../routes/StackRoutes';
 
 import * as SplashScreen from 'expo-splash-screen';
-import { useGerenteConectado, useListarGerentes } from '../hooks/useGerente';
+import { useGerenteConectado } from '../hooks/useGerente';
+import { customTheme } from '../theme/custom.theme';
 
 SplashScreen.hideAsync()
 
@@ -53,11 +55,14 @@ export const LoginRestaurante: React.FC = () => {
   return (
     <CardGradient colors_one='4' colors_two='1' styles={styles.container}>
       <View style={styles.header}>
+        <View style={{backgroundColor: customTheme['background-transparent-primary'], padding: 20, borderRadius: 50, marginBottom: 20}}>
+          <AntDesign name="shop" size={40} color={customTheme['color-primary-500']} />
+        </View>
         <Text category="h3" style={styles.title}>
-          Vale App
+          Bem-vindo ao Vale App!
         </Text>
         <Text appearance="hint" style={styles.subtitle}>
-          Acesse sua conta do restaurante
+          Entre com as credenciais do seu restaurante
         </Text>
       </View>
 
@@ -119,6 +124,8 @@ const styles = StyleSheet.create({
 
   title: {
     fontWeight: '700',
+    textAlign: 'center',
+    color: customTheme['color-primary-400']
   },
 
   subtitle: {
