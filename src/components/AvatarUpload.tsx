@@ -1,5 +1,5 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { Text } from '@ui-kitten/components';
+import { Text, Button } from '@ui-kitten/components';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
@@ -55,9 +55,19 @@ export const AvatarUpload = ({ value, onChange }: AvatarUploadProps) => {
         <Image source={{ uri: value }} style={styles.avatar} />
       ) : (
         <View style={styles.placeholder}>
-         <AntDesign name="cloud-upload" size={30} color="gray" />
+          <AntDesign name="cloud-upload" size={30} color="gray" />
         </View>
       )}
+
+      <Button
+        size="small"
+        status='info'
+        appearance="outline"
+        onPress={pickImage}
+        disabled={loading}
+      >
+        {loading ? 'Enviando...' : 'Selecionar imagem de perfil'}
+      </Button>
     </View>
   );
 };

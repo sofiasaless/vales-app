@@ -41,7 +41,7 @@ export default function Financas() {
     cor: 'blue' as keyof typeof colorMap
   });
 
-  const { totalDespesas, resetarDatas } = useTotalDespesasContext()
+  const { totalDespesas, resetarDatas, isLoading: carregandoTotal } = useTotalDespesasContext()
 
 
   const totalGeral = useMemo(() => {
@@ -78,7 +78,7 @@ export default function Financas() {
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View style={{ gap: 5 }}>
             <Text appearance="hint">Total do mês</Text>
-            {(!totalGeral) ?
+            {(carregandoTotal) ?
               <Spinner status='danger' />
               :
               <DinheiroDisplay

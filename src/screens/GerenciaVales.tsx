@@ -6,28 +6,28 @@ import {
   Card,
   Input,
   Layout,
-  Modal,
   Text
 } from '@ui-kitten/components';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { FlatList } from 'react-native-gesture-handler';
+import { AppModal } from '../components/AppModal';
 import { AvatarIniciais } from '../components/AvatarIniciais';
+import { Carregando } from '../components/Carregando';
 import { ItemVale } from '../components/ItemVale';
+import { useEventoAlteracoesContext } from '../context/EventoAlteracaoContext';
 import { useFuncionarios } from '../hooks/useFuncionarios';
+import { useGerenteConectado } from '../hooks/useGerente';
 import { useVales } from '../hooks/useVales';
 import { RootStackParamList } from '../routes/StackRoutes';
+import { Gerente } from '../schema/gerente.schema';
 import { Vale, ValeDinheiroPostRequestBody } from '../schema/vale.shema';
 import { customTheme } from '../theme/custom.theme';
 import { alert } from '../util/alertfeedback.util';
 import { calcularTotalVales } from '../util/calculos.util';
-import { useEventoAlteracoesContext } from '../context/EventoAlteracaoContext';
-import { Gerente } from '../schema/gerente.schema';
-import { useGerenteConectado } from '../hooks/useGerente';
-import { AppModal } from '../components/AppModal';
 
 type RouteParams = {
   idFunc: string;
@@ -57,8 +57,18 @@ export const GerenciaVales = () => {
   const { adicionarVale, isLoading: carregando, removerVale, isLoadingVales, listarVales, vales } = useVales()
 
   const handleRemoveItem = async (valeToRemove: Vale) => {
-    await removerVale(idFunc, valeToRemove);
-    listarVales(idFunc);
+    Alert.alert(`Confirmar remoção`, `Tem certeza que quer remover "${valeToRemove.descricao}"?`, [
+      {
+        text: "Cancelar"
+      },
+      {
+        text: "Confirmar",
+        onPress: async () => {
+          await removerVale(idFunc, valeToRemove);
+          listarVales(idFunc);
+        }
+      }
+    ])
   };
 
   const handleAddCashVoucher = async () => {
@@ -100,11 +110,7 @@ export const GerenciaVales = () => {
 
   return (
     (isLoadingF) ?
-      <Layout style={styles.centered}>
-        <Text category="h6" style={styles.notFoundText}>
-          Carregando...
-        </Text>
-      </Layout>
+      <Carregando />
       :
       <Layout style={styles.container}>
         <ScrollView nestedScrollEnabled contentContainerStyle={styles.content}>
@@ -143,7 +149,7 @@ export const GerenciaVales = () => {
             {(vales) ?
               (isLoadingVales)
                 ?
-                <Text>Carregando vales...</Text>
+                <Carregando />
                 :
                 vales?.length > 0 ? (
                   <FlatList

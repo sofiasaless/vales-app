@@ -36,7 +36,7 @@ export async function contratoFuncionario(servico: string, clt: boolean, assinat
           }
   
           .signature {
-            margin-top: 48px;
+            margin-top: 60px;
             display: flex;
             justify-content: space-between;
             gap: 15px;
@@ -103,9 +103,6 @@ export async function contratoFuncionario(servico: string, clt: boolean, assinat
         ${(assinaturas)
       ?
       `<div class="section-assinatura">
-          <h5>Assinatura do Contratante</h5>
-          <img src="${assinaturas.contratante}" style="width: 120px; transform: rotate(90deg);" />
-
           <h5>Assinatura do Contratado</h5>
           <img src="${assinaturas.contratado}" style="width: 120px; transform: rotate(90deg);" />
         </div>

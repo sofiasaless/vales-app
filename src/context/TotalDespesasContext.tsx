@@ -9,7 +9,8 @@ interface TotalDespesasContextType {
   adicionarNovaDespesa: (body: DespesaPostRequestBody) => void,
   filtrarPorDatas: (datas: DateFilterProps) => Promise<void>,
   resetarDatas: () => void;
-  filtrando: boolean
+  filtrando: boolean,
+  isLoading: boolean
 }
 
 const TotalDespesasContext = createContext<TotalDespesasContextType | undefined>(undefined)
@@ -60,7 +61,8 @@ export const TotalDespesasProvider = ({ children }: { children: ReactNode }) => 
       adicionarNovaDespesa,
       filtrarPorDatas,
       resetarDatas,
-      filtrando
+      filtrando,
+      isLoading
     }}>
       {children}
     </TotalDespesasContext.Provider>

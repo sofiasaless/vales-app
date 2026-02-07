@@ -13,6 +13,7 @@ import { Gerente } from '../schema/gerente.schema';
 import { customTheme } from '../theme/custom.theme';
 import { calcularTotalVales } from '../util/calculos.util';
 import { CardGradient } from './CardGradient';
+import { Carregando } from './Carregando';
 import { DinheiroDisplay } from './DinheiroDisplay';
 import { FuncionarioCard } from './FuncionarioCard';
 import { IncentivoAtivoCard } from './IncentivoAtivoCard';
@@ -111,7 +112,7 @@ export const ListaFuncionarios = () => {
 
       {
         (isLoading) ?
-          <Text>Carregando funcionários...</Text>
+          <Carregando />
           :
           <FlatList
             showsVerticalScrollIndicator={false}

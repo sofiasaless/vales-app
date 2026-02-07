@@ -11,14 +11,14 @@ import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import { NavigationProp, useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { AvatarIniciais } from '../components/AvatarIniciais';
+import { Carregando } from '../components/Carregando';
 import { DinheiroDisplay } from '../components/DinheiroDisplay';
 import { FuncionarioFirestore } from '../firestore/funcionario.firestore';
 import { useFuncionarios } from '../hooks/useFuncionarios';
 import { RootStackParamList } from '../routes/StackRoutes';
 import { customTheme } from '../theme/custom.theme';
-import { converterParaIsoDate, formatCPF } from '../util/formatadores.util';
-import { BottomTabParamList } from '../routes/BottomRoutes';
 import { contratoFuncionario } from '../util/contratos.util';
+import { converterParaIsoDate, formatCPF } from '../util/formatadores.util';
 
 interface RouteParams {
   idFunc: string
@@ -80,7 +80,7 @@ export const DetalhesFuncionario = () => {
     <Layout style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         {(isLoadingF) ?
-          <Text>Carregando...</Text>
+          <Carregando />
           :
           <>
             <Card style={styles.cardCenter}>
