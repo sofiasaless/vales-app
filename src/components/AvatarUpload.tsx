@@ -33,20 +33,6 @@ export const AvatarUpload = ({ value, onChange }: AvatarUploadProps) => {
     onChange(result.assets[0].uri);
   };
 
-  const pickImagemWeb = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result;
-        if (typeof result === 'string') {
-          onChange(result); // Salva a URL da imagem
-        }
-      };
-      reader.readAsDataURL(file); // Lê o arquivo como base64
-    }
-  };
-
   return (
     <View style={styles.container}>
       <Text category="label">Foto do funcionário</Text>
