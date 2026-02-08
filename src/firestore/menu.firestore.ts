@@ -1,9 +1,10 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { COLLECTIONS } from "../enums/firebase.enum";
 import { PatternFirestore } from "./pattern.firestore";
 import { ItemMenu, ItemMenuFirestorePostRequestBody, ItemMenuPostRequestBody } from "../schema/menu.schema";
 import { itensCardapio } from "./cardapio";
 import { RestauranteSerivce } from "../auth/restaurante.service";
+import { itensNobres } from "../../cardapionob";
 
 export class MenuFirestore extends PatternFirestore {
   private readonly restauranteService = new RestauranteSerivce()
@@ -17,7 +18,8 @@ export class MenuFirestore extends PatternFirestore {
       const querySnap = await getDocs(
         query(
           this.setup(),
-          where("restaurante_ref", "==", this.restauranteService.getRef(idRestaurante))
+          where("restaurante_ref", "==", this.restauranteService.getRef(idRestaurante)),
+          orderBy("descricao", "asc")
         )
       )
   
@@ -39,15 +41,6 @@ export class MenuFirestore extends PatternFirestore {
   }
 
   public async cadastrar() {
-    itensCardapio.map(async (item) => {
-      const itemToSave: ItemMenuFirestorePostRequestBody = {
-        ...item,
-        restaurante_ref: this.restauranteService.getRef('Az7xUZaL0IQDPp85bu9JDYB6DPE3'),
-        data_criacao: new Date()
-      }
-
-      await addDoc(this.setup(), itemToSave);
-    })
 
     console.info('itens cadastrados com sucesso')
   }

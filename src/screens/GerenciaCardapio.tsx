@@ -66,6 +66,7 @@ export const GerenciaCardapio = () => {
       descricao: product.descricao,
       preco: product.preco,
     });
+    setPrecoTexto(product.preco.toFixed(2))
     setEditingProduct(product);
     setModalVisible(true);
   };
@@ -88,7 +89,7 @@ export const GerenciaCardapio = () => {
 
     if (editingProduct?.descricao === '') newErrors.descricao = 'Nome do produto é obrigatório';
 
-    if (editingProduct?.preco === undefined || editingProduct?.preco <= 0) newErrors.preco = 'Preço precisa ser maior que zero';
+    if (precoTexto === '') newErrors.preco = 'Preço precisa ser maior que zero';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -102,7 +103,10 @@ export const GerenciaCardapio = () => {
       if (!validateAtualizacaoProduto()) return;
       atualizarProdutoMutation.mutate({
         props: {
-          body: editingProduct,
+          body: {
+            descricao: formData.descricao,
+            preco: formData.preco
+          },
           idProduto: editingProduct.id
         }
       })
@@ -127,6 +131,10 @@ export const GerenciaCardapio = () => {
   useEffect(() => {
     refetch()
   }, [carregandoRest])
+
+  useEffect(() => {
+    if (cadastrarProdutoMutation.isSuccess || atualizarProdutoMutation.isSuccess) refetch() 
+  }, [cadastrarProdutoMutation.isPending, atualizarProdutoMutation.isPaused])
 
   const renderItem = ({ item }: { item: ItemMenu }) => (
     <Card style={[styles.card]}>
@@ -224,56 +232,58 @@ export const GerenciaCardapio = () => {
         </View>
       )}
 
-      <AppModal visible={modalVisible} onClose={() => setModalVisible(false)}>
-        <Text category="h6" style={styles.modalTitle}>
-          {editingProduct ? 'Editar Produto' : 'Novo Produto'}
-        </Text>
+      <Modal backdropStyle={{backgroundColor: 'rgba(0,0,0,0.5)'}} visible={modalVisible} onBackdropPress={() => setModalVisible(false)}>
+        <Card style={styles.cardModal}>
+          <Text category="h6" style={styles.modalTitle}>
+            {editingProduct ? 'Editar Produto' : 'Novo Produto'}
+          </Text>
 
-        <Input
-          label="Nome do Produto"
-          value={formData.descricao}
-          onChangeText={(name) =>
-            setFormData({ ...formData, descricao: name })
-          }
-          status={errors.descricao ? 'danger' : 'basic'}
-          caption={errors.descricao}
-          style={styles.input}
-        />
-
-        <Input
-          label="Preço"
-          keyboardType="decimal-pad"
-          placeholder="0,00"
-          value={precoTexto}
-          onChangeText={(price) => {
-            setPrecoTexto(price);
-            const numero = parseMoedaBR(price);
-
-            if (numero !== null) {
-              setFormData({
-                ...formData,
-                preco: numero,
-              })
+          <Input
+            label="Nome do Produto"
+            value={formData.descricao}
+            onChangeText={(name) =>
+              setFormData({ ...formData, descricao: name })
             }
-          }}
-          status={errors.preco ? 'danger' : 'basic'}
-          caption={errors.preco}
-          style={styles.input}
-        />
+            status={errors.descricao ? 'danger' : 'basic'}
+            caption={errors.descricao}
+            style={styles.input}
+          />
 
-        <View style={styles.modalActions}>
-          <Button
-            size='small'
-            appearance="outline"
-            onPress={() => setModalVisible(false)}
-          >
-            Cancelar
-          </Button>
-          <Button onPress={handleSave} size='small'>
-            {editingProduct ? 'Salvar' : 'Adicionar'}
-          </Button>
-        </View>
-      </AppModal>
+          <Input
+            label="Preço"
+            keyboardType="decimal-pad"
+            placeholder="0,00"
+            value={precoTexto}
+            onChangeText={(price) => {
+              setPrecoTexto(price);
+              const numero = parseMoedaBR(price);
+
+              if (numero !== null) {
+                setFormData({
+                  ...formData,
+                  preco: numero,
+                })
+              }
+            }}
+            status={errors.preco ? 'danger' : 'basic'}
+            caption={errors.preco}
+            style={styles.input}
+          />
+
+          <View style={styles.modalActions}>
+            <Button
+              size='small'
+              appearance="outline"
+              onPress={() => setModalVisible(false)}
+            >
+              Cancelar
+            </Button>
+            <Button onPress={handleSave} size='small'>
+              {editingProduct ? 'Salvar' : 'Adicionar'}
+            </Button>
+          </View>
+        </Card>
+      </Modal>
     </Layout>
   );
 };
@@ -342,6 +352,9 @@ const createStyles = () =>
       justifyContent: 'flex-end',
       gap: 8,
       marginTop: 16,
+    },
+    cardModal: {
+      width: 300, maxWidth: 300, minWidth: 200,
     },
   }
   );
