@@ -42,12 +42,16 @@ export const Cadastro = () => {
 
   const [formData, setFormData] = useState<FuncionarioPostRequestBody>(emptyFuncionario);
 
-  const [salarioTexto, setsalarioTexto] = useState('');
+  const [salarioTexto, setsalarioTexto] = useState(formData.salario.toFixed(2));
 
   const [dataAdmissao, setDataAdmissao] = useState<Date>(new Date)
   const settingAdmissao = (tipo: 'DATA' | 'HORA', dado?: string) => {
     if (tipo === 'DATA' && dado != undefined) {
       setDataAdmissao(converterParaDate(dado))
+      setFormData((prev) => ({
+        ...prev,
+        data_admissao: converterParaDate(dado)
+      }))
     }
   }
 
@@ -100,15 +104,6 @@ export const Cadastro = () => {
     }
 
     handleChange('cpf', formatted);
-  };
-
-  const handleSalaryChange = (value: string) => {
-    let valor = Number(value)
-    if (isNaN(valor)) {
-      handleChange('salario', 0);
-      return
-    }
-    handleChange('salario', valor);
   };
 
   const validate = () => {
@@ -206,10 +201,14 @@ export const Cadastro = () => {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.card}>
+              <Button size='small' appearance='ghost' status='danger' onPress={() => {
+                setFormData(emptyFuncionario)
+                setsalarioTexto('')
+              }}>Limpar campos para novo contrato</Button>
+
               <AvatarUpload value={formData.foto_url}
                 onChange={(url) => handleChange('foto_url', url)}
               />
-
               <Input
                 size="small"
                 label="Nome Completo *"
@@ -323,6 +322,7 @@ export const Cadastro = () => {
                   size="small"
                   label="1° Dia do Pagamento"
                   placeholder="4"
+                  keyboardType='numeric'
                   value={(formData.primeiro_dia_pagamento === 0) ? '' : formData.primeiro_dia_pagamento.toString()}
                   onChangeText={(v) => handleChange('primeiro_dia_pagamento', v)}
                   accessoryLeft={() => (
@@ -335,6 +335,7 @@ export const Cadastro = () => {
                   size="small"
                   label="2° Dia do Pagamento"
                   placeholder="19"
+                  keyboardType='numeric'
                   value={(formData.segundo_dia_pagamento === 0) ? '' : formData.segundo_dia_pagamento.toString()}
                   onChangeText={(v) => handleChange('segundo_dia_pagamento', v)}
                   accessoryLeft={() => (

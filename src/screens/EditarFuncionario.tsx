@@ -291,6 +291,7 @@ export const EditarFuncionario = () => {
               size="small"
               label="1° Dia do Pagamento"
               placeholder="4"
+              keyboardType="numeric"
               value={(formData.primeiro_dia_pagamento === 0) ? '' : formData.primeiro_dia_pagamento.toString()}
               onChangeText={(v) => handleChange('primeiro_dia_pagamento', v)}
               accessoryLeft={() => (
@@ -303,6 +304,7 @@ export const EditarFuncionario = () => {
               size="small"
               label="2° Dia do Pagamento"
               placeholder="19"
+              keyboardType="numeric"
               value={(formData.segundo_dia_pagamento === 0) ? '' : formData.segundo_dia_pagamento.toString()}
               onChangeText={(v) => handleChange('segundo_dia_pagamento', v)}
               accessoryLeft={() => (
