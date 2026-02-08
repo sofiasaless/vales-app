@@ -1,10 +1,8 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, updateDoc, where } from "firebase/firestore";
-import { COLLECTIONS } from "../enums/firebase.enum";
-import { PatternFirestore } from "./pattern.firestore";
-import { ItemMenu, ItemMenuFirestorePostRequestBody, ItemMenuPostRequestBody } from "../schema/menu.schema";
-import { itensCardapio } from "./cardapio";
+import { addDoc, deleteDoc, doc, getDocs, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { RestauranteSerivce } from "../auth/restaurante.service";
-import { itensNobres } from "../../cardapionob";
+import { COLLECTIONS } from "../enums/firebase.enum";
+import { ItemMenu, ItemMenuFirestorePostRequestBody, ItemMenuPostRequestBody } from "../schema/menu.schema";
+import { PatternFirestore } from "./pattern.firestore";
 
 export class MenuFirestore extends PatternFirestore {
   private readonly restauranteService = new RestauranteSerivce()

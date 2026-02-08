@@ -7,5 +7,6 @@ export enum COLLECTIONS {
   CATEGORIA_FINANCA = "categorias_financa",
   DESPESA = "despesas",
   INCENTIVO = "incentivos",
-  FUNCIONARIOS_INCENTIVOS = "funcionarios_incentivos"
+  FUNCIONARIOS_INCENTIVOS = "funcionarios_incentivos",
+  MENSALIDADE = "mensalidades"
 }
