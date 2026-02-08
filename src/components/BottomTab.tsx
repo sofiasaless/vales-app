@@ -14,6 +14,24 @@ type Props = {
   >;
 };
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
+
+export function useNavigationMode() {
+  const insets = useSafeAreaInsets();
+
+  if (Platform.OS !== 'android') {
+    return 'unknown'; // iOS não tem esse conceito
+  }
+
+  // valores típicos:
+  // botões: ~48-80
+  // gestos: 0-16
+  const hasNavButtons = insets.bottom > 20;
+
+  return hasNavButtons ? 'buttons' : 'gestures';
+}
+
 const IconTab = ({ nome, ativo }: { nome: string; ativo: boolean }) => {
   const color = ativo
     ? customTheme['color-primary-600']
@@ -35,8 +53,10 @@ const IconTab = ({ nome, ativo }: { nome: string; ativo: boolean }) => {
 };
 
 export function BottomTab({ state, descriptors, navigation }: Props) {
+  const area = useNavigationMode()
+  
   return (
-    <Layout >
+    <Layout style={{paddingBottom: (area === 'buttons')?50:0}}>
       <BottomNavigation
         style={{paddingBlock: 12, backgroundColor: customTheme['background-alternative-color-1']}}
         selectedIndex={state.index}

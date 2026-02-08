@@ -408,6 +408,7 @@ const styles = StyleSheet.create({
     gap: 10
   },
   btnsArea: {
-    gap: 10
+    gap: 10,
+    paddingBottom: 60
   }
 });
