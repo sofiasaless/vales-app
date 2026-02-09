@@ -9,6 +9,7 @@ export type Gerente = {
   senha: string,
   restaurante_ref: string,
   ativo: boolean,
+  img_perfil?: string,
   data_ultimo_acesso?: Date,
   data_criacao: Date
 }

@@ -18,7 +18,7 @@ const SIZE_MAP = {
 const SIZE_MAP_IMG = {
   sm: 'medium',
   md: 'giant',
-  lg: 'large',
+  lg: 'giant',
 };
 
 export const AvatarIniciais: React.FC<AvatarInitialsProps> = ({

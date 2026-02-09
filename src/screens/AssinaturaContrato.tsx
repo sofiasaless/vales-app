@@ -52,7 +52,10 @@ export const AssinaturaContrato = () => {
       await funcSer.criar(funcionarioPronto);
       Alert.alert("Sucesso ao contratar!", "Confira na área de funcionários, o contrato estará disponível no perfil.", [{
         text: 'Confirmar',
-        onPress: () => navigator.navigate('Tabs')
+        onPress: () => {
+          signatureRef.current?.limpar()
+          navigator.goBack()
+        }
       }])
     } catch (error: any) {
       alert('Ocorreu um erro ao confirmar pagamento do funcionário', error);

@@ -57,10 +57,10 @@ export const getPaydayText = (day: number): string => {
 export const validateCPF = (cpf: string): boolean => {
   const cleaned = cpf.replace(/\D/g, '');
   if (cleaned.length !== 11) return false;
-  
+
   // Verifica se todos os dígitos são iguais
   if (/^(\d)\1+$/.test(cleaned)) return false;
-  
+
   // Validação dos dígitos verificadores
   let sum = 0;
   for (let i = 0; i < 9; i++) {
@@ -69,7 +69,7 @@ export const validateCPF = (cpf: string): boolean => {
   let remainder = (sum * 10) % 11;
   if (remainder === 10 || remainder === 11) remainder = 0;
   if (remainder !== parseInt(cleaned[9])) return false;
-  
+
   sum = 0;
   for (let i = 0; i < 10; i++) {
     sum += parseInt(cleaned[i]) * (11 - i);
@@ -77,7 +77,7 @@ export const validateCPF = (cpf: string): boolean => {
   remainder = (sum * 10) % 11;
   if (remainder === 10 || remainder === 11) remainder = 0;
   if (remainder !== parseInt(cleaned[10])) return false;
-  
+
   return true;
 };
 
@@ -102,4 +102,23 @@ export function formatMoney(value: number) {
     style: 'currency',
     currency: 'BRL',
   });
+}
+
+export function parseMoedaBR(text: string): number | null {
+  if (!text) return null;
+
+  let cleaned = text.replace(/\s/g, '');
+
+  const lastComma = cleaned.lastIndexOf(',');
+  const lastDot = cleaned.lastIndexOf('.');
+
+  if (lastComma > lastDot) {
+    cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+  } else {
+    cleaned = cleaned.replace(/,/g, '');
+  }
+
+  const value = Number(cleaned);
+
+  return Number.isFinite(value) ? value : null;
 }

@@ -36,7 +36,7 @@ export type RootStackParamList = {
   GerenciaCardapio: undefined;
   Detalhes: { idFunc: string };
   Historico: { funcObj: Funcionario };
-  Mensalidades: undefined;
+  Mensalidades: { idRest: string };
   Cardapio: { idFunc: string };
   EditarFuncionario: { funcObj: Funcionario };
   LoginRestaurante: undefined;

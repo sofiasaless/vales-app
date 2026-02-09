@@ -1,22 +1,26 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { Button, Layout, Text } from '@ui-kitten/components';
+import { Layout, Text } from '@ui-kitten/components';
+import * as ImagePicker from 'expo-image-picker';
 import React, { ReactNode } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { AvatarIniciais } from '../components/AvatarIniciais';
 import { CardGradient } from '../components/CardGradient';
 import { Header } from '../components/Header';
-import { RootStackParamList } from '../routes/StackRoutes';
-import { customTheme } from '../theme/custom.theme';
-import { useGerenteConectado } from '../hooks/useGerente';
-import { useSair } from '../hooks/useSair';
+import { useAcoesGerente, useGerenteConectado } from '../hooks/useGerente';
 import { useRestauranteConectado } from '../hooks/useRestaurante';
+import { useSair } from '../hooks/useSair';
+import { RootStackParamList } from '../routes/StackRoutes';
 import { Gerente } from '../schema/gerente.schema';
+import { uploadImage } from '../services/cloudnary.serivce';
+import { customTheme } from '../theme/custom.theme';
+import { alert } from '../util/alertfeedback.util';
 
 export const Perfil = () => {
   const {
     data: gerente_conectado,
+    refetch,
     isLoading
   } = useGerenteConectado()
   const styles = style(gerente_conectado);
@@ -68,6 +72,39 @@ export const Perfil = () => {
 
   const { isLoading: carregandoLogout, sairDasContas } = useSair()
 
+  const { atualizarFotoGerente } = useAcoesGerente()
+
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      alert('Permission required', 'Permission to access the media library is required.');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    let img_url_upload
+    if (result.assets) img_url_upload = await uploadImage(result.assets[0].uri)
+
+    if (result.canceled) return;
+    if (gerente_conectado && rest_conectado?.id) {
+      console.info('mudando foto')
+      atualizarFotoGerente.mutate({
+        props: {
+          id_rest: rest_conectado?.id,
+          gerente_atual: gerente_conectado,
+          img: img_url_upload
+        }
+      })
+    }
+  };
+
   return (
     <Layout style={styles.container}>
       <Header
@@ -75,10 +112,11 @@ export const Perfil = () => {
       />
 
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Profile */}
         <CardGradient styles={styles.card}>
           <View style={styles.profileRow}>
-            <AvatarIniciais name={gerente_conectado?.nome || ''} size="lg" />
+            <TouchableOpacity onPress={pickImage}>
+              <AvatarIniciais img_url={gerente_conectado?.img_perfil} name={gerente_conectado?.nome || ''} size="lg" />
+            </TouchableOpacity>
 
             <View style={styles.profileInfo}>
               <Text category="h6">
@@ -133,7 +171,7 @@ export const Perfil = () => {
           <MenuItem
             icon={<MaterialIcons name="calendar-month" size={20} color={iconColor} />}
             label="Mensalidades"
-            onPress={() => navigation.navigate('Mensalidades')}
+            onPress={() => navigation.navigate('Mensalidades', { idRest: rest_conectado?.id! })}
           />
           <View style={styles.divider} />
           <MenuItem
@@ -166,7 +204,7 @@ export const Perfil = () => {
 
         <View style={styles.footer}>
           <Text appearance="hint" category="c1">
-            Vale App v1.0.1
+            Vale App v1.0.0
           </Text>
         </View>
       </ScrollView>

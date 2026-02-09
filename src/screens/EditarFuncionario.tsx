@@ -10,7 +10,7 @@ import { Funcionario, FuncionarioUpdateRequestBody } from "../schema/funcionario
 import { uploadImage, uploadImagemFromWeb } from "../services/cloudnary.serivce";
 import { customTheme } from "../theme/custom.theme";
 import { converterParaDate } from "../util/datas.util";
-import { converterTimestamp, validateCPF } from "../util/formatadores.util";
+import { converterTimestamp, parseMoedaBR, validateCPF } from "../util/formatadores.util";
 
 interface RouteParams {
   funcObj: Funcionario
@@ -22,6 +22,8 @@ export const EditarFuncionario = () => {
   const navigator = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const [salarioTexto, setsalarioTexto] = useState(funcObj.salario.toFixed(2));
 
   const [formData, setFormData] = useState<FuncionarioUpdateRequestBody>({
     ...funcObj
@@ -205,8 +207,16 @@ export const EditarFuncionario = () => {
               }
               placeholder="0,00"
               keyboardType="numeric"
-              value={formData.salario.toString()}
-              onChangeText={handleSalaryChange}
+              value={salarioTexto}
+              onChangeText={(text) => {
+                setsalarioTexto(text);
+
+                const numero = parseMoedaBR(text);
+
+                if (numero !== null) {
+                  handleChange('salario', numero)
+                }
+              }}
               status={errors.salario ? 'danger' : 'basic'}
               caption={errors.salario}
               accessoryLeft={() => (
@@ -281,6 +291,7 @@ export const EditarFuncionario = () => {
               size="small"
               label="1° Dia do Pagamento"
               placeholder="4"
+              keyboardType="numeric"
               value={(formData.primeiro_dia_pagamento === 0) ? '' : formData.primeiro_dia_pagamento.toString()}
               onChangeText={(v) => handleChange('primeiro_dia_pagamento', v)}
               accessoryLeft={() => (
@@ -293,6 +304,7 @@ export const EditarFuncionario = () => {
               size="small"
               label="2° Dia do Pagamento"
               placeholder="19"
+              keyboardType="numeric"
               value={(formData.segundo_dia_pagamento === 0) ? '' : formData.segundo_dia_pagamento.toString()}
               onChangeText={(v) => handleChange('segundo_dia_pagamento', v)}
               accessoryLeft={() => (

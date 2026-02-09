@@ -16,7 +16,7 @@ import { uploadImage, uploadImagemFromWeb } from "../services/cloudnary.serivce"
 import { customTheme } from "../theme/custom.theme";
 import { alert } from '../util/alertfeedback.util';
 import { converterParaDate } from "../util/datas.util";
-import { validateCPF } from "../util/formatadores.util";
+import { parseMoedaBR, validateCPF } from "../util/formatadores.util";
 
 const emptyFuncionario: FuncionarioPostRequestBody = {
   nome: '',
@@ -42,10 +42,16 @@ export const Cadastro = () => {
 
   const [formData, setFormData] = useState<FuncionarioPostRequestBody>(emptyFuncionario);
 
+  const [salarioTexto, setsalarioTexto] = useState(formData.salario.toFixed(2));
+
   const [dataAdmissao, setDataAdmissao] = useState<Date>(new Date)
   const settingAdmissao = (tipo: 'DATA' | 'HORA', dado?: string) => {
     if (tipo === 'DATA' && dado != undefined) {
       setDataAdmissao(converterParaDate(dado))
+      setFormData((prev) => ({
+        ...prev,
+        data_admissao: converterParaDate(dado)
+      }))
     }
   }
 
@@ -98,15 +104,6 @@ export const Cadastro = () => {
     }
 
     handleChange('cpf', formatted);
-  };
-
-  const handleSalaryChange = (value: string) => {
-    let valor = Number(value)
-    if (isNaN(valor)) {
-      handleChange('salario', 0);
-      return
-    }
-    handleChange('salario', valor);
   };
 
   const validate = () => {
@@ -204,10 +201,14 @@ export const Cadastro = () => {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.card}>
+              <Button size='small' appearance='ghost' status='danger' onPress={() => {
+                setFormData(emptyFuncionario)
+                setsalarioTexto('')
+              }}>Limpar campos para novo contrato</Button>
+
               <AvatarUpload value={formData.foto_url}
                 onChange={(url) => handleChange('foto_url', url)}
               />
-
               <Input
                 size="small"
                 label="Nome Completo *"
@@ -257,8 +258,16 @@ export const Cadastro = () => {
                   }
                   placeholder="0,00"
                   keyboardType="numeric"
-                  value={formData.salario.toString()}
-                  onChangeText={handleSalaryChange}
+                  value={salarioTexto}
+                  onChangeText={(text) => {
+                    setsalarioTexto(text);
+
+                    const numero = parseMoedaBR(text);
+
+                    if (numero !== null) {
+                      handleChange('salario', numero)
+                    }
+                  }}
                   status={errors.salario ? 'danger' : 'basic'}
                   caption={errors.salario}
                   accessoryLeft={() => (
@@ -307,12 +316,13 @@ export const Cadastro = () => {
               </View>
 
               {/* Payday */}
-              <View style={[styles.paymentDays, { display: (formData.tipo === 'DIARISTA')?'none':'flex' }]}>
+              <View style={[styles.paymentDays, { display: (formData.tipo === 'DIARISTA') ? 'none' : 'flex' }]}>
                 <Input
                   style={{ flex: 1 }}
                   size="small"
                   label="1° Dia do Pagamento"
                   placeholder="4"
+                  keyboardType='numeric'
                   value={(formData.primeiro_dia_pagamento === 0) ? '' : formData.primeiro_dia_pagamento.toString()}
                   onChangeText={(v) => handleChange('primeiro_dia_pagamento', v)}
                   accessoryLeft={() => (
@@ -325,6 +335,7 @@ export const Cadastro = () => {
                   size="small"
                   label="2° Dia do Pagamento"
                   placeholder="19"
+                  keyboardType='numeric'
                   value={(formData.segundo_dia_pagamento === 0) ? '' : formData.segundo_dia_pagamento.toString()}
                   onChangeText={(v) => handleChange('segundo_dia_pagamento', v)}
                   accessoryLeft={() => (
@@ -398,6 +409,7 @@ const styles = StyleSheet.create({
     gap: 10
   },
   btnsArea: {
-    gap: 10
+    gap: 10,
+    paddingBottom: 60
   }
 });
